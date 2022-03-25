@@ -1,0 +1,32 @@
+apiVersion: "nais.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: tms-ktor-template
+  namespace: min-side
+  labels:
+    team: min-side
+spec:
+  envFrom:
+    - secret: tms-ktor-template-secrets
+  image: {{version}}
+  port: 8080
+  liveness:
+    path: /tms-ktor-template/internal/isAlive
+    initialDelay: 10
+  readiness:
+    path: /tms-ktor-template/internal/isReady
+    initialDelay: 10
+  replicas:
+    min: 2
+    max: 4
+  webproxy: true
+  ingresses:
+    - "https://person.dev.nav.no/tms-ktor-template"
+    - "https://tms-ktor-template.intern.dev.nav.no/tms-ktor-template"
+  resources:
+    limits:
+      cpu: "1"
+      memory: 768Mi
+    requests:
+      cpu: "50m"
+      memory: 64Mi
