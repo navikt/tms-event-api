@@ -1,4 +1,4 @@
-package no.nav.tms.template.config
+package no.nav.tms.event.api.config
 
 import io.ktor.application.*
 import io.ktor.client.*
@@ -6,7 +6,7 @@ import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
-import no.nav.tms.template.health.healthApi
+import no.nav.tms.event.api.health.healthApi
 
 fun Application.mainModule(appContext: ApplicationContext = ApplicationContext()) {
     val environment = Environment()

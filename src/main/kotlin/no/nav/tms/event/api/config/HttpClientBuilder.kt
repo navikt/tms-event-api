@@ -1,4 +1,4 @@
-package no.nav.tms.template.config
+package no.nav.tms.event.api.config
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache

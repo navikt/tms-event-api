@@ -1,6 +1,6 @@
-package no.nav.tms.template.config
+package no.nav.tms.event.api.config
 
-import no.nav.tms.template.health.HealthService
+import no.nav.tms.event.api.health.HealthService
 
 class ApplicationContext {
 

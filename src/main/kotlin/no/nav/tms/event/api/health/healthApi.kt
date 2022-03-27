@@ -1,4 +1,4 @@
-package no.nav.tms.template.health
+package no.nav.tms.event.api.health
 
 import io.ktor.application.call
 import io.ktor.http.ContentType

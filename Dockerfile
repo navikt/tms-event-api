@@ -1,5 +1,5 @@
-FROM navikt/java:13-appdynamics
-COPY build/libs/tms-ktor-template-all.jar /app/app.jar
+FROM navikt/java:17
+COPY build/libs/tms-event-api.jar /app/app.jar
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 \
                -XX:+HeapDumpOnOutOfMemoryError \
                -XX:HeapDumpPath=/oom-dump.hprof"

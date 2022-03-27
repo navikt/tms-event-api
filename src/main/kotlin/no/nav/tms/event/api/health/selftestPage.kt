@@ -1,12 +1,12 @@
-package no.nav.tms.template.health
+package no.nav.tms.event.api.health
 
 import io.ktor.application.*
 import io.ktor.html.*
 import io.ktor.http.*
 import kotlinx.coroutines.coroutineScope
 import kotlinx.html.*
-import no.nav.tms.template.config.Environment
-import no.nav.tms.template.config.HttpClientBuilder
+import no.nav.tms.event.api.config.Environment
+import no.nav.tms.event.api.config.HttpClientBuilder
 
 suspend fun ApplicationCall.buildSelftestPage(healthService: HealthService) = coroutineScope {
 

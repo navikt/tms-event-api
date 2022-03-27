@@ -1,1 +1,1 @@
-rootProject.name = "tms-ktor-template"
+rootProject.name = "tms-event-api"

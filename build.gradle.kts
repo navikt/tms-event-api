@@ -12,7 +12,7 @@ plugins {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "13"
+    kotlinOptions.jvmTarget = "17"
 }
 
 repositories {
@@ -42,6 +42,7 @@ dependencies {
     implementation(Ktor.serialization)
     implementation(Logback.classic)
     implementation(Logstash.logbackEncoder)
+    implementation(Tms.KtorTokenSupport.azureExchange)
 
     testImplementation(Junit.api)
     testImplementation(Ktor.clientMock)
@@ -73,7 +74,7 @@ tasks {
 
         environment("CORS_ALLOWED_ORIGINS", "localhost:9002")
 
-        environment("NAIS_CLUSTER_NAME", "dev-sbs")
+        environment("NAIS_CLUSTER_NAME", "dev-gcp")
         environment("NAIS_NAMESPACE", "personbruker")
 
         main = application.mainClassName
