@@ -1,4 +1,4 @@
-package no.nav.tms.event.api.beskjed
+package no.nav.tms.event.api.innboks
 
 import io.mockk.clearMocks
 import io.mockk.coEvery
@@ -14,81 +14,80 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-internal class BeskjedEventServiceTest {
+internal class InnboksEventServiceTest {
 
-    private val beskjedConsumer: BeskjedConsumer = mockk()
+    private val innboksConsumer: InnboksConsumer = mockk()
     private val tokenFetcher: AzureTokenFetcher = mockk()
 
-    private val beskjedEventService = BeskjedEventService(beskjedConsumer, tokenFetcher)
+    private val innboksEventService = InnboksEventService(innboksConsumer, tokenFetcher)
     private val bruker = InnloggetBrukerObjectMother.createInnloggetBruker("123")
 
     private val azureToken = AzureToken("tokenValue")
 
-    private val mockedEvents: List<Beskjed> = mockk()
+    private val mockedEvents: List<Innboks> = mockk()
 
     @AfterEach
     fun cleanUp() {
-        clearMocks(beskjedConsumer, tokenFetcher)
+        clearMocks(innboksConsumer, tokenFetcher)
     }
 
     @Test
-    fun `should request an azure token and make request on behalf of user for active beskjed events`() {
+    fun `should request an azure token and make request on behalf of user for active innboks events`() {
         coEvery {
             tokenFetcher.fetchTokenForEventHandler()
         } returns azureToken
 
         coEvery {
-            beskjedConsumer.getActiveEvents(azureToken, bruker.fodselsnummer)
+            innboksConsumer.getActiveEvents(azureToken, bruker.fodselsnummer)
         } returns mockedEvents
 
         val result = runBlocking {
-            beskjedEventService.getActiveCachedEventsForUser(bruker)
+            innboksEventService.getActiveCachedEventsForUser(bruker)
         }
 
         result `should be equal to` mockedEvents
 
         coVerify(exactly = 1) { tokenFetcher.fetchTokenForEventHandler() }
-        coVerify(exactly = 1) { beskjedConsumer.getActiveEvents(azureToken, bruker.fodselsnummer) }
+        coVerify(exactly = 1) { innboksConsumer.getActiveEvents(azureToken, bruker.fodselsnummer) }
     }
 
     @Test
-    fun `should request an azure token and make request on behalf of user for inactive beskjed events`() {
+    fun `should request an azure token and make request on behalf of user for inactive innboks events`() {
         coEvery {
             tokenFetcher.fetchTokenForEventHandler()
         } returns azureToken
 
         coEvery {
-            beskjedConsumer.getInactiveEvents(azureToken, bruker.fodselsnummer)
+            innboksConsumer.getInactiveEvents(azureToken, bruker.fodselsnummer)
         } returns mockedEvents
 
         val result = runBlocking {
-            beskjedEventService.getInactiveCachedEventsForUser(bruker)
+            innboksEventService.getInactiveCachedEventsForUser(bruker)
         }
 
         result `should be equal to` mockedEvents
 
         coVerify(exactly = 1) { tokenFetcher.fetchTokenForEventHandler() }
-        coVerify(exactly = 1) { beskjedConsumer.getInactiveEvents(azureToken, bruker.fodselsnummer) }
+        coVerify(exactly = 1) { innboksConsumer.getInactiveEvents(azureToken, bruker.fodselsnummer) }
     }
 
     @Test
-    fun `should request an azure token and make request on behalf of user for all beskjed events`() {
+    fun `should request an azure token and make request on behalf of user for all innboks events`() {
         coEvery {
             tokenFetcher.fetchTokenForEventHandler()
         } returns azureToken
 
         coEvery {
-            beskjedConsumer.getAllEvents(azureToken, bruker.fodselsnummer)
+            innboksConsumer.getAllEvents(azureToken, bruker.fodselsnummer)
         } returns mockedEvents
 
         val result = runBlocking {
-            beskjedEventService.getAllCachedEventsForUser(bruker)
+            innboksEventService.getAllCachedEventsForUser(bruker)
         }
 
         result `should be equal to` mockedEvents
 
         coVerify(exactly = 1) { tokenFetcher.fetchTokenForEventHandler() }
-        coVerify(exactly = 1) { beskjedConsumer.getAllEvents(azureToken, bruker.fodselsnummer) }
+        coVerify(exactly = 1) { innboksConsumer.getAllEvents(azureToken, bruker.fodselsnummer) }
     }
-
 }
