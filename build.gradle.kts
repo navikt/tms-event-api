@@ -41,6 +41,7 @@ dependencies {
     implementation(Logstash.logbackEncoder)
     implementation(Tms.KtorTokenSupport.authenticationInstaller)
     implementation(Tms.KtorTokenSupport.azureExchange)
+    implementation(Tms.KtorTokenSupport.azureValidation)
 
     testImplementation(Junit.api)
     testImplementation(Ktor.clientMock)
