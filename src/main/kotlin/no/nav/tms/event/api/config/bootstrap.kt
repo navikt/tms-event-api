@@ -1,22 +1,23 @@
 package no.nav.tms.event.api.config
 
 import io.ktor.application.*
+import io.ktor.auth.*
 import io.ktor.client.*
 import io.ktor.features.*
-import io.ktor.http.*
 import io.ktor.routing.*
 import io.ktor.serialization.*
+import no.nav.tms.event.api.beskjed.beskjedApi
 import no.nav.tms.event.api.health.healthApi
+import no.nav.tms.event.api.innboks.innboksApi
+import no.nav.tms.event.api.oppgave.oppgaveApi
+import no.nav.tms.token.support.azure.validation.installAzureAuth
 
 fun Application.mainModule(appContext: ApplicationContext = ApplicationContext()) {
-    val environment = Environment()
 
     install(DefaultHeaders)
 
-    install(CORS) {
-        host(environment.corsAllowedOrigins)
-        allowCredentials = true
-        header(HttpHeaders.ContentType)
+    installAzureAuth {
+        setAsDefault = true
     }
 
     install(ContentNegotiation) {
@@ -25,6 +26,11 @@ fun Application.mainModule(appContext: ApplicationContext = ApplicationContext()
 
     routing {
         healthApi(appContext.healthService)
+        authenticate {
+            oppgaveApi(appContext.oppgaveEventService)
+            beskjedApi(appContext.beskjedEventService)
+            innboksApi(appContext.innboksEventService)
+        }
     }
 
     configureShutdownHook(appContext.httpClient)

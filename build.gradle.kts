@@ -25,23 +25,21 @@ repositories {
 dependencies {
     implementation(DittNAV.Common.logging)
     implementation(DittNAV.Common.utils)
-    implementation(Jackson.dataTypeJsr310)
     implementation(Kotlinx.coroutines)
     implementation(Kotlinx.htmlJvm)
     implementation(Ktor.auth)
     implementation(Ktor.authJwt)
     implementation(Ktor.clientApache)
-    implementation(Ktor.clientJackson)
     implementation(Ktor.clientJson)
     implementation(Ktor.clientLogging)
     implementation(Ktor.clientLoggingJvm)
     implementation(Ktor.clientSerializationJvm)
     implementation(Ktor.htmlBuilder)
-    implementation(Ktor.jackson)
     implementation(Ktor.serverNetty)
     implementation(Ktor.serialization)
     implementation(Logback.classic)
     implementation(Logstash.logbackEncoder)
+    implementation(Tms.KtorTokenSupport.authenticationInstaller)
     implementation(Tms.KtorTokenSupport.azureExchange)
 
     testImplementation(Junit.api)
@@ -53,7 +51,6 @@ dependencies {
 
     testRuntimeOnly(Bouncycastle.bcprovJdk15on)
     testRuntimeOnly(Jjwt.impl)
-    testRuntimeOnly(Jjwt.jackson)
     testRuntimeOnly(Junit.engine)
 }
 
