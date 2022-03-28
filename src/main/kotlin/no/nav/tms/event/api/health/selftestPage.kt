@@ -21,7 +21,7 @@ suspend fun ApplicationCall.buildSelftestPage(healthService: HealthService) = co
     })
     {
         head {
-            title { +"Selftest tms-ktor-template" }
+            title { +"Selftest tms-event-api" }
         }
         body {
             var text = if(hasFailedChecks) {
@@ -39,7 +39,7 @@ suspend fun ApplicationCall.buildSelftestPage(healthService: HealthService) = co
             }
             table {
                 thead {
-                    tr { th { +"SELFTEST tms-ktor-template" } }
+                    tr { th { +"SELFTEST tms-event-api" } }
                 }
                 tbody {
                     healthChecks.map {

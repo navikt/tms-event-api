@@ -3,9 +3,9 @@
 API som tilbyr endepunkter for å hente eventer fra Ditt NAV sin event-cache. Autentisering skjer vha et AzureAD-token.
 
 # Kom i gang
-1. Bygg tms-ktor-template ved å kjøre `gradle build`
+1. Bygg tms-event-api ved å kjøre `gradle build`
 1. Start appen lokalt ved å kjøre `gradle runServer`
-1. Appen nås på `http://localhost:8101/tms-ktor-template`
+1. Appen nås på `http://localhost:8101/tms-event-api`
    * F.eks. via `curl http://localhost:8101/tms-event-api/internal/isAlive`
 
 # Henvendelser
