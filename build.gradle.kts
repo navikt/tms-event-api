@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin on the JVM.
     kotlin("jvm").version(Kotlin.version)
+    kotlin("plugin.serialization").version(Kotlin.version)
     kotlin("plugin.allopen").version(Kotlin.version)
 
     id(Shadow.pluginId) version (Shadow.version)
@@ -56,7 +57,7 @@ dependencies {
 }
 
 application {
-    mainClassName = "io.ktor.server.netty.EngineMain"
+    mainClass.set("io.ktor.server.netty.EngineMain")
 }
 
 tasks {
@@ -75,9 +76,12 @@ tasks {
         environment("NAIS_CLUSTER_NAME", "dev-gcp")
         environment("NAIS_NAMESPACE", "personbruker")
 
-        main = application.mainClassName
+        main = application.mainClass.get()
         classpath = sourceSets["main"].runtimeClasspath
     }
 }
 
+// TODO: Fjern følgende work around i ny versjon av Shadow-pluginet:
+// Skal være løst i denne: https://github.com/johnrengelman/shadow/pull/612
+project.setProperty("mainClassName", application.mainClass.get())
 apply(plugin = Shadow.pluginId)
