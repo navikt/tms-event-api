@@ -23,7 +23,7 @@ spec:
     application:
       enabled: true
   ingresses:
-    - "https://person.ekstern.dev.nav.no/tms-event-api"
+    - "https://tms-event-api.ekstern.dev.nav.no/tms-event-api"
   resources:
     limits:
       cpu: "1"
