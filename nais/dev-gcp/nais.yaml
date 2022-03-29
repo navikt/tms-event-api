@@ -31,3 +31,7 @@ spec:
     requests:
       cpu: "50m"
       memory: 64Mi
+  accessPolicy:
+    outbound:
+      rules:
+        - application: dittnav-event-handler
