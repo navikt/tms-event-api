@@ -12,7 +12,7 @@ fun Route.innboksApi(innboksEventService: InnboksEventService) {
 
     val log = LoggerFactory.getLogger(InnboksEventService::class.java)
 
-    get("/fetch/innboks/aktive") {
+    get("/innboks/aktive") {
         doIfValidRequest { userToFetchEventsFor ->
             try {
                 val aktiveInnboksEvents = innboksEventService.getActiveCachedEventsForUser(userToFetchEventsFor)
@@ -25,7 +25,7 @@ fun Route.innboksApi(innboksEventService: InnboksEventService) {
     }
 
 
-    get("/fetch/innboks/inaktive") {
+    get("/innboks/inaktive") {
         doIfValidRequest { userToFetchEventsFor ->
             try {
                 val inaktiveInnboksEvents = innboksEventService.getInactiveCachedEventsForUser(userToFetchEventsFor)
@@ -37,7 +37,7 @@ fun Route.innboksApi(innboksEventService: InnboksEventService) {
         }
     }
 
-    get("/fetch/innboks/all") {
+    get("/innboks/all") {
         doIfValidRequest { userToFetchEventsFor ->
             try {
                 val innboksEvents = innboksEventService.getAllCachedEventsForUser(userToFetchEventsFor)

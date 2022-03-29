@@ -12,7 +12,7 @@ fun Route.oppgaveApi(oppgaveEventService: OppgaveEventService) {
 
     val log = LoggerFactory.getLogger(OppgaveEventService::class.java)
 
-    get("/fetch/oppgave/aktive") {
+    get("/oppgave/aktive") {
         doIfValidRequest { userToFetchEventsFor ->
             try {
                 val aktiveOppgaveEvents = oppgaveEventService.getActiveCachedEventsForUser(userToFetchEventsFor)
@@ -24,7 +24,7 @@ fun Route.oppgaveApi(oppgaveEventService: OppgaveEventService) {
         }
     }
 
-    get("/fetch/oppgave/inaktive") {
+    get("/oppgave/inaktive") {
         doIfValidRequest { userToFetchEventsFor ->
             try {
                 val inaktiveOppgaveEvents = oppgaveEventService.getInactiveCachedEventsForUser(userToFetchEventsFor)
@@ -35,7 +35,7 @@ fun Route.oppgaveApi(oppgaveEventService: OppgaveEventService) {
         }
     }
 
-    get("/fetch/oppgave/all") {
+    get("/oppgave/all") {
         doIfValidRequest { userToFetchEventsFor ->
             try {
                 val oppgaveEvents = oppgaveEventService.getAllCachedEventsForUser(userToFetchEventsFor)
