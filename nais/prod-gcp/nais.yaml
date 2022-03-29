@@ -31,3 +31,12 @@ spec:
     requests:
       cpu: "50m"
       memory: 64Mi
+  accessPolicy:
+    inbound:
+      rules:
+        - application: salesforce
+          namespace: teamcrm
+          cluster: prod-external
+    outbound:
+      rules:
+        - application: dittnav-event-handler
