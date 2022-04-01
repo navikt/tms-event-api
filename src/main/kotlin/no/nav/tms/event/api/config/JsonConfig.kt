@@ -1,4 +1,4 @@
-package no.nav.tms.template.config
+package no.nav.tms.event.api.config
 
 import kotlinx.serialization.json.Json
 

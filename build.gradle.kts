@@ -4,6 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin on the JVM.
     kotlin("jvm").version(Kotlin.version)
+    kotlin("plugin.serialization").version(Kotlin.version)
     kotlin("plugin.allopen").version(Kotlin.version)
 
     id(Shadow.pluginId) version (Shadow.version)
@@ -12,7 +13,7 @@ plugins {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "13"
+    kotlinOptions.jvmTarget = "17"
 }
 
 repositories {
@@ -25,23 +26,23 @@ repositories {
 dependencies {
     implementation(DittNAV.Common.logging)
     implementation(DittNAV.Common.utils)
-    implementation(Jackson.dataTypeJsr310)
     implementation(Kotlinx.coroutines)
     implementation(Kotlinx.htmlJvm)
     implementation(Ktor.auth)
     implementation(Ktor.authJwt)
     implementation(Ktor.clientApache)
-    implementation(Ktor.clientJackson)
     implementation(Ktor.clientJson)
     implementation(Ktor.clientLogging)
     implementation(Ktor.clientLoggingJvm)
     implementation(Ktor.clientSerializationJvm)
     implementation(Ktor.htmlBuilder)
-    implementation(Ktor.jackson)
     implementation(Ktor.serverNetty)
     implementation(Ktor.serialization)
     implementation(Logback.classic)
     implementation(Logstash.logbackEncoder)
+    implementation(Tms.KtorTokenSupport.authenticationInstaller)
+    implementation(Tms.KtorTokenSupport.azureExchange)
+    implementation(Tms.KtorTokenSupport.azureValidation)
 
     testImplementation(Junit.api)
     testImplementation(Ktor.clientMock)
@@ -52,12 +53,11 @@ dependencies {
 
     testRuntimeOnly(Bouncycastle.bcprovJdk15on)
     testRuntimeOnly(Jjwt.impl)
-    testRuntimeOnly(Jjwt.jackson)
     testRuntimeOnly(Junit.engine)
 }
 
 application {
-    mainClassName = "io.ktor.server.netty.EngineMain"
+    mainClass.set("io.ktor.server.netty.EngineMain")
 }
 
 tasks {
@@ -73,12 +73,15 @@ tasks {
 
         environment("CORS_ALLOWED_ORIGINS", "localhost:9002")
 
-        environment("NAIS_CLUSTER_NAME", "dev-sbs")
+        environment("NAIS_CLUSTER_NAME", "dev-gcp")
         environment("NAIS_NAMESPACE", "personbruker")
 
-        main = application.mainClassName
+        main = application.mainClass.get()
         classpath = sourceSets["main"].runtimeClasspath
     }
 }
 
+// TODO: Fjern følgende work around i ny versjon av Shadow-pluginet:
+// Skal være løst i denne: https://github.com/johnrengelman/shadow/pull/612
+project.setProperty("mainClassName", application.mainClass.get())
 apply(plugin = Shadow.pluginId)

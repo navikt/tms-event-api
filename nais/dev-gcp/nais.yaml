@@ -1,28 +1,29 @@
 apiVersion: "nais.io/v1alpha1"
 kind: "Application"
 metadata:
-  name: tms-ktor-template
+  name: tms-event-api
   namespace: min-side
   labels:
     team: min-side
 spec:
   envFrom:
-    - secret: tms-ktor-template-secrets
+    - secret: tms-event-api-secrets
   image: {{version}}
   port: 8080
   liveness:
-    path: /tms-ktor-template/internal/isAlive
+    path: /tms-event-api/internal/isAlive
     initialDelay: 10
   readiness:
-    path: /tms-ktor-template/internal/isReady
+    path: /tms-event-api/internal/isReady
     initialDelay: 10
   replicas:
     min: 2
     max: 4
-  webproxy: true
+  azure:
+    application:
+      enabled: true
   ingresses:
-    - "https://person.dev.nav.no/tms-ktor-template"
-    - "https://tms-ktor-template.intern.dev.nav.no/tms-ktor-template"
+    - "https://tms-event-api.ekstern.dev.nav.no/tms-event-api"
   resources:
     limits:
       cpu: "1"
@@ -30,3 +31,12 @@ spec:
     requests:
       cpu: "50m"
       memory: 64Mi
+  accessPolicy:
+    inbound:
+      rules:
+        - application: salesforce
+          namespace: teamcrm
+          cluster: dev-external
+    outbound:
+      rules:
+        - application: dittnav-event-handler
