@@ -8,7 +8,6 @@ import java.time.ZonedDateTime
 
 @Serializable
 data class Beskjed(
-    val uid: String,
     val fodselsnummer: String,
     val grupperingsId: String,
     val eventId: String,
