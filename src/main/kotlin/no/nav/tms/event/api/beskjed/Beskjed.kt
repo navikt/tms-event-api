@@ -12,6 +12,7 @@ data class Beskjed(
     val grupperingsId: String,
     val eventId: String,
     val eventTidspunkt: ZonedDateTime,
+    val forstBehandlet: ZonedDateTime,
     val produsent: String,
     val sikkerhetsnivaa: Int,
     val sistOppdatert: ZonedDateTime,
