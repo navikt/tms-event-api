@@ -11,7 +11,6 @@ data class Beskjed(
     val fodselsnummer: String,
     val grupperingsId: String,
     val eventId: String,
-    val eventTidspunkt: ZonedDateTime,
     val forstBehandlet: ZonedDateTime,
     val produsent: String,
     val sikkerhetsnivaa: Int,

@@ -9,7 +9,6 @@ import java.time.ZonedDateTime
 @Serializable
 data class Innboks(
     val produsent: String,
-    val eventTidspunkt: ZonedDateTime,
     val forstBehandlet: ZonedDateTime,
     val fodselsnummer: String,
     val eventId: String,
