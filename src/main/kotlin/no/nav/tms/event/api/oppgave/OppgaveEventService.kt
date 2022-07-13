@@ -8,21 +8,27 @@ class OppgaveEventService(
     private val azureTokenFetcher: AzureTokenFetcher
 ) {
 
-    suspend fun getActiveCachedEventsForUser(bruker: User): List<Oppgave> {
+    suspend fun getActiveCachedEventsForUser(bruker: User): List<OppgaveDTO> {
         val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
 
-        return oppgaveConsumer.getActiveEvents(azureToken, bruker.fodselsnummer)
+        val oppgaveList = oppgaveConsumer.getActiveEvents(azureToken, bruker.fodselsnummer)
+
+        return OppgaveTransformer.toOppgaveDTO(oppgaveList)
     }
 
-    suspend fun getInactiveCachedEventsForUser(bruker: User): List<Oppgave> {
+    suspend fun getInactiveCachedEventsForUser(bruker: User): List<OppgaveDTO> {
         val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
 
-        return oppgaveConsumer.getInactiveEvents(azureToken, bruker.fodselsnummer)
+        val oppgaveList = oppgaveConsumer.getInactiveEvents(azureToken, bruker.fodselsnummer)
+
+        return OppgaveTransformer.toOppgaveDTO(oppgaveList)
     }
 
-    suspend fun getAllCachedEventsForUser(bruker: User): List<Oppgave> {
+    suspend fun getAllCachedEventsForUser(bruker: User): List<OppgaveDTO> {
         val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
 
-        return oppgaveConsumer.getAllEvents(azureToken, bruker.fodselsnummer)
+        val oppgaveList = oppgaveConsumer.getAllEvents(azureToken, bruker.fodselsnummer)
+
+        return OppgaveTransformer.toOppgaveDTO(oppgaveList)
     }
 }
