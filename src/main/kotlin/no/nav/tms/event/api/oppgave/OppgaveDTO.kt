@@ -7,7 +7,7 @@ import no.nav.tms.event.api.common.serializer.ZonedDateTimeSerializer
 import java.time.ZonedDateTime
 
 @Serializable
-data class Oppgave(
+data class OppgaveDTO(
     val fodselsnummer: String,
     val grupperingsId: String,
     val eventId: String,
@@ -17,7 +17,5 @@ data class Oppgave(
     val sistOppdatert: ZonedDateTime,
     val tekst: String,
     val link: String,
-    val aktiv: Boolean,
-    val eksternVarslingSendt: Boolean,
-    val eksternVarslingKanaler: List<String>
+    val aktiv: Boolean
 )

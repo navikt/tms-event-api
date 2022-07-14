@@ -1,5 +1,5 @@
 @file:UseSerializers(ZonedDateTimeSerializer::class)
-package no.nav.tms.event.api.oppgave
+package no.nav.tms.event.api.innboks
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
@@ -7,17 +7,15 @@ import no.nav.tms.event.api.common.serializer.ZonedDateTimeSerializer
 import java.time.ZonedDateTime
 
 @Serializable
-data class Oppgave(
-    val fodselsnummer: String,
-    val grupperingsId: String,
-    val eventId: String,
-    val forstBehandlet: ZonedDateTime,
+data class InnboksDTO(
     val produsent: String,
-    val sikkerhetsnivaa: Int,
-    val sistOppdatert: ZonedDateTime,
+    val forstBehandlet: ZonedDateTime,
+    val fodselsnummer: String,
+    val eventId: String,
+    val grupperingsId: String,
     val tekst: String,
     val link: String,
-    val aktiv: Boolean,
-    val eksternVarslingSendt: Boolean,
-    val eksternVarslingKanaler: List<String>
+    val sikkerhetsnivaa: Int,
+    val sistOppdatert: ZonedDateTime,
+    val aktiv: Boolean
 )
