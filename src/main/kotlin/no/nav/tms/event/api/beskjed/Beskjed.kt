@@ -18,5 +18,7 @@ data class Beskjed(
     val synligFremTil: ZonedDateTime? = null,
     val tekst: String,
     val link: String,
-    val aktiv: Boolean
+    val aktiv: Boolean,
+    val eksternVarslingSendt: Boolean,
+    val eksternVarslingKanaler: List<String>
 )
