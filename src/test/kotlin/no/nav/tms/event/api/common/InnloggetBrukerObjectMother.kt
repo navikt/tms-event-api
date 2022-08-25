@@ -10,5 +10,4 @@ object InnloggetBrukerObjectMother {
     fun createInnloggetBruker(ident: String): User {
         return User(ident)
     }
-
 }

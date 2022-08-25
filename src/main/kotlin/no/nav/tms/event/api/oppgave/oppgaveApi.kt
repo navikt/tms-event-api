@@ -1,9 +1,10 @@
 package no.nav.tms.event.api.oppgave
 
-import io.ktor.application.*
-import io.ktor.http.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.application.call
+import io.ktor.http.HttpStatusCode
+import io.ktor.response.respond
+import io.ktor.routing.Route
+import io.ktor.routing.get
 import no.nav.tms.event.api.common.respondWithError
 import no.nav.tms.event.api.config.doIfValidRequest
 import org.slf4j.LoggerFactory
@@ -17,7 +18,6 @@ fun Route.oppgaveApi(oppgaveEventService: OppgaveEventService) {
             try {
                 val aktiveOppgaveEvents = oppgaveEventService.getActiveCachedEventsForUser(userToFetchEventsFor)
                 call.respond(HttpStatusCode.OK, aktiveOppgaveEvents)
-
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
@@ -40,7 +40,6 @@ fun Route.oppgaveApi(oppgaveEventService: OppgaveEventService) {
             try {
                 val oppgaveEvents = oppgaveEventService.getAllCachedEventsForUser(userToFetchEventsFor)
                 call.respond(HttpStatusCode.OK, oppgaveEvents)
-
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }

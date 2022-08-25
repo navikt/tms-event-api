@@ -29,5 +29,4 @@ class ApplicationContext {
 
     val innboksConsumer = InnboksConsumer(httpClient, URL(environment.eventHandlerUrl))
     val innboksEventService = InnboksEventService(innboksConsumer, azureTokenFetcher)
-
 }

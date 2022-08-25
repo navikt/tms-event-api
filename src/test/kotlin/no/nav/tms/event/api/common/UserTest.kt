@@ -23,5 +23,4 @@ internal class UserTest {
 
         outputOfToString `should not contain` (userToFetchEventsFor.fodselsnummer)
     }
-
 }

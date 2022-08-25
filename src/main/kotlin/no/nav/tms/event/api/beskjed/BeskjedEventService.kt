@@ -2,8 +2,6 @@ package no.nav.tms.event.api.beskjed
 
 import no.nav.tms.event.api.common.AzureTokenFetcher
 import no.nav.tms.event.api.common.User
-import no.nav.tms.event.api.beskjed.Beskjed
-import no.nav.tms.event.api.beskjed.BeskjedDTO
 
 class BeskjedEventService(
     private val beskjedConsumer: BeskjedConsumer,

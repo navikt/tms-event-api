@@ -35,6 +35,6 @@ fun Routing.healthApi(healthService: HealthService) {
 private suspend fun isReady(healthService: HealthService): Boolean {
     val healthChecks = healthService.getHealthChecks()
     return healthChecks
-            .filter { healthStatus -> healthStatus.includeInReadiness }
-            .all { healthStatus -> Status.OK == healthStatus.status }
+        .filter { healthStatus -> healthStatus.includeInReadiness }
+        .all { healthStatus -> Status.OK == healthStatus.status }
 }

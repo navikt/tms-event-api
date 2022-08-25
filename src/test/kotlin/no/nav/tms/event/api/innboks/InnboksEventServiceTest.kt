@@ -1,14 +1,17 @@
 package no.nav.tms.event.api.innboks
 
-import io.mockk.*
+import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.tms.event.api.common.AzureToken
 import no.nav.tms.event.api.common.AzureTokenFetcher
 import no.nav.tms.event.api.common.InnloggetBrukerObjectMother
-import no.nav.tms.event.api.innboks.Innboks
-import no.nav.tms.event.api.innboks.InnboksConsumer
-import no.nav.tms.event.api.innboks.InnboksDTO
-import no.nav.tms.event.api.innboks.InnboksEventService
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

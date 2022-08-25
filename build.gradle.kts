@@ -10,6 +10,9 @@ plugins {
     id(Shadow.pluginId) version (Shadow.version)
     // Apply the application plugin to add support for building a CLI application.
     application
+
+    // Ktlint
+    id("org.jlleitschuh.gradle.ktlint").version("10.3.0")
 }
 
 tasks.withType<KotlinCompile> {

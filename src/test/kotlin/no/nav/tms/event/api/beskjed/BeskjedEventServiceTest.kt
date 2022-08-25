@@ -1,14 +1,17 @@
 package no.nav.tms.event.api.beskjed
 
-import io.mockk.*
+import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.tms.event.api.common.AzureToken
 import no.nav.tms.event.api.common.AzureTokenFetcher
 import no.nav.tms.event.api.common.InnloggetBrukerObjectMother
-import no.nav.tms.event.api.beskjed.Beskjed
-import no.nav.tms.event.api.beskjed.BeskjedConsumer
-import no.nav.tms.event.api.beskjed.BeskjedDTO
-import no.nav.tms.event.api.beskjed.BeskjedEventService
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach

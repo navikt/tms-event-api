@@ -1,6 +1,13 @@
 package no.nav.tms.event.api.oppgave
 
-import io.mockk.*
+import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.tms.event.api.common.AzureToken
 import no.nav.tms.event.api.common.AzureTokenFetcher
@@ -111,4 +118,3 @@ class OppgaveEventServiceTest {
         coVerify(exactly = 1) { oppgaveConsumer.getAllEvents(azureToken, bruker.fodselsnummer) }
     }
 }
-

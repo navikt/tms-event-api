@@ -1,9 +1,10 @@
 package no.nav.tms.event.api.config
 
-import io.ktor.application.*
-import io.ktor.http.*
-import io.ktor.response.*
-import io.ktor.util.pipeline.*
+import io.ktor.application.ApplicationCall
+import io.ktor.application.call
+import io.ktor.http.HttpStatusCode
+import io.ktor.response.respond
+import io.ktor.util.pipeline.PipelineContext
 import no.nav.tms.event.api.common.User
 import org.slf4j.LoggerFactory
 
@@ -17,13 +18,11 @@ suspend inline fun PipelineContext<Unit, ApplicationCall>.doIfValidRequest(handl
         if (isFodselsnummerOfValidLength(fnrHeader)) {
             val user = User(fnrHeader)
             handler.invoke(user)
-
         } else {
             val msg = "Header-en '$headerName' inneholder ikke et gyldig fødselsnummer."
             log.warn(msg)
             call.respond(HttpStatusCode.BadRequest, msg)
         }
-
     } else {
         val msg = "Requesten mangler header-en '$headerName'"
         log.warn(msg)

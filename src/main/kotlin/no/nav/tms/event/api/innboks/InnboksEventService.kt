@@ -2,8 +2,6 @@ package no.nav.tms.event.api.innboks
 
 import no.nav.tms.event.api.common.AzureTokenFetcher
 import no.nav.tms.event.api.common.User
-import no.nav.tms.event.api.innboks.Innboks
-import no.nav.tms.event.api.innboks.InnboksDTO
 
 class InnboksEventService(
     private val innboksConsumer: InnboksConsumer,
