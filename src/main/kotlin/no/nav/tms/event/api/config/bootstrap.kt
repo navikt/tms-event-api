@@ -9,34 +9,42 @@ import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
 import io.ktor.routing.routing
 import io.ktor.serialization.json
+import no.nav.tms.event.api.beskjed.BeskjedEventService
 import no.nav.tms.event.api.beskjed.beskjedApi
+import no.nav.tms.event.api.health.HealthService
 import no.nav.tms.event.api.health.healthApi
+import no.nav.tms.event.api.innboks.InnboksEventService
 import no.nav.tms.event.api.innboks.innboksApi
+import no.nav.tms.event.api.oppgave.OppgaveEventService
 import no.nav.tms.event.api.oppgave.oppgaveApi
-import no.nav.tms.token.support.azure.validation.installAzureAuth
 
-fun Application.mainModule(appContext: ApplicationContext = ApplicationContext()) {
+fun Application.api(
+    healthService: HealthService,
+    beskjedEventService: BeskjedEventService,
+    oppgaveEventService: OppgaveEventService,
+    innboksEventService: InnboksEventService,
+    httpClient: HttpClient,
+    authConfig: Application.() -> Unit
+) {
 
     install(DefaultHeaders)
 
-    installAzureAuth {
-        setAsDefault = true
-    }
+    authConfig()
 
     install(ContentNegotiation) {
         json(jsonConfig())
     }
 
     routing {
-        healthApi(appContext.healthService)
+        healthApi(healthService)
         authenticate {
-            oppgaveApi(appContext.oppgaveEventService)
-            beskjedApi(appContext.beskjedEventService)
-            innboksApi(appContext.innboksEventService)
+            oppgaveApi(oppgaveEventService)
+            beskjedApi(beskjedEventService)
+            innboksApi(innboksEventService)
         }
     }
 
-    configureShutdownHook(appContext.httpClient)
+    configureShutdownHook(httpClient)
 }
 
 private fun Application.configureShutdownHook(httpClient: HttpClient) {

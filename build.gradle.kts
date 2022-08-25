@@ -60,7 +60,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("io.ktor.server.netty.EngineMain")
+    mainClass.set("no.nav.tms.event.api.config.AppKt")
 }
 
 tasks {
