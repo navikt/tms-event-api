@@ -53,6 +53,10 @@ dependencies {
     testImplementation(Kluent.kluent)
     testImplementation(Mockk.mockk)
     testImplementation(Jjwt.api)
+    testImplementation(Ktor.serverTestHost)
+    testImplementation(Tms.KtorTokenSupport.authenticationInstallerMock)
+    testImplementation(Tms.KtorTokenSupport.tokenXValidationMock)
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
 
     testRuntimeOnly(Bouncycastle.bcprovJdk15on)
     testRuntimeOnly(Jjwt.impl)

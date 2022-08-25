@@ -7,6 +7,7 @@ import io.ktor.auth.authenticate
 import io.ktor.client.HttpClient
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
+import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.serialization.json
 import no.nav.tms.event.api.beskjed.BeskjedEventService
@@ -36,11 +37,13 @@ fun Application.api(
     }
 
     routing {
-        healthApi(healthService)
-        authenticate {
-            oppgaveApi(oppgaveEventService)
-            beskjedApi(beskjedEventService)
-            innboksApi(innboksEventService)
+        route("/tms-event-api") {
+            healthApi(healthService)
+            authenticate {
+                oppgaveApi(oppgaveEventService)
+                beskjedApi(beskjedEventService)
+                innboksApi(innboksEventService)
+            }
         }
     }
 

@@ -4,10 +4,11 @@ import io.ktor.application.call
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respondText
+import io.ktor.routing.Route
 import io.ktor.routing.Routing
 import io.ktor.routing.get
 
-fun Routing.healthApi(healthService: HealthService) {
+fun Route.healthApi(healthService: HealthService) {
 
     val pingJsonResponse = """{"ping": "pong"}"""
 
