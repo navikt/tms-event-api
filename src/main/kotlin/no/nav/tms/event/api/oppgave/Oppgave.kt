@@ -22,10 +22,6 @@ data class Oppgave(
     val eksternVarslingSendt: Boolean,
     val eksternVarslingKanaler: List<String>
 ) {
-    companion object {
-        internal fun List<Oppgave>.toDTO() = map { oppgave -> oppgave.toDTO() }
-    }
-
     internal fun toDTO() = OppgaveDTO(
         forstBehandlet = forstBehandlet,
         eventId = eventId,
