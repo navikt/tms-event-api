@@ -10,7 +10,7 @@ import io.ktor.features.DefaultHeaders
 import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.serialization.json
-import no.nav.tms.event.api.beskjed.BeskjedEventService
+import no.nav.tms.event.api.beskjed.BeskjedVarselReader
 import no.nav.tms.event.api.beskjed.beskjedApi
 import no.nav.tms.event.api.health.HealthService
 import no.nav.tms.event.api.health.healthApi
@@ -21,7 +21,7 @@ import no.nav.tms.event.api.oppgave.oppgaveApi
 
 fun Application.api(
     healthService: HealthService,
-    beskjedEventService: BeskjedEventService,
+    beskjedVarselReader: BeskjedVarselReader,
     oppgaveVarselReader: OppgaveVarselReader,
     innboksVarselReader: InnboksVarselReader,
     httpClient: HttpClient,
@@ -41,7 +41,7 @@ fun Application.api(
             healthApi(healthService)
             authenticate {
                 oppgaveApi(oppgaveVarselReader)
-                beskjedApi(beskjedEventService)
+                beskjedApi(beskjedVarselReader)
                 innboksApi(innboksVarselReader)
             }
         }

@@ -12,7 +12,7 @@ import io.ktor.server.testing.withTestApplication
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.tms.event.api.beskjed.BeskjedDTO
-import no.nav.tms.event.api.beskjed.BeskjedEventService
+import no.nav.tms.event.api.beskjed.BeskjedVarselReader
 import no.nav.tms.event.api.innboks.InnboksDTO
 import no.nav.tms.event.api.innboks.InnboksVarselReader
 import no.nav.tms.event.api.oppgave.OppgaveDTO
@@ -54,13 +54,13 @@ class ApiTest {
     @Test
     fun beskjedvarsler() {
         val dummyFnr = "16045571871"
-        val beskjedEventService = mockk<BeskjedEventService>()
+        val beskjedVarselReader = mockk<BeskjedVarselReader>()
         val rootPath = "/tms-event-api/beskjed"
-        coEvery { beskjedEventService.getInactiveCachedEventsForUser(dummyFnr) } returns dummyBeskjeder(5)
-        coEvery { beskjedEventService.getActiveCachedEventsForUser(dummyFnr) } returns dummyBeskjeder(1)
-        coEvery { beskjedEventService.getAllCachedEventsForUser(dummyFnr) } returns dummyBeskjeder(6)
+        coEvery { beskjedVarselReader.inaktiveVarsler(dummyFnr) } returns dummyBeskjeder(5)
+        coEvery { beskjedVarselReader.aktiveVarsler(dummyFnr) } returns dummyBeskjeder(1)
+        coEvery { beskjedVarselReader.alleVarsler(dummyFnr) } returns dummyBeskjeder(6)
 
-        withTestApplication(mockApi(beskjedEventService = beskjedEventService)) {
+        withTestApplication(mockApi(beskjedVarselReader = beskjedVarselReader)) {
             assertVarselApiCall("$rootPath/inaktive", dummyFnr, 5)
             assertVarselApiCall("$rootPath/aktive", dummyFnr, 1)
             assertVarselApiCall("$rootPath/all", dummyFnr, 6)

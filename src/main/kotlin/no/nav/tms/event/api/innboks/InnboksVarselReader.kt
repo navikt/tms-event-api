@@ -16,11 +16,11 @@ class InnboksVarselReader(
     private val inactiveEventsEndpoint = URL("$eventHandlerBaseURL/fetch/modia/innboks/inaktive")
     private val allEventsEndpoint = URL("$eventHandlerBaseURL/fetch/modia/innboks/all")
 
-    suspend fun aktiveVarsler(fnr: String): List<InnboksDTO> = getExternalEvents(fnr, activeEventsEndpoint)
-    suspend fun inaktiveVarsler(fnr: String): List<InnboksDTO> = getExternalEvents(fnr, inactiveEventsEndpoint)
-    suspend fun alleVarsler(fnr: String): List<InnboksDTO> = getExternalEvents(fnr, allEventsEndpoint)
+    suspend fun aktiveVarsler(fnr: String): List<InnboksDTO> = getEksterneVarsler(fnr, activeEventsEndpoint)
+    suspend fun inaktiveVarsler(fnr: String): List<InnboksDTO> = getEksterneVarsler(fnr, inactiveEventsEndpoint)
+    suspend fun alleVarsler(fnr: String): List<InnboksDTO> = getEksterneVarsler(fnr, allEventsEndpoint)
 
-    private suspend fun getExternalEvents(
+    private suspend fun getEksterneVarsler(
         fnr: String,
         completePathToEndpoint: URL
     ): List<InnboksDTO> {

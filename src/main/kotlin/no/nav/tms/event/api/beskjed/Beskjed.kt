@@ -1,4 +1,5 @@
 @file:UseSerializers(ZonedDateTimeSerializer::class)
+
 package no.nav.tms.event.api.beskjed
 
 import kotlinx.serialization.Serializable
@@ -21,4 +22,32 @@ data class Beskjed(
     val aktiv: Boolean,
     val eksternVarslingSendt: Boolean,
     val eksternVarslingKanaler: List<String>
+) {
+    internal fun toDTO() = BeskjedDTO(
+        forstBehandlet = forstBehandlet,
+        eventId = eventId,
+        fodselsnummer = fodselsnummer,
+        tekst = tekst,
+        link = link,
+        produsent = produsent,
+        sistOppdatert = sistOppdatert,
+        sikkerhetsnivaa = sikkerhetsnivaa,
+        aktiv = aktiv,
+        grupperingsId = grupperingsId
+    )
+}
+
+@Serializable
+data class BeskjedDTO(
+    val fodselsnummer: String,
+    val grupperingsId: String,
+    val eventId: String,
+    val forstBehandlet: ZonedDateTime,
+    val produsent: String,
+    val sikkerhetsnivaa: Int,
+    val sistOppdatert: ZonedDateTime,
+    val synligFremTil: ZonedDateTime? = null,
+    val tekst: String,
+    val link: String,
+    val aktiv: Boolean
 )

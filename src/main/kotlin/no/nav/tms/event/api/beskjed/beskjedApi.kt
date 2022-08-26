@@ -9,14 +9,14 @@ import no.nav.tms.event.api.common.respondWithError
 import no.nav.tms.event.api.config.doIfValidRequest
 import org.slf4j.LoggerFactory
 
-fun Route.beskjedApi(beskjedEventService: BeskjedEventService) {
+fun Route.beskjedApi(beskjedVarselReader: BeskjedVarselReader) {
 
-    val log = LoggerFactory.getLogger(BeskjedEventService::class.java)
+    val log = LoggerFactory.getLogger(BeskjedVarselReader::class.java)
 
     get("/beskjed/aktive") {
         doIfValidRequest { fnr ->
             try {
-                val aktiveBeskjedEvents = beskjedEventService.getActiveCachedEventsForUser(fnr)
+                val aktiveBeskjedEvents = beskjedVarselReader.aktiveVarsler(fnr)
                 call.respond(HttpStatusCode.OK, aktiveBeskjedEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
@@ -27,7 +27,7 @@ fun Route.beskjedApi(beskjedEventService: BeskjedEventService) {
     get("/beskjed/inaktive") {
         doIfValidRequest { fnr ->
             try {
-                val inaktiveBeskjedEvents = beskjedEventService.getInactiveCachedEventsForUser(fnr)
+                val inaktiveBeskjedEvents = beskjedVarselReader.inaktiveVarsler(fnr)
                 call.respond(HttpStatusCode.OK, inaktiveBeskjedEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
@@ -38,7 +38,7 @@ fun Route.beskjedApi(beskjedEventService: BeskjedEventService) {
     get("/beskjed/all") {
         doIfValidRequest { fnr ->
             try {
-                val beskjedEvents = beskjedEventService.getAllCachedEventsForUser(fnr)
+                val beskjedEvents = beskjedVarselReader.alleVarsler(fnr)
                 call.respond(HttpStatusCode.OK, beskjedEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
