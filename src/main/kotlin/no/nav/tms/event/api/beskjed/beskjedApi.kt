@@ -14,9 +14,9 @@ fun Route.beskjedApi(beskjedEventService: BeskjedEventService) {
     val log = LoggerFactory.getLogger(BeskjedEventService::class.java)
 
     get("/beskjed/aktive") {
-        doIfValidRequest { userToFetchEventsFor ->
+        doIfValidRequest { fnr ->
             try {
-                val aktiveBeskjedEvents = beskjedEventService.getActiveCachedEventsForUser(userToFetchEventsFor)
+                val aktiveBeskjedEvents = beskjedEventService.getActiveCachedEventsForUser(fnr)
                 call.respond(HttpStatusCode.OK, aktiveBeskjedEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
@@ -25,9 +25,9 @@ fun Route.beskjedApi(beskjedEventService: BeskjedEventService) {
     }
 
     get("/beskjed/inaktive") {
-        doIfValidRequest { userToFetchEventsFor ->
+        doIfValidRequest { fnr ->
             try {
-                val inaktiveBeskjedEvents = beskjedEventService.getInactiveCachedEventsForUser(userToFetchEventsFor)
+                val inaktiveBeskjedEvents = beskjedEventService.getInactiveCachedEventsForUser(fnr)
                 call.respond(HttpStatusCode.OK, inaktiveBeskjedEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
@@ -36,9 +36,9 @@ fun Route.beskjedApi(beskjedEventService: BeskjedEventService) {
     }
 
     get("/beskjed/all") {
-        doIfValidRequest { userToFetchEventsFor ->
+        doIfValidRequest { fnr ->
             try {
-                val beskjedEvents = beskjedEventService.getAllCachedEventsForUser(userToFetchEventsFor)
+                val beskjedEvents = beskjedEventService.getAllCachedEventsForUser(fnr)
                 call.respond(HttpStatusCode.OK, beskjedEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)

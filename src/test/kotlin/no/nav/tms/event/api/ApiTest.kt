@@ -12,7 +12,6 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.tms.event.api.beskjed.BeskjedDTO
 import no.nav.tms.event.api.beskjed.BeskjedEventService
-import no.nav.tms.event.api.common.User
 import no.nav.tms.event.api.innboks.InnboksDTO
 import no.nav.tms.event.api.innboks.InnboksEventService
 import no.nav.tms.event.api.oppgave.OppgaveDTO
@@ -30,7 +29,6 @@ class ApiTest {
             allRoutes(this.application.feature(Routing)).size shouldBeEqualTo 14
         }
     }
-
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
@@ -56,9 +54,9 @@ class ApiTest {
         val dummyFnr = "16045571871"
         val beskjedEventService = mockk<BeskjedEventService>()
         val rootPath = "/tms-event-api/beskjed"
-        coEvery { beskjedEventService.getInactiveCachedEventsForUser(User(dummyFnr)) } returns dummyBeskjeder(5)
-        coEvery { beskjedEventService.getActiveCachedEventsForUser(User(dummyFnr)) } returns dummyBeskjeder(1)
-        coEvery { beskjedEventService.getAllCachedEventsForUser(User(dummyFnr)) } returns dummyBeskjeder(6)
+        coEvery { beskjedEventService.getInactiveCachedEventsForUser(dummyFnr) } returns dummyBeskjeder(5)
+        coEvery { beskjedEventService.getActiveCachedEventsForUser(dummyFnr) } returns dummyBeskjeder(1)
+        coEvery { beskjedEventService.getAllCachedEventsForUser(dummyFnr) } returns dummyBeskjeder(6)
 
         withTestApplication(mockApi(beskjedEventService = beskjedEventService)) {
             assertVarselApiCall("$rootPath/inaktive", dummyFnr, 5)
@@ -72,9 +70,9 @@ class ApiTest {
         val dummyFnr = "16045571871"
         val oppgaveEventService = mockk<OppgaveEventService>()
         val rootPath = "/tms-event-api/oppgave"
-        coEvery { oppgaveEventService.getInactiveCachedEventsForUser(User(dummyFnr)) } returns dummyOppgaver(5)
-        coEvery { oppgaveEventService.getActiveCachedEventsForUser(User(dummyFnr)) } returns dummyOppgaver(1)
-        coEvery { oppgaveEventService.getAllCachedEventsForUser(User(dummyFnr)) } returns dummyOppgaver(6)
+        coEvery { oppgaveEventService.getInactiveCachedEventsForUser(dummyFnr) } returns dummyOppgaver(5)
+        coEvery { oppgaveEventService.getActiveCachedEventsForUser(dummyFnr) } returns dummyOppgaver(1)
+        coEvery { oppgaveEventService.getAllCachedEventsForUser(dummyFnr) } returns dummyOppgaver(6)
 
         withTestApplication(mockApi(oppgaveEventService = oppgaveEventService)) {
             assertVarselApiCall("$rootPath/inaktive", dummyFnr, 5)
@@ -88,9 +86,9 @@ class ApiTest {
         val dummyFnr = "16045571871"
         val innboksEventService = mockk<InnboksEventService>()
         val rootPath = "/tms-event-api/innboks"
-        coEvery { innboksEventService.getInactiveCachedEventsForUser(User(dummyFnr)) } returns dummyInnboks(3)
-        coEvery { innboksEventService.getActiveCachedEventsForUser(User(dummyFnr)) } returns dummyInnboks(1)
-        coEvery { innboksEventService.getAllCachedEventsForUser(User(dummyFnr)) } returns dummyInnboks(6)
+        coEvery { innboksEventService.getInactiveCachedEventsForUser(dummyFnr) } returns dummyInnboks(3)
+        coEvery { innboksEventService.getActiveCachedEventsForUser(dummyFnr) } returns dummyInnboks(1)
+        coEvery { innboksEventService.getAllCachedEventsForUser(dummyFnr) } returns dummyInnboks(6)
 
         withTestApplication(mockApi(innboksEventService = innboksEventService)) {
             assertVarselApiCall("$rootPath/inaktive", dummyFnr, 3)
@@ -155,7 +153,7 @@ private fun InnboksDTO.createList(antall: Int): List<InnboksDTO> = mutableListOf
     }
 }
 
-private fun OppgaveDTO.createList(antall:Int): List<OppgaveDTO> = mutableListOf<OppgaveDTO>() .also { list ->
+private fun OppgaveDTO.createList(antall: Int): List<OppgaveDTO> = mutableListOf<OppgaveDTO>().also { list ->
     for (i in 1..antall) {
         list.add(this)
     }
@@ -167,7 +165,6 @@ private fun BeskjedDTO.createList(antall: Int): MutableList<BeskjedDTO> =
             list.add(this)
         }
     }
-
 
 fun allRoutes(root: Route): List<Route> {
     return listOf(root) + root.children.flatMap { allRoutes(it) }

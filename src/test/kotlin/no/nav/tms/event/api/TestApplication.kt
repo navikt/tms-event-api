@@ -2,8 +2,6 @@ package no.nav.tms.event.api
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.application.Application
-import io.ktor.application.install
-import io.ktor.auth.Authentication
 import io.ktor.client.HttpClient
 import io.mockk.mockk
 import no.nav.tms.event.api.beskjed.BeskjedEventService

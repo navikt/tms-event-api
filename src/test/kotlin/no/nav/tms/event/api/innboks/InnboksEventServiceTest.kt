@@ -11,7 +11,6 @@ import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.tms.event.api.common.AzureToken
 import no.nav.tms.event.api.common.AzureTokenFetcher
-import no.nav.tms.event.api.common.InnloggetBrukerObjectMother
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -25,7 +24,7 @@ class InnboksEventServiceTest {
     private val tokenFetcher: AzureTokenFetcher = mockk()
 
     private val innboksEventService = InnboksEventService(innboksConsumer, tokenFetcher)
-    private val bruker = InnloggetBrukerObjectMother.createInnloggetBruker("123")
+    private val fnr = "123"
 
     private val azureToken = AzureToken("tokenValue")
 
@@ -50,7 +49,7 @@ class InnboksEventServiceTest {
         } returns azureToken
 
         coEvery {
-            innboksConsumer.getActiveEvents(azureToken, bruker.fodselsnummer)
+            innboksConsumer.getActiveEvents(azureToken, fnr)
         } returns mockedEvents
 
         every {
@@ -58,14 +57,14 @@ class InnboksEventServiceTest {
         } returns transformedEvents
 
         val result = runBlocking {
-            innboksEventService.getActiveCachedEventsForUser(bruker)
+            innboksEventService.getActiveCachedEventsForUser(fnr)
         }
 
         result `should be equal to` transformedEvents
 
         verify(exactly = 1) { InnboksTransformer.toInnboksDTO(mockedEvents) }
         coVerify(exactly = 1) { tokenFetcher.fetchTokenForEventHandler() }
-        coVerify(exactly = 1) { innboksConsumer.getActiveEvents(azureToken, bruker.fodselsnummer) }
+        coVerify(exactly = 1) { innboksConsumer.getActiveEvents(azureToken, fnr) }
     }
 
     @Test
@@ -75,7 +74,7 @@ class InnboksEventServiceTest {
         } returns azureToken
 
         coEvery {
-            innboksConsumer.getInactiveEvents(azureToken, bruker.fodselsnummer)
+            innboksConsumer.getInactiveEvents(azureToken, fnr)
         } returns mockedEvents
 
         every {
@@ -83,14 +82,14 @@ class InnboksEventServiceTest {
         } returns transformedEvents
 
         val result = runBlocking {
-            innboksEventService.getInactiveCachedEventsForUser(bruker)
+            innboksEventService.getInactiveCachedEventsForUser(fnr)
         }
 
         result `should be equal to` transformedEvents
 
         verify(exactly = 1) { InnboksTransformer.toInnboksDTO(mockedEvents) }
         coVerify(exactly = 1) { tokenFetcher.fetchTokenForEventHandler() }
-        coVerify(exactly = 1) { innboksConsumer.getInactiveEvents(azureToken, bruker.fodselsnummer) }
+        coVerify(exactly = 1) { innboksConsumer.getInactiveEvents(azureToken, fnr) }
     }
 
     @Test
@@ -100,7 +99,7 @@ class InnboksEventServiceTest {
         } returns azureToken
 
         coEvery {
-            innboksConsumer.getAllEvents(azureToken, bruker.fodselsnummer)
+            innboksConsumer.getAllEvents(azureToken, fnr)
         } returns mockedEvents
 
         every {
@@ -108,13 +107,13 @@ class InnboksEventServiceTest {
         } returns transformedEvents
 
         val result = runBlocking {
-            innboksEventService.getAllCachedEventsForUser(bruker)
+            innboksEventService.getAllCachedEventsForUser(fnr)
         }
 
         result `should be equal to` transformedEvents
 
         verify(exactly = 1) { InnboksTransformer.toInnboksDTO(mockedEvents) }
         coVerify(exactly = 1) { tokenFetcher.fetchTokenForEventHandler() }
-        coVerify(exactly = 1) { innboksConsumer.getAllEvents(azureToken, bruker.fodselsnummer) }
+        coVerify(exactly = 1) { innboksConsumer.getAllEvents(azureToken, fnr) }
     }
 }
