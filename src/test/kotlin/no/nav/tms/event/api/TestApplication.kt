@@ -1,8 +1,15 @@
 package no.nav.tms.event.api
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.application.Application
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.features.HttpTimeout
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.json.serializer.KotlinxSerializer
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.headersOf
 import io.mockk.mockk
 import no.nav.tms.event.api.beskjed.BeskjedEventService
 import no.nav.tms.event.api.config.api
@@ -12,7 +19,6 @@ import no.nav.tms.event.api.oppgave.OppgaveReader
 import no.nav.tms.token.support.authentication.installer.mock.installMockedAuthenticators
 import no.nav.tms.token.support.tokenx.validation.mock.SecurityLevel
 
-val objectmapper = ObjectMapper()
 fun mockApi(
     authConfig: Application.() -> Unit = mockAuthBuilder(),
     httpClient: HttpClient = mockk(relaxed = true),
@@ -42,5 +48,26 @@ fun mockAuthBuilder(): Application.() -> Unit = {
             staticSecurityLevel = SecurityLevel.LEVEL_4
         }
         installAzureAuthMock { }
+    }
+}
+
+fun mockClient(dummyContent: String) = HttpClient(
+    MockEngine() {
+        respond(
+            content = dummyContent,
+            status = HttpStatusCode.OK,
+            headers = headersOf(HttpHeaders.ContentType, "application/json")
+        )
+    }
+) {
+    install(JsonFeature) {
+        serializer = KotlinxSerializer()
+    }
+    install(HttpTimeout)
+}
+
+internal fun <T> T.createListFromObject(size: Int): List<T> = mutableListOf<T>().also { list ->
+    for (i in 1..size) {
+        list.add(this)
     }
 }

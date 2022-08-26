@@ -1,5 +1,6 @@
 package no.nav.tms.event.api
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.application.feature
 import io.ktor.http.HttpMethod
 import io.ktor.http.HttpStatusCode
@@ -22,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.ZonedDateTime
 
+private val objectmapper = ObjectMapper()
 class ApiTest {
     @Test
     fun `setter opp api ruter`() {
@@ -70,9 +72,9 @@ class ApiTest {
         val dummyFnr = "16045571871"
         val oppgaveReader = mockk<OppgaveReader>()
         val rootPath = "/tms-event-api/oppgave"
-        coEvery { oppgaveReader.inaktiveVarsler(dummyFnr) } returns dummyOppgaver(5)
-        coEvery { oppgaveReader.aktiveVarsler(dummyFnr) } returns dummyOppgaver(1)
-        coEvery { oppgaveReader.alleVarsler(dummyFnr) } returns dummyOppgaver(6)
+        coEvery { oppgaveReader.inaktiveVarsler(dummyFnr) } returns dummyOppgaveDTOs(5)
+        coEvery { oppgaveReader.aktiveVarsler(dummyFnr) } returns dummyOppgaveDTOs(1)
+        coEvery { oppgaveReader.alleVarsler(dummyFnr) } returns dummyOppgaveDTOs(6)
 
         withTestApplication(mockApi(oppgaveReader = oppgaveReader)) {
             assertVarselApiCall("$rootPath/inaktive", dummyFnr, 5)
@@ -107,7 +109,12 @@ private fun TestApplicationEngine.assertVarselApiCall(endpoint: String, fnr: Str
     }
 }
 
-private fun dummyBeskjeder(antall: Int = 0): List<BeskjedDTO> = BeskjedDTO(
+fun allRoutes(root: Route): List<Route> {
+    return listOf(root) + root.children.flatMap { allRoutes(it) }
+        .filter { it.toString().contains("method") && it.toString() != "/" }
+}
+
+private fun dummyBeskjeder(size: Int = 0): List<BeskjedDTO> = BeskjedDTO(
     fodselsnummer = "",
     grupperingsId = "",
     eventId = "",
@@ -119,9 +126,8 @@ private fun dummyBeskjeder(antall: Int = 0): List<BeskjedDTO> = BeskjedDTO(
     tekst = "",
     link = "",
     aktiv = false
-).createList(antall = antall)
-
-private fun dummyOppgaver(antall: Int = 0): List<OppgaveDTO> = OppgaveDTO(
+).createListFromObject(size = size)
+private fun dummyOppgaveDTOs(size: Int = 0): List<OppgaveDTO> = OppgaveDTO(
     fodselsnummer = "",
     grupperingsId = "",
     eventId = "",
@@ -132,9 +138,8 @@ private fun dummyOppgaver(antall: Int = 0): List<OppgaveDTO> = OppgaveDTO(
     tekst = "",
     link = "",
     aktiv = false
-).createList(antall)
-
-private fun dummyInnboks(antall: Int): List<InnboksDTO> = InnboksDTO(
+).createListFromObject(size)
+private fun dummyInnboks(size: Int): List<InnboksDTO> = InnboksDTO(
     produsent = "",
     forstBehandlet = ZonedDateTime.now().minusMinutes(9),
     fodselsnummer = "",
@@ -145,28 +150,4 @@ private fun dummyInnboks(antall: Int): List<InnboksDTO> = InnboksDTO(
     sikkerhetsnivaa = 0,
     sistOppdatert = ZonedDateTime.now(),
     aktiv = false
-).createList(antall)
-
-private fun InnboksDTO.createList(antall: Int): List<InnboksDTO> = mutableListOf<InnboksDTO>().also { list ->
-    for (i in 1..antall) {
-        list.add(this)
-    }
-}
-
-private fun OppgaveDTO.createList(antall: Int): List<OppgaveDTO> = mutableListOf<OppgaveDTO>().also { list ->
-    for (i in 1..antall) {
-        list.add(this)
-    }
-}
-
-private fun BeskjedDTO.createList(antall: Int): MutableList<BeskjedDTO> =
-    mutableListOf<BeskjedDTO>().also { list ->
-        for (i in 1..antall) {
-            list.add(this)
-        }
-    }
-
-fun allRoutes(root: Route): List<Route> {
-    return listOf(root) + root.children.flatMap { allRoutes(it) }
-        .filter { it.toString().contains("method") && it.toString() != "/" }
-}
+).createListFromObject(size)

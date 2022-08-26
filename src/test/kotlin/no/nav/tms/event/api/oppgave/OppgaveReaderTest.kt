@@ -1,119 +1,115 @@
 package no.nav.tms.event.api.oppgave
 
-import io.mockk.clearMocks
 import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
-import io.mockk.verify
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import no.nav.tms.event.api.common.AzureToken
 import no.nav.tms.event.api.common.AzureTokenFetcher
+import no.nav.tms.event.api.createListFromObject
+import no.nav.tms.event.api.mockClient
 import org.amshove.kluent.`should be equal to`
-import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import java.time.ZonedDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class OppgaveReaderTest {
 
-    private val oppgaveConsumer: OppgaveConsumer = mockk()
     private val tokenFetcher: AzureTokenFetcher = mockk()
-
-    private val oppgaveReader = OppgaveReader(oppgaveConsumer, tokenFetcher)
     private val fnr = "123"
-
     private val azureToken = AzureToken("tokenValue")
 
-    private val mockedEvents: List<Oppgave> = mockk()
-    private val transformedEvents: List<OppgaveDTO> = mockk()
-
-    @BeforeEach
-    fun setupMock() {
-        mockkObject(OppgaveTransformer)
-    }
-
-    @AfterEach
-    fun cleanUp() {
-        clearMocks(oppgaveConsumer, tokenFetcher)
-        unmockkObject(OppgaveTransformer)
-    }
-
     @Test
-    fun `should request an azure token and make request on behalf of user for active oppgave events`() {
+    fun `henter aktive oppgaver`() {
+        val (mockresponse, expectedResult) = mockContent(ZonedDateTime.now().minusDays(1), ZonedDateTime.now())
+
         coEvery {
             tokenFetcher.fetchTokenForEventHandler()
         } returns azureToken
 
-        coEvery {
-            oppgaveConsumer.getActiveEvents(azureToken, fnr)
-        } returns mockedEvents
-
-        every {
-            OppgaveTransformer.toOppgaveDTO(mockedEvents)
-        } returns transformedEvents
-
         val result = runBlocking {
-            oppgaveReader.aktiveVarsler(fnr)
+            OppgaveReader(
+                azureTokenFetcher = tokenFetcher,
+                client = mockClient(Json.encodeToString(mockresponse)),
+                eventHandlerBaseURL = "https://tms-test.something.no"
+            ).aktiveVarsler(fnr)
         }
 
-        result `should be equal to` transformedEvents
-
-        verify(exactly = 1) { OppgaveTransformer.toOppgaveDTO(mockedEvents) }
-        coVerify(exactly = 1) { tokenFetcher.fetchTokenForEventHandler() }
-        coVerify(exactly = 1) { oppgaveConsumer.getActiveEvents(azureToken, fnr) }
+        result `should be equal to` expectedResult
     }
 
     @Test
-    fun `should request an azure token and make request on behalf of user for inactive oppgave events`() {
+    fun `henter inaktive oppgaver`() {
+        val (mockresponse, expectedResult) = mockContent(ZonedDateTime.now().minusDays(1), ZonedDateTime.now())
+
         coEvery {
             tokenFetcher.fetchTokenForEventHandler()
         } returns azureToken
 
-        coEvery {
-            oppgaveConsumer.getInactiveEvents(azureToken, fnr)
-        } returns mockedEvents
-
-        every {
-            OppgaveTransformer.toOppgaveDTO(mockedEvents)
-        } returns transformedEvents
-
         val result = runBlocking {
-            oppgaveReader.inaktiveVarsler(fnr)
+            OppgaveReader(
+                azureTokenFetcher = tokenFetcher,
+                client = mockClient(Json.encodeToString(mockresponse)),
+                eventHandlerBaseURL = "https://tms-test.something.no"
+            ).inaktiveVarsler(fnr)
         }
 
-        result `should be equal to` transformedEvents
-
-        verify(exactly = 1) { OppgaveTransformer.toOppgaveDTO(mockedEvents) }
-        coVerify(exactly = 1) { tokenFetcher.fetchTokenForEventHandler() }
-        coVerify(exactly = 1) { oppgaveConsumer.getInactiveEvents(azureToken, fnr) }
+        result `should be equal to` expectedResult
     }
 
     @Test
     fun `should request an azure token and make request on behalf of user for all oppgave events`() {
+        val (mockresponse, expectedResult) = mockContent(ZonedDateTime.now().minusDays(1), ZonedDateTime.now())
+
         coEvery {
             tokenFetcher.fetchTokenForEventHandler()
         } returns azureToken
 
-        coEvery {
-            oppgaveConsumer.getAllEvents(azureToken, fnr)
-        } returns mockedEvents
-
-        every {
-            OppgaveTransformer.toOppgaveDTO(mockedEvents)
-        } returns transformedEvents
-
         val result = runBlocking {
-            oppgaveReader.alleVarsler(fnr)
+            OppgaveReader(
+                azureTokenFetcher = tokenFetcher,
+                client = mockClient(Json.encodeToString(mockresponse)),
+                eventHandlerBaseURL = "https://tms-test.something.no"
+            ).aktiveVarsler(fnr)
         }
 
-        result `should be equal to` transformedEvents
-
-        verify(exactly = 1) { OppgaveTransformer.toOppgaveDTO(mockedEvents) }
-        coVerify(exactly = 1) { tokenFetcher.fetchTokenForEventHandler() }
-        coVerify(exactly = 1) { oppgaveConsumer.getAllEvents(azureToken, fnr) }
+        result `should be equal to` expectedResult
     }
+}
+
+private fun mockContent(
+    førstBehandlet: ZonedDateTime,
+    sistOppdatert: ZonedDateTime
+): Pair<List<Oppgave>, List<OppgaveDTO>> {
+    return Pair(
+        Oppgave(
+            fodselsnummer = "123",
+            grupperingsId = "",
+            eventId = "",
+            forstBehandlet = førstBehandlet,
+            produsent = "",
+            sikkerhetsnivaa = 0,
+            sistOppdatert = sistOppdatert,
+            tekst = "Tadda vi tester",
+            link = "",
+            aktiv = false,
+            eksternVarslingSendt = false,
+            eksternVarslingKanaler = listOf()
+        ).createListFromObject(5),
+        OppgaveDTO(
+            fodselsnummer = "123",
+            grupperingsId = "",
+            eventId = "",
+            forstBehandlet = førstBehandlet.withFixedOffsetZone(),
+            produsent = "",
+            sikkerhetsnivaa = 0,
+            sistOppdatert = sistOppdatert.withFixedOffsetZone(),
+            tekst = "Tadda vi tester",
+            link = "",
+            aktiv = false
+        ).createListFromObject(5)
+
+    )
 }
