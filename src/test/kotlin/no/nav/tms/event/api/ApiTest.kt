@@ -15,7 +15,7 @@ import no.nav.tms.event.api.beskjed.BeskjedEventService
 import no.nav.tms.event.api.innboks.InnboksDTO
 import no.nav.tms.event.api.innboks.InnboksEventService
 import no.nav.tms.event.api.oppgave.OppgaveDTO
-import no.nav.tms.event.api.oppgave.OppgaveEventService
+import no.nav.tms.event.api.oppgave.OppgaveReader
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -68,13 +68,13 @@ class ApiTest {
     @Test
     fun oppgavevarsler() {
         val dummyFnr = "16045571871"
-        val oppgaveEventService = mockk<OppgaveEventService>()
+        val oppgaveReader = mockk<OppgaveReader>()
         val rootPath = "/tms-event-api/oppgave"
-        coEvery { oppgaveEventService.getInactiveCachedEventsForUser(dummyFnr) } returns dummyOppgaver(5)
-        coEvery { oppgaveEventService.getActiveCachedEventsForUser(dummyFnr) } returns dummyOppgaver(1)
-        coEvery { oppgaveEventService.getAllCachedEventsForUser(dummyFnr) } returns dummyOppgaver(6)
+        coEvery { oppgaveReader.inaktiveVarsler(dummyFnr) } returns dummyOppgaver(5)
+        coEvery { oppgaveReader.aktiveVarsler(dummyFnr) } returns dummyOppgaver(1)
+        coEvery { oppgaveReader.alleVarsler(dummyFnr) } returns dummyOppgaver(6)
 
-        withTestApplication(mockApi(oppgaveEventService = oppgaveEventService)) {
+        withTestApplication(mockApi(oppgaveReader = oppgaveReader)) {
             assertVarselApiCall("$rootPath/inaktive", dummyFnr, 5)
             assertVarselApiCall("$rootPath/aktive", dummyFnr, 1)
             assertVarselApiCall("$rootPath/all", dummyFnr, 6)

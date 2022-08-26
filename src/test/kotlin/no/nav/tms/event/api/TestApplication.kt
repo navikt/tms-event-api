@@ -8,7 +8,7 @@ import no.nav.tms.event.api.beskjed.BeskjedEventService
 import no.nav.tms.event.api.config.api
 import no.nav.tms.event.api.health.HealthService
 import no.nav.tms.event.api.innboks.InnboksEventService
-import no.nav.tms.event.api.oppgave.OppgaveEventService
+import no.nav.tms.event.api.oppgave.OppgaveReader
 import no.nav.tms.token.support.authentication.installer.mock.installMockedAuthenticators
 import no.nav.tms.token.support.tokenx.validation.mock.SecurityLevel
 
@@ -18,7 +18,7 @@ fun mockApi(
     httpClient: HttpClient = mockk(relaxed = true),
     innboksEventService: InnboksEventService = mockk(relaxed = true),
     beskjedEventService: BeskjedEventService = mockk(relaxed = true),
-    oppgaveEventService: OppgaveEventService = mockk(relaxed = true),
+    oppgaveReader: OppgaveReader = mockk(relaxed = true),
     healthService: HealthService = mockk(relaxed = true)
 ): Application.() -> Unit {
     return fun Application.() {
@@ -26,7 +26,7 @@ fun mockApi(
             authConfig = authConfig,
             httpClient = httpClient,
             innboksEventService = innboksEventService,
-            oppgaveEventService = oppgaveEventService,
+            oppgaveReader = oppgaveReader,
             beskjedEventService = beskjedEventService, healthService = healthService
         )
     }

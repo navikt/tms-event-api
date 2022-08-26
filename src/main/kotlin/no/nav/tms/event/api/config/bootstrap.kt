@@ -16,13 +16,13 @@ import no.nav.tms.event.api.health.HealthService
 import no.nav.tms.event.api.health.healthApi
 import no.nav.tms.event.api.innboks.InnboksEventService
 import no.nav.tms.event.api.innboks.innboksApi
-import no.nav.tms.event.api.oppgave.OppgaveEventService
+import no.nav.tms.event.api.oppgave.OppgaveReader
 import no.nav.tms.event.api.oppgave.oppgaveApi
 
 fun Application.api(
     healthService: HealthService,
     beskjedEventService: BeskjedEventService,
-    oppgaveEventService: OppgaveEventService,
+    oppgaveReader: OppgaveReader,
     innboksEventService: InnboksEventService,
     httpClient: HttpClient,
     authConfig: Application.() -> Unit
@@ -40,7 +40,7 @@ fun Application.api(
         route("/tms-event-api") {
             healthApi(healthService)
             authenticate {
-                oppgaveApi(oppgaveEventService)
+                oppgaveApi(oppgaveReader)
                 beskjedApi(beskjedEventService)
                 innboksApi(innboksEventService)
             }

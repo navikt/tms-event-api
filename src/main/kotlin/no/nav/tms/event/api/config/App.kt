@@ -10,7 +10,7 @@ import no.nav.tms.event.api.health.HealthService
 import no.nav.tms.event.api.innboks.InnboksConsumer
 import no.nav.tms.event.api.innboks.InnboksEventService
 import no.nav.tms.event.api.oppgave.OppgaveConsumer
-import no.nav.tms.event.api.oppgave.OppgaveEventService
+import no.nav.tms.event.api.oppgave.OppgaveReader
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
 import no.nav.tms.token.support.azure.validation.installAzureAuth
 import java.net.URL
@@ -27,7 +27,7 @@ fun main() {
     val beskjedEventService = BeskjedEventService(beskjedConsumer, azureTokenFetcher)
 
     val oppgaveConsumer = OppgaveConsumer(httpClient, URL(environment.eventHandlerUrl))
-    val oppgaveEventService = OppgaveEventService(oppgaveConsumer, azureTokenFetcher)
+    val oppgaveReader = OppgaveReader(oppgaveConsumer, azureTokenFetcher)
 
     val innboksConsumer = InnboksConsumer(httpClient, URL(environment.eventHandlerUrl))
     val innboksEventService = InnboksEventService(innboksConsumer, azureTokenFetcher)
@@ -36,7 +36,7 @@ fun main() {
         api(
             healthService = HealthService(),
             beskjedEventService = beskjedEventService,
-            oppgaveEventService = oppgaveEventService,
+            oppgaveReader = oppgaveReader,
             innboksEventService = innboksEventService,
             authConfig = authConfigBuilder(),
             httpClient = httpClient

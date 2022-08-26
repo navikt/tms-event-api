@@ -18,12 +18,12 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OppgaveEventServiceTest {
+class OppgaveReaderTest {
 
     private val oppgaveConsumer: OppgaveConsumer = mockk()
     private val tokenFetcher: AzureTokenFetcher = mockk()
 
-    private val oppgaveEventService = OppgaveEventService(oppgaveConsumer, tokenFetcher)
+    private val oppgaveReader = OppgaveReader(oppgaveConsumer, tokenFetcher)
     private val fnr = "123"
 
     private val azureToken = AzureToken("tokenValue")
@@ -57,7 +57,7 @@ class OppgaveEventServiceTest {
         } returns transformedEvents
 
         val result = runBlocking {
-            oppgaveEventService.getActiveCachedEventsForUser(fnr)
+            oppgaveReader.aktiveVarsler(fnr)
         }
 
         result `should be equal to` transformedEvents
@@ -82,7 +82,7 @@ class OppgaveEventServiceTest {
         } returns transformedEvents
 
         val result = runBlocking {
-            oppgaveEventService.getInactiveCachedEventsForUser(fnr)
+            oppgaveReader.inaktiveVarsler(fnr)
         }
 
         result `should be equal to` transformedEvents
@@ -107,7 +107,7 @@ class OppgaveEventServiceTest {
         } returns transformedEvents
 
         val result = runBlocking {
-            oppgaveEventService.getAllCachedEventsForUser(fnr)
+            oppgaveReader.alleVarsler(fnr)
         }
 
         result `should be equal to` transformedEvents

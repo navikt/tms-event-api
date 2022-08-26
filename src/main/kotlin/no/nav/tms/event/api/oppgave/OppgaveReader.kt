@@ -2,12 +2,12 @@ package no.nav.tms.event.api.oppgave
 
 import no.nav.tms.event.api.common.AzureTokenFetcher
 
-class OppgaveEventService(
+class OppgaveReader(
     private val oppgaveConsumer: OppgaveConsumer,
     private val azureTokenFetcher: AzureTokenFetcher
 ) {
 
-    suspend fun getActiveCachedEventsForUser(fnr: String): List<OppgaveDTO> {
+    suspend fun aktiveVarsler(fnr: String): List<OppgaveDTO> {
         val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
 
         return oppgaveConsumer.getActiveEvents(azureToken, fnr).let {
@@ -15,7 +15,7 @@ class OppgaveEventService(
         }
     }
 
-    suspend fun getInactiveCachedEventsForUser(fnr: String): List<OppgaveDTO> {
+    suspend fun inaktiveVarsler(fnr: String): List<OppgaveDTO> {
         val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
 
         return oppgaveConsumer.getInactiveEvents(azureToken, fnr).let {
@@ -23,7 +23,7 @@ class OppgaveEventService(
         }
     }
 
-    suspend fun getAllCachedEventsForUser(fnr: String): List<OppgaveDTO> {
+    suspend fun alleVarsler(fnr: String): List<OppgaveDTO> {
         val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
 
         return oppgaveConsumer.getAllEvents(azureToken, fnr).let {
