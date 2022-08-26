@@ -9,14 +9,14 @@ import no.nav.tms.event.api.common.respondWithError
 import no.nav.tms.event.api.config.doIfValidRequest
 import org.slf4j.LoggerFactory
 
-fun Route.oppgaveApi(oppgaveReader: OppgaveReader) {
+fun Route.oppgaveApi(oppgaveVarselReader: OppgaveVarselReader) {
 
-    val log = LoggerFactory.getLogger(OppgaveReader::class.java)
+    val log = LoggerFactory.getLogger(OppgaveVarselReader::class.java)
 
     get("/oppgave/aktive") {
         doIfValidRequest { fnr ->
             try {
-                val aktiveOppgaveEvents = oppgaveReader.aktiveVarsler(fnr)
+                val aktiveOppgaveEvents = oppgaveVarselReader.aktiveVarsler(fnr)
                 call.respond(HttpStatusCode.OK, aktiveOppgaveEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
@@ -27,7 +27,7 @@ fun Route.oppgaveApi(oppgaveReader: OppgaveReader) {
     get("/oppgave/inaktive") {
         doIfValidRequest { fnr ->
             try {
-                val inaktiveOppgaveEvents = oppgaveReader.inaktiveVarsler(fnr)
+                val inaktiveOppgaveEvents = oppgaveVarselReader.inaktiveVarsler(fnr)
                 call.respond(HttpStatusCode.OK, inaktiveOppgaveEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
@@ -38,7 +38,7 @@ fun Route.oppgaveApi(oppgaveReader: OppgaveReader) {
     get("/oppgave/all") {
         doIfValidRequest { fnr ->
             try {
-                val oppgaveEvents = oppgaveReader.alleVarsler(fnr)
+                val oppgaveEvents = oppgaveVarselReader.alleVarsler(fnr)
                 call.respond(HttpStatusCode.OK, oppgaveEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)

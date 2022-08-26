@@ -14,16 +14,16 @@ import no.nav.tms.event.api.beskjed.BeskjedEventService
 import no.nav.tms.event.api.beskjed.beskjedApi
 import no.nav.tms.event.api.health.HealthService
 import no.nav.tms.event.api.health.healthApi
-import no.nav.tms.event.api.innboks.InnboksEventService
+import no.nav.tms.event.api.innboks.InnboksVarselReader
 import no.nav.tms.event.api.innboks.innboksApi
-import no.nav.tms.event.api.oppgave.OppgaveReader
+import no.nav.tms.event.api.oppgave.OppgaveVarselReader
 import no.nav.tms.event.api.oppgave.oppgaveApi
 
 fun Application.api(
     healthService: HealthService,
     beskjedEventService: BeskjedEventService,
-    oppgaveReader: OppgaveReader,
-    innboksEventService: InnboksEventService,
+    oppgaveVarselReader: OppgaveVarselReader,
+    innboksVarselReader: InnboksVarselReader,
     httpClient: HttpClient,
     authConfig: Application.() -> Unit
 ) {
@@ -40,9 +40,9 @@ fun Application.api(
         route("/tms-event-api") {
             healthApi(healthService)
             authenticate {
-                oppgaveApi(oppgaveReader)
+                oppgaveApi(oppgaveVarselReader)
                 beskjedApi(beskjedEventService)
-                innboksApi(innboksEventService)
+                innboksApi(innboksVarselReader)
             }
         }
     }

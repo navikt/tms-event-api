@@ -14,9 +14,9 @@ import io.mockk.mockk
 import no.nav.tms.event.api.beskjed.BeskjedDTO
 import no.nav.tms.event.api.beskjed.BeskjedEventService
 import no.nav.tms.event.api.innboks.InnboksDTO
-import no.nav.tms.event.api.innboks.InnboksEventService
+import no.nav.tms.event.api.innboks.InnboksVarselReader
 import no.nav.tms.event.api.oppgave.OppgaveDTO
-import no.nav.tms.event.api.oppgave.OppgaveReader
+import no.nav.tms.event.api.oppgave.OppgaveVarselReader
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -70,13 +70,13 @@ class ApiTest {
     @Test
     fun oppgavevarsler() {
         val dummyFnr = "16045571871"
-        val oppgaveReader = mockk<OppgaveReader>()
+        val oppgaveVarselReader = mockk<OppgaveVarselReader>()
         val rootPath = "/tms-event-api/oppgave"
-        coEvery { oppgaveReader.inaktiveVarsler(dummyFnr) } returns dummyOppgaveDTOs(5)
-        coEvery { oppgaveReader.aktiveVarsler(dummyFnr) } returns dummyOppgaveDTOs(1)
-        coEvery { oppgaveReader.alleVarsler(dummyFnr) } returns dummyOppgaveDTOs(6)
+        coEvery { oppgaveVarselReader.inaktiveVarsler(dummyFnr) } returns dummyOppgaveDTOs(5)
+        coEvery { oppgaveVarselReader.aktiveVarsler(dummyFnr) } returns dummyOppgaveDTOs(1)
+        coEvery { oppgaveVarselReader.alleVarsler(dummyFnr) } returns dummyOppgaveDTOs(6)
 
-        withTestApplication(mockApi(oppgaveReader = oppgaveReader)) {
+        withTestApplication(mockApi(oppgaveVarselReader = oppgaveVarselReader)) {
             assertVarselApiCall("$rootPath/inaktive", dummyFnr, 5)
             assertVarselApiCall("$rootPath/aktive", dummyFnr, 1)
             assertVarselApiCall("$rootPath/all", dummyFnr, 6)
@@ -86,13 +86,13 @@ class ApiTest {
     @Test
     fun innboksvarsler() {
         val dummyFnr = "16045571871"
-        val innboksEventService = mockk<InnboksEventService>()
+        val innboksVarselReader = mockk<InnboksVarselReader>()
         val rootPath = "/tms-event-api/innboks"
-        coEvery { innboksEventService.getInactiveCachedEventsForUser(dummyFnr) } returns dummyInnboks(3)
-        coEvery { innboksEventService.getActiveCachedEventsForUser(dummyFnr) } returns dummyInnboks(1)
-        coEvery { innboksEventService.getAllCachedEventsForUser(dummyFnr) } returns dummyInnboks(6)
+        coEvery { innboksVarselReader.inaktiveVarsler(dummyFnr) } returns dummyInnboks(3)
+        coEvery { innboksVarselReader.aktiveVarsler(dummyFnr) } returns dummyInnboks(1)
+        coEvery { innboksVarselReader.alleVarsler(dummyFnr) } returns dummyInnboks(6)
 
-        withTestApplication(mockApi(innboksEventService = innboksEventService)) {
+        withTestApplication(mockApi(innboksVarselReader = innboksVarselReader)) {
             assertVarselApiCall("$rootPath/inaktive", dummyFnr, 3)
             assertVarselApiCall("$rootPath/aktive", dummyFnr, 1)
             assertVarselApiCall("$rootPath/all", dummyFnr, 6)

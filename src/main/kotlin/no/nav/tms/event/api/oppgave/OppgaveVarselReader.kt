@@ -8,7 +8,7 @@ import no.nav.tms.event.api.config.getWithAzureAndFnr
 import no.nav.tms.event.api.oppgave.Oppgave.Companion.toDTO
 import java.net.URL
 
-class OppgaveReader(
+class OppgaveVarselReader(
     private val azureTokenFetcher: AzureTokenFetcher,
     private val client: HttpClient,
     eventHandlerBaseURL: String

@@ -15,7 +15,7 @@ import org.junit.jupiter.api.TestInstance
 import java.time.ZonedDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class OppgaveReaderTest {
+class OppgaveVarselReaderTest {
 
     private val tokenFetcher: AzureTokenFetcher = mockk()
     private val fnr = "123"
@@ -30,7 +30,7 @@ class OppgaveReaderTest {
         } returns azureToken
 
         val result = runBlocking {
-            OppgaveReader(
+            OppgaveVarselReader(
                 azureTokenFetcher = tokenFetcher,
                 client = mockClient(Json.encodeToString(mockresponse)),
                 eventHandlerBaseURL = "https://tms-test.something.no"
@@ -49,7 +49,7 @@ class OppgaveReaderTest {
         } returns azureToken
 
         val result = runBlocking {
-            OppgaveReader(
+            OppgaveVarselReader(
                 azureTokenFetcher = tokenFetcher,
                 client = mockClient(Json.encodeToString(mockresponse)),
                 eventHandlerBaseURL = "https://tms-test.something.no"
@@ -68,7 +68,7 @@ class OppgaveReaderTest {
         } returns azureToken
 
         val result = runBlocking {
-            OppgaveReader(
+            OppgaveVarselReader(
                 azureTokenFetcher = tokenFetcher,
                 client = mockClient(Json.encodeToString(mockresponse)),
                 eventHandlerBaseURL = "https://tms-test.something.no"
