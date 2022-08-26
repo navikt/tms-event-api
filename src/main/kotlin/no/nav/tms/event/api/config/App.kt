@@ -3,6 +3,7 @@ package no.nav.tms.event.api.config
 import io.ktor.application.Application
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import no.nav.personbruker.dittnav.common.util.config.StringEnvVar
 import no.nav.tms.event.api.beskjed.BeskjedVarselReader
 import no.nav.tms.event.api.common.AzureTokenFetcher
 import no.nav.tms.event.api.health.HealthService
@@ -12,28 +13,29 @@ import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
 import no.nav.tms.token.support.azure.validation.installAzureAuth
 
 fun main() {
-    val environment = Environment()
+
+    val eventHandlerUrl: String = StringEnvVar.getEnvVar("EVENT_HANDLER_URL")
+    val eventHandlerClientId: String = StringEnvVar.getEnvVar("EVENT_HANDLER_CLIENT_ID")
 
     val httpClient = HttpClientBuilder.build()
-
     val azureService = AzureServiceBuilder.buildAzureService(enableDefaultProxy = true)
-    val azureTokenFetcher = AzureTokenFetcher(azureService, environment.eventHandlerClientId)
+    val azureTokenFetcher = AzureTokenFetcher(azureService, eventHandlerClientId)
 
     val beskjedVarselReader = BeskjedVarselReader(
         azureTokenFetcher = azureTokenFetcher,
         client = httpClient,
-        eventHandlerBaseURL = environment.eventHandlerUrl
+        eventHandlerBaseURL = eventHandlerUrl
     )
 
     val oppgaveVarselReader = OppgaveVarselReader(
         azureTokenFetcher = azureTokenFetcher,
         client = httpClient,
-        eventHandlerBaseURL = environment.eventHandlerUrl
+        eventHandlerBaseURL = eventHandlerUrl
     )
 
     val innboksVarselReader = InnboksVarselReader(
         azureTokenFetcher = azureTokenFetcher,
-        eventHandlerBaseURL = environment.eventHandlerUrl,
+        eventHandlerBaseURL = eventHandlerUrl,
         client = httpClient
     )
 

@@ -1,8 +1,6 @@
 package no.nav.tms.event.api.beskjed
 
-import io.mockk.clearMocks
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
@@ -12,7 +10,6 @@ import no.nav.tms.event.api.common.AzureTokenFetcher
 import no.nav.tms.event.api.createListFromObject
 import no.nav.tms.event.api.mockClient
 import org.amshove.kluent.`should be equal to`
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.time.ZonedDateTime
@@ -23,7 +20,6 @@ class BeskjedVarselReaderTest {
     private val tokenFetcher: AzureTokenFetcher = mockk()
     private val fnr = "123"
     private val azureToken = AzureToken("tokenValue")
-
 
     @Test
     fun `should request an azure token and make request on behalf of user for active beskjed events`() {
