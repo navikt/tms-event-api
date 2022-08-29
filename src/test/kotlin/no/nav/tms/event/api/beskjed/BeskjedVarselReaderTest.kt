@@ -9,6 +9,8 @@ import no.nav.tms.event.api.common.AzureToken
 import no.nav.tms.event.api.common.AzureTokenFetcher
 import no.nav.tms.event.api.createListFromObject
 import no.nav.tms.event.api.mockClient
+import no.nav.tms.event.api.varsel.VarselDTO
+import no.nav.tms.event.api.varsel.VarselReader
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -34,8 +36,10 @@ class BeskjedVarselReaderTest {
 
         val result = runBlocking {
             BeskjedVarselReader(
-                azureTokenFetcher = tokenFetcher,
-                client = mockClient(Json.encodeToString(mockresponse)),
+                varselReader = VarselReader(
+                    azureTokenFetcher = tokenFetcher,
+                    client = mockClient(Json.encodeToString(mockresponse))
+                ),
                 eventHandlerBaseURL = "https://tms-test.something.no"
             ).aktiveVarsler(fnr)
         }
@@ -56,8 +60,10 @@ class BeskjedVarselReaderTest {
 
         val result = runBlocking {
             BeskjedVarselReader(
-                azureTokenFetcher = tokenFetcher,
-                client = mockClient(Json.encodeToString(mockresponse)),
+                VarselReader(
+                    azureTokenFetcher = tokenFetcher,
+                    client = mockClient(Json.encodeToString(mockresponse))
+                ),
                 eventHandlerBaseURL = "https://tms-test.something.no"
             ).inaktiveVarsler(fnr)
         }
@@ -78,8 +84,10 @@ class BeskjedVarselReaderTest {
 
         val result = runBlocking {
             BeskjedVarselReader(
-                azureTokenFetcher = tokenFetcher,
-                client = mockClient(Json.encodeToString(mockresponse)),
+                varselReader = VarselReader(
+                    azureTokenFetcher = tokenFetcher,
+                    client = mockClient(Json.encodeToString(mockresponse))
+                ),
                 eventHandlerBaseURL = "https://tms-test.something.no"
             ).alleVarsler(fnr)
         }
@@ -91,7 +99,7 @@ class BeskjedVarselReaderTest {
 private fun mockContent(
     førstBehandlet: ZonedDateTime,
     sistOppdatert: ZonedDateTime
-): Pair<List<Beskjed>, List<BeskjedDTO>> {
+): Pair<List<Beskjed>, List<VarselDTO>> {
     return Pair(
         Beskjed(
             fodselsnummer = "123",
@@ -107,7 +115,7 @@ private fun mockContent(
             eksternVarslingSendt = false,
             eksternVarslingKanaler = listOf()
         ).createListFromObject(5),
-        BeskjedDTO(
+        VarselDTO(
             fodselsnummer = "123",
             grupperingsId = "",
             eventId = "",

@@ -9,6 +9,7 @@ import no.nav.tms.event.api.common.AzureTokenFetcher
 import no.nav.tms.event.api.health.HealthService
 import no.nav.tms.event.api.innboks.InnboksVarselReader
 import no.nav.tms.event.api.oppgave.OppgaveVarselReader
+import no.nav.tms.event.api.varsel.VarselReader
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
 import no.nav.tms.token.support.azure.validation.installAzureAuth
 
@@ -20,23 +21,24 @@ fun main() {
     val httpClient = HttpClientBuilder.build()
     val azureService = AzureServiceBuilder.buildAzureService(enableDefaultProxy = true)
     val azureTokenFetcher = AzureTokenFetcher(azureService, eventHandlerClientId)
-
-    val beskjedVarselReader = BeskjedVarselReader(
+    val varselReader = VarselReader(
         azureTokenFetcher = azureTokenFetcher,
         client = httpClient,
-        eventHandlerBaseURL = eventHandlerUrl
+    )
+
+    val beskjedVarselReader = BeskjedVarselReader(
+        eventHandlerBaseURL = eventHandlerUrl,
+        varselReader = varselReader
     )
 
     val oppgaveVarselReader = OppgaveVarselReader(
-        azureTokenFetcher = azureTokenFetcher,
-        client = httpClient,
-        eventHandlerBaseURL = eventHandlerUrl
+        eventHandlerBaseURL = eventHandlerUrl,
+        varselReader = varselReader
     )
 
     val innboksVarselReader = InnboksVarselReader(
-        azureTokenFetcher = azureTokenFetcher,
         eventHandlerBaseURL = eventHandlerUrl,
-        client = httpClient
+        varselReader = varselReader
     )
 
     embeddedServer(Netty, port = 8080) {

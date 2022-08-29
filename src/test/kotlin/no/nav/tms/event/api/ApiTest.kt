@@ -11,12 +11,10 @@ import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.withTestApplication
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.tms.event.api.beskjed.BeskjedDTO
 import no.nav.tms.event.api.beskjed.BeskjedVarselReader
-import no.nav.tms.event.api.innboks.InnboksDTO
 import no.nav.tms.event.api.innboks.InnboksVarselReader
-import no.nav.tms.event.api.oppgave.OppgaveDTO
 import no.nav.tms.event.api.oppgave.OppgaveVarselReader
+import no.nav.tms.event.api.varsel.VarselDTO
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
@@ -56,9 +54,9 @@ class ApiTest {
         val dummyFnr = "16045571871"
         val beskjedVarselReader = mockk<BeskjedVarselReader>()
         val rootPath = "/tms-event-api/beskjed"
-        coEvery { beskjedVarselReader.inaktiveVarsler(dummyFnr) } returns dummyBeskjeder(5)
-        coEvery { beskjedVarselReader.aktiveVarsler(dummyFnr) } returns dummyBeskjeder(1)
-        coEvery { beskjedVarselReader.alleVarsler(dummyFnr) } returns dummyBeskjeder(6)
+        coEvery { beskjedVarselReader.inaktiveVarsler(dummyFnr) } returns dummyVarsel(5)
+        coEvery { beskjedVarselReader.aktiveVarsler(dummyFnr) } returns dummyVarsel(1)
+        coEvery { beskjedVarselReader.alleVarsler(dummyFnr) } returns dummyVarsel(6)
 
         withTestApplication(mockApi(beskjedVarselReader = beskjedVarselReader)) {
             assertVarselApiCall("$rootPath/inaktive", dummyFnr, 5)
@@ -72,9 +70,9 @@ class ApiTest {
         val dummyFnr = "16045571871"
         val oppgaveVarselReader = mockk<OppgaveVarselReader>()
         val rootPath = "/tms-event-api/oppgave"
-        coEvery { oppgaveVarselReader.inaktiveVarsler(dummyFnr) } returns dummyOppgaveDTOs(5)
-        coEvery { oppgaveVarselReader.aktiveVarsler(dummyFnr) } returns dummyOppgaveDTOs(1)
-        coEvery { oppgaveVarselReader.alleVarsler(dummyFnr) } returns dummyOppgaveDTOs(6)
+        coEvery { oppgaveVarselReader.inaktiveVarsler(dummyFnr) } returns dummyVarsel(5)
+        coEvery { oppgaveVarselReader.aktiveVarsler(dummyFnr) } returns dummyVarsel(1)
+        coEvery { oppgaveVarselReader.alleVarsler(dummyFnr) } returns dummyVarsel(6)
 
         withTestApplication(mockApi(oppgaveVarselReader = oppgaveVarselReader)) {
             assertVarselApiCall("$rootPath/inaktive", dummyFnr, 5)
@@ -88,9 +86,9 @@ class ApiTest {
         val dummyFnr = "16045571871"
         val innboksVarselReader = mockk<InnboksVarselReader>()
         val rootPath = "/tms-event-api/innboks"
-        coEvery { innboksVarselReader.inaktiveVarsler(dummyFnr) } returns dummyInnboks(3)
-        coEvery { innboksVarselReader.aktiveVarsler(dummyFnr) } returns dummyInnboks(1)
-        coEvery { innboksVarselReader.alleVarsler(dummyFnr) } returns dummyInnboks(6)
+        coEvery { innboksVarselReader.inaktiveVarsler(dummyFnr) } returns dummyVarsel(3)
+        coEvery { innboksVarselReader.aktiveVarsler(dummyFnr) } returns dummyVarsel(1)
+        coEvery { innboksVarselReader.alleVarsler(dummyFnr) } returns dummyVarsel(6)
 
         withTestApplication(mockApi(innboksVarselReader = innboksVarselReader)) {
             assertVarselApiCall("$rootPath/inaktive", dummyFnr, 3)
@@ -114,7 +112,7 @@ fun allRoutes(root: Route): List<Route> {
         .filter { it.toString().contains("method") && it.toString() != "/" }
 }
 
-private fun dummyBeskjeder(size: Int = 0): List<BeskjedDTO> = BeskjedDTO(
+private fun dummyVarsel(size: Int = 0): List<VarselDTO> = VarselDTO(
     fodselsnummer = "",
     grupperingsId = "",
     eventId = "",
@@ -127,27 +125,3 @@ private fun dummyBeskjeder(size: Int = 0): List<BeskjedDTO> = BeskjedDTO(
     link = "",
     aktiv = false
 ).createListFromObject(size = size)
-private fun dummyOppgaveDTOs(size: Int = 0): List<OppgaveDTO> = OppgaveDTO(
-    fodselsnummer = "",
-    grupperingsId = "",
-    eventId = "",
-    forstBehandlet = ZonedDateTime.now().minusMinutes(9),
-    produsent = "",
-    sikkerhetsnivaa = 0,
-    sistOppdatert = ZonedDateTime.now(),
-    tekst = "",
-    link = "",
-    aktiv = false
-).createListFromObject(size)
-private fun dummyInnboks(size: Int): List<InnboksDTO> = InnboksDTO(
-    produsent = "",
-    forstBehandlet = ZonedDateTime.now().minusMinutes(9),
-    fodselsnummer = "",
-    eventId = "",
-    grupperingsId = "",
-    tekst = "",
-    link = "",
-    sikkerhetsnivaa = 0,
-    sistOppdatert = ZonedDateTime.now(),
-    aktiv = false
-).createListFromObject(size)

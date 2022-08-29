@@ -9,6 +9,8 @@ import no.nav.tms.event.api.common.AzureToken
 import no.nav.tms.event.api.common.AzureTokenFetcher
 import no.nav.tms.event.api.createListFromObject
 import no.nav.tms.event.api.mockClient
+import no.nav.tms.event.api.varsel.VarselDTO
+import no.nav.tms.event.api.varsel.VarselReader
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -34,8 +36,10 @@ class InnboksVarselReaderTest {
 
         val result = runBlocking {
             InnboksVarselReader(
-                tokenFetcher,
-                mockClient(Json.encodeToString(mockresponse)),
+                varselReader = VarselReader(
+                    tokenFetcher,
+                    mockClient(Json.encodeToString(mockresponse))
+                ),
                 "https://no.na.ne"
             ).aktiveVarsler(fnr)
         }
@@ -56,8 +60,10 @@ class InnboksVarselReaderTest {
 
         val result = runBlocking {
             InnboksVarselReader(
-                tokenFetcher,
-                mockClient(Json.encodeToString(mockresponse)),
+                varselReader = VarselReader(
+                    tokenFetcher,
+                    mockClient(Json.encodeToString(mockresponse))
+                ),
                 "https://no.na.ne"
             ).inaktiveVarsler(fnr)
         }
@@ -78,8 +84,10 @@ class InnboksVarselReaderTest {
 
         val result = runBlocking {
             InnboksVarselReader(
-                tokenFetcher,
-                mockClient(Json.encodeToString(mockresponse)),
+                VarselReader(
+                    tokenFetcher,
+                    mockClient(Json.encodeToString(mockresponse))
+                ),
                 "https://no.na.ne"
             ).alleVarsler(fnr)
         }
@@ -91,7 +99,7 @@ class InnboksVarselReaderTest {
 private fun mockContent(
     førstBehandlet: ZonedDateTime,
     sistOppdatert: ZonedDateTime
-): Pair<List<Innboks>, List<InnboksDTO>> {
+): Pair<List<Innboks>, List<VarselDTO>> {
     return Pair(
         Innboks(
             fodselsnummer = "123",
@@ -107,7 +115,7 @@ private fun mockContent(
             eksternVarslingSendt = false,
             eksternVarslingKanaler = listOf()
         ).createListFromObject(5),
-        InnboksDTO(
+        VarselDTO(
             fodselsnummer = "123",
             grupperingsId = "",
             eventId = "",

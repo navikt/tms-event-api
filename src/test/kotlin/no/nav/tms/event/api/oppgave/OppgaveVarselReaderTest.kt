@@ -9,6 +9,8 @@ import no.nav.tms.event.api.common.AzureToken
 import no.nav.tms.event.api.common.AzureTokenFetcher
 import no.nav.tms.event.api.createListFromObject
 import no.nav.tms.event.api.mockClient
+import no.nav.tms.event.api.varsel.VarselDTO
+import no.nav.tms.event.api.varsel.VarselReader
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -24,15 +26,14 @@ class OppgaveVarselReaderTest {
     @Test
     fun `henter aktive oppgaver`() {
         val (mockresponse, expectedResult) = mockContent(ZonedDateTime.now().minusDays(1), ZonedDateTime.now())
-
+        val varselReader = VarselReader(tokenFetcher, mockClient(Json.encodeToString(mockresponse)),)
         coEvery {
             tokenFetcher.fetchTokenForEventHandler()
         } returns azureToken
 
         val result = runBlocking {
             OppgaveVarselReader(
-                azureTokenFetcher = tokenFetcher,
-                client = mockClient(Json.encodeToString(mockresponse)),
+                varselReader = varselReader,
                 eventHandlerBaseURL = "https://tms-test.something.no"
             ).aktiveVarsler(fnr)
         }
@@ -43,6 +44,7 @@ class OppgaveVarselReaderTest {
     @Test
     fun `henter inaktive oppgaver`() {
         val (mockresponse, expectedResult) = mockContent(ZonedDateTime.now().minusDays(1), ZonedDateTime.now())
+        val varselReader = VarselReader(tokenFetcher, mockClient(Json.encodeToString(mockresponse)))
 
         coEvery {
             tokenFetcher.fetchTokenForEventHandler()
@@ -50,8 +52,7 @@ class OppgaveVarselReaderTest {
 
         val result = runBlocking {
             OppgaveVarselReader(
-                azureTokenFetcher = tokenFetcher,
-                client = mockClient(Json.encodeToString(mockresponse)),
+                varselReader = varselReader,
                 eventHandlerBaseURL = "https://tms-test.something.no"
             ).inaktiveVarsler(fnr)
         }
@@ -62,6 +63,7 @@ class OppgaveVarselReaderTest {
     @Test
     fun `should request an azure token and make request on behalf of user for all oppgave events`() {
         val (mockresponse, expectedResult) = mockContent(ZonedDateTime.now().minusDays(1), ZonedDateTime.now())
+        val varselReader = VarselReader(tokenFetcher, mockClient(Json.encodeToString(mockresponse)))
 
         coEvery {
             tokenFetcher.fetchTokenForEventHandler()
@@ -69,8 +71,7 @@ class OppgaveVarselReaderTest {
 
         val result = runBlocking {
             OppgaveVarselReader(
-                azureTokenFetcher = tokenFetcher,
-                client = mockClient(Json.encodeToString(mockresponse)),
+                varselReader = varselReader,
                 eventHandlerBaseURL = "https://tms-test.something.no"
             ).aktiveVarsler(fnr)
         }
@@ -82,7 +83,7 @@ class OppgaveVarselReaderTest {
 private fun mockContent(
     førstBehandlet: ZonedDateTime,
     sistOppdatert: ZonedDateTime
-): Pair<List<Oppgave>, List<OppgaveDTO>> {
+): Pair<List<Oppgave>, List<VarselDTO>> {
     return Pair(
         Oppgave(
             fodselsnummer = "123",
@@ -98,7 +99,7 @@ private fun mockContent(
             eksternVarslingSendt = false,
             eksternVarslingKanaler = listOf()
         ).createListFromObject(5),
-        OppgaveDTO(
+        VarselDTO(
             fodselsnummer = "123",
             grupperingsId = "",
             eventId = "",

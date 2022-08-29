@@ -1,14 +1,11 @@
 package no.nav.tms.event.api.innboks
 
-import io.ktor.client.HttpClient
-import no.nav.tms.event.api.common.AzureTokenFetcher
-import no.nav.tms.event.api.common.retryOnConnectionLost
-import no.nav.tms.event.api.config.getWithAzureAndFnr
+import no.nav.tms.event.api.varsel.VarselDTO
+import no.nav.tms.event.api.varsel.VarselReader
 import java.net.URL
 
 class InnboksVarselReader(
-    private val azureTokenFetcher: AzureTokenFetcher,
-    private val client: HttpClient,
+    private val varselReader: VarselReader,
     eventHandlerBaseURL: String
 ) {
 
@@ -16,17 +13,7 @@ class InnboksVarselReader(
     private val inactiveEventsEndpoint = URL("$eventHandlerBaseURL/fetch/modia/innboks/inaktive")
     private val allEventsEndpoint = URL("$eventHandlerBaseURL/fetch/modia/innboks/all")
 
-    suspend fun aktiveVarsler(fnr: String): List<InnboksDTO> = getEksterneVarsler(fnr, activeEventsEndpoint)
-    suspend fun inaktiveVarsler(fnr: String): List<InnboksDTO> = getEksterneVarsler(fnr, inactiveEventsEndpoint)
-    suspend fun alleVarsler(fnr: String): List<InnboksDTO> = getEksterneVarsler(fnr, allEventsEndpoint)
-
-    private suspend fun getEksterneVarsler(
-        fnr: String,
-        completePathToEndpoint: URL
-    ): List<InnboksDTO> {
-        val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
-        return retryOnConnectionLost<List<Innboks>> {
-            client.getWithAzureAndFnr(completePathToEndpoint, azureToken, fnr)
-        }.map { innboks -> innboks.toDTO() }
-    }
+    suspend fun aktiveVarsler(fnr: String): List<VarselDTO> = varselReader.getEksterneVarsler(fnr, activeEventsEndpoint)
+    suspend fun inaktiveVarsler(fnr: String): List<VarselDTO> = varselReader.getEksterneVarsler(fnr, inactiveEventsEndpoint)
+    suspend fun alleVarsler(fnr: String): List<VarselDTO> = varselReader.getEksterneVarsler(fnr, allEventsEndpoint)
 }
