@@ -1,4 +1,4 @@
-package no.nav.tms.event.api.innboks
+package no.nav.tms.event.api.api
 
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
@@ -7,39 +7,40 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import no.nav.tms.event.api.common.respondWithError
 import no.nav.tms.event.api.config.doIfValidRequest
+import no.nav.tms.event.api.oppgave.OppgaveVarselReader
 import org.slf4j.LoggerFactory
 
-fun Route.innboksApi(innboksVarselReader: InnboksVarselReader) {
+fun Route.oppgaveApi(oppgaveVarselReader: OppgaveVarselReader) {
 
-    val log = LoggerFactory.getLogger(InnboksVarselReader::class.java)
+    val log = LoggerFactory.getLogger(OppgaveVarselReader::class.java)
 
-    get("/innboks/aktive") {
+    get("/oppgave/aktive") {
         doIfValidRequest { fnr ->
             try {
-                val aktiveInnboksEvents = innboksVarselReader.aktiveVarsler(fnr)
-                call.respond(HttpStatusCode.OK, aktiveInnboksEvents)
+                val aktiveOppgaveEvents = oppgaveVarselReader.aktiveVarsler(fnr)
+                call.respond(HttpStatusCode.OK, aktiveOppgaveEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
         }
     }
 
-    get("/innboks/inaktive") {
+    get("/oppgave/inaktive") {
         doIfValidRequest { fnr ->
             try {
-                val inaktiveInnboksEvents = innboksVarselReader.inaktiveVarsler(fnr)
-                call.respond(HttpStatusCode.OK, inaktiveInnboksEvents)
+                val inaktiveOppgaveEvents = oppgaveVarselReader.inaktiveVarsler(fnr)
+                call.respond(HttpStatusCode.OK, inaktiveOppgaveEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
         }
     }
 
-    get("/innboks/all") {
+    get("/oppgave/all") {
         doIfValidRequest { fnr ->
             try {
-                val innboksEvents = innboksVarselReader.alleVarsler(fnr)
-                call.respond(HttpStatusCode.OK, innboksEvents)
+                val oppgaveEvents = oppgaveVarselReader.alleVarsler(fnr)
+                call.respond(HttpStatusCode.OK, oppgaveEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }

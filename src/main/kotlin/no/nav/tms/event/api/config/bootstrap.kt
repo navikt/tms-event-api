@@ -10,17 +10,15 @@ import io.ktor.features.DefaultHeaders
 import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.serialization.json
+import no.nav.tms.event.api.api.healthApi
+import no.nav.tms.event.api.api.innboksApi
+import no.nav.tms.event.api.api.oppgaveApi
 import no.nav.tms.event.api.beskjed.BeskjedVarselReader
 import no.nav.tms.event.api.beskjed.beskjedApi
-import no.nav.tms.event.api.health.HealthService
-import no.nav.tms.event.api.health.healthApi
 import no.nav.tms.event.api.innboks.InnboksVarselReader
-import no.nav.tms.event.api.innboks.innboksApi
 import no.nav.tms.event.api.oppgave.OppgaveVarselReader
-import no.nav.tms.event.api.oppgave.oppgaveApi
 
 fun Application.api(
-    healthService: HealthService,
     beskjedVarselReader: BeskjedVarselReader,
     oppgaveVarselReader: OppgaveVarselReader,
     innboksVarselReader: InnboksVarselReader,
@@ -38,7 +36,7 @@ fun Application.api(
 
     routing {
         route("/tms-event-api") {
-            healthApi(healthService)
+            healthApi()
             authenticate {
                 oppgaveApi(oppgaveVarselReader)
                 beskjedApi(beskjedVarselReader)

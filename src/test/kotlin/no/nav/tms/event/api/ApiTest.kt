@@ -26,7 +26,7 @@ class ApiTest {
     @Test
     fun `setter opp api ruter`() {
         withTestApplication(mockApi()) {
-            allRoutes(this.application.feature(Routing)).size shouldBeEqualTo 14
+            allRoutes(this.application.feature(Routing)).size shouldBeEqualTo 13
         }
     }
 

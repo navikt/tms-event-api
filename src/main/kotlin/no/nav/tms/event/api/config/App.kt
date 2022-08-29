@@ -6,7 +6,6 @@ import io.ktor.server.netty.Netty
 import no.nav.personbruker.dittnav.common.util.config.StringEnvVar
 import no.nav.tms.event.api.beskjed.BeskjedVarselReader
 import no.nav.tms.event.api.common.AzureTokenFetcher
-import no.nav.tms.event.api.health.HealthService
 import no.nav.tms.event.api.innboks.InnboksVarselReader
 import no.nav.tms.event.api.oppgave.OppgaveVarselReader
 import no.nav.tms.event.api.varsel.VarselReader
@@ -43,7 +42,6 @@ fun main() {
 
     embeddedServer(Netty, port = 8080) {
         api(
-            healthService = HealthService(),
             beskjedVarselReader = beskjedVarselReader,
             oppgaveVarselReader = oppgaveVarselReader,
             innboksVarselReader = innboksVarselReader,

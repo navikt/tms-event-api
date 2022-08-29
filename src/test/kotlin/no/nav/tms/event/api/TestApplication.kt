@@ -13,7 +13,6 @@ import io.ktor.http.headersOf
 import io.mockk.mockk
 import no.nav.tms.event.api.beskjed.BeskjedVarselReader
 import no.nav.tms.event.api.config.api
-import no.nav.tms.event.api.health.HealthService
 import no.nav.tms.event.api.innboks.InnboksVarselReader
 import no.nav.tms.event.api.oppgave.OppgaveVarselReader
 import no.nav.tms.token.support.authentication.installer.mock.installMockedAuthenticators
@@ -24,8 +23,7 @@ fun mockApi(
     httpClient: HttpClient = mockk(relaxed = true),
     innboksVarselReader: InnboksVarselReader = mockk(relaxed = true),
     beskjedVarselReader: BeskjedVarselReader = mockk(relaxed = true),
-    oppgaveVarselReader: OppgaveVarselReader = mockk(relaxed = true),
-    healthService: HealthService = mockk(relaxed = true)
+    oppgaveVarselReader: OppgaveVarselReader = mockk(relaxed = true)
 ): Application.() -> Unit {
     return fun Application.() {
         api(
@@ -33,7 +31,7 @@ fun mockApi(
             httpClient = httpClient,
             innboksVarselReader = innboksVarselReader,
             oppgaveVarselReader = oppgaveVarselReader,
-            beskjedVarselReader = beskjedVarselReader, healthService = healthService
+            beskjedVarselReader = beskjedVarselReader
         )
     }
 }
