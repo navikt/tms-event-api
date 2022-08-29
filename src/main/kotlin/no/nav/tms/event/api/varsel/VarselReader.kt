@@ -1,7 +1,6 @@
 package no.nav.tms.event.api.varsel
 
 import io.ktor.client.HttpClient
-import no.nav.tms.event.api.beskjed.Beskjed
 import no.nav.tms.event.api.common.AzureTokenFetcher
 import no.nav.tms.event.api.common.retryOnConnectionLost
 import no.nav.tms.event.api.config.getWithAzureAndFnr
@@ -14,7 +13,7 @@ class VarselReader(private val azureTokenFetcher: AzureTokenFetcher, private val
         completePathToEndpoint: URL
     ): List<VarselDTO> {
         val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
-        return retryOnConnectionLost<List<Beskjed>> {
+        return retryOnConnectionLost<List<Varsel>> {
             client.getWithAzureAndFnr(completePathToEndpoint, azureToken, fnr)
         }.map { beskjed -> beskjed.toDTO() }
     }

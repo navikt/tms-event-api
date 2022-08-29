@@ -9,6 +9,7 @@ import no.nav.tms.event.api.common.AzureToken
 import no.nav.tms.event.api.common.AzureTokenFetcher
 import no.nav.tms.event.api.createListFromObject
 import no.nav.tms.event.api.mockClient
+import no.nav.tms.event.api.varsel.Varsel
 import no.nav.tms.event.api.varsel.VarselDTO
 import no.nav.tms.event.api.varsel.VarselReader
 import org.amshove.kluent.`should be equal to`
@@ -99,9 +100,9 @@ class InnboksVarselReaderTest {
 private fun mockContent(
     førstBehandlet: ZonedDateTime,
     sistOppdatert: ZonedDateTime
-): Pair<List<Innboks>, List<VarselDTO>> {
+): Pair<List<Varsel>, List<VarselDTO>> {
     return Pair(
-        Innboks(
+        Varsel(
             fodselsnummer = "123",
             grupperingsId = "",
             eventId = "",
