@@ -1,4 +1,4 @@
-package no.nav.tms.event.api.common
+package no.nav.tms.event.api.config
 
 import no.nav.tms.token.support.azure.exchange.AzureService
 
@@ -10,3 +10,7 @@ class AzureTokenFetcher(private val azureService: AzureService, private val even
         return AzureToken(tokenString)
     }
 }
+
+data class AzureToken(
+    val value: String
+)

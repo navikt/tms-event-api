@@ -4,7 +4,7 @@ package no.nav.tms.event.api.varsel
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
-import no.nav.tms.event.api.common.serializer.ZonedDateTimeSerializer
+import no.nav.tms.event.api.config.ZonedDateTimeSerializer
 import java.time.ZonedDateTime
 
 @Serializable

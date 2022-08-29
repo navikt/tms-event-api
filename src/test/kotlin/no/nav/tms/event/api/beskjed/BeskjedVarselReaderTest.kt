@@ -5,11 +5,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import no.nav.tms.event.api.common.AzureToken
-import no.nav.tms.event.api.common.AzureTokenFetcher
+import no.nav.tms.event.api.config.AzureToken
+import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.createListFromObject
 import no.nav.tms.event.api.mockClient
-import no.nav.tms.event.api.oppgave.OppgaveVarselReader
 import no.nav.tms.event.api.varsel.Varsel
 import no.nav.tms.event.api.varsel.VarselDTO
 import no.nav.tms.event.api.varsel.VarselReader
@@ -37,19 +36,17 @@ class BeskjedVarselReaderTest {
         } returns azureToken
 
         val result = runBlocking {
-            BeskjedVarselReader(
-                varselReader = VarselReader(
+            VarselReader(
                     azureTokenFetcher = tokenFetcher,
-                    client = mockClient(Json.encodeToString(mockresponse))
-                ),
+                    client = mockClient(Json.encodeToString(mockresponse)),
                 eventHandlerBaseURL = "https://tms-test.something.no"
-            ).aktiveVarsler(fnr)
+            ).fetchVarsel(fnr,"/hjkhk")
         }
 
         result `should be equal to` expectedResult
     }
 
-    @Test
+  /*  @Test
     fun `should request an azure token and make request on behalf of user for inactive beskjed events`() {
         val (mockresponse, expectedResult) = mockContent(
             ZonedDateTime.now().minusDays(1),
@@ -95,7 +92,7 @@ class BeskjedVarselReaderTest {
         }
 
         result `should be equal to` expectedResult
-    }
+    }*/
 }
 
 private fun mockContent(

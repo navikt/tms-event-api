@@ -1,4 +1,4 @@
-package no.nav.tms.event.api.api
+package no.nav.tms.event.api.config
 
 import io.ktor.application.call
 import io.ktor.http.ContentType

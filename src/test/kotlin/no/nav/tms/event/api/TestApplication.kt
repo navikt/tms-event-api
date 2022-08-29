@@ -11,27 +11,25 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.mockk.mockk
-import no.nav.tms.event.api.beskjed.BeskjedVarselReader
-import no.nav.tms.event.api.config.api
-import no.nav.tms.event.api.innboks.InnboksVarselReader
-import no.nav.tms.event.api.oppgave.OppgaveVarselReader
+import no.nav.tms.event.api.config.AzureTokenFetcher
+
+import no.nav.tms.event.api.varsel.VarselReader
 import no.nav.tms.token.support.authentication.installer.mock.installMockedAuthenticators
 import no.nav.tms.token.support.tokenx.validation.mock.SecurityLevel
 
 fun mockApi(
     authConfig: Application.() -> Unit = mockAuthBuilder(),
     httpClient: HttpClient = mockk(relaxed = true),
-    innboksVarselReader: InnboksVarselReader = mockk(relaxed = true),
-    beskjedVarselReader: BeskjedVarselReader = mockk(relaxed = true),
-    oppgaveVarselReader: OppgaveVarselReader = mockk(relaxed = true)
+    azureTokenFetcher: AzureTokenFetcher
 ): Application.() -> Unit {
     return fun Application.() {
         api(
             authConfig = authConfig,
-            httpClient = httpClient,
-            innboksVarselReader = innboksVarselReader,
-            oppgaveVarselReader = oppgaveVarselReader,
-            beskjedVarselReader = beskjedVarselReader
+            httpClient = httpClient, varselReader = VarselReader(
+                azureTokenFetcher = azureTokenFetcher,
+                client =httpClient,
+                eventHandlerBaseURL = "https://test.noe"
+            )
         )
     }
 }
