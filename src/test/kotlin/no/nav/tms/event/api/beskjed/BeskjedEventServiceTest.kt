@@ -1,14 +1,16 @@
 package no.nav.tms.event.api.beskjed
 
-import io.mockk.*
+import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
+import io.mockk.verify
 import kotlinx.coroutines.runBlocking
 import no.nav.tms.event.api.common.AzureToken
 import no.nav.tms.event.api.common.AzureTokenFetcher
-import no.nav.tms.event.api.common.InnloggetBrukerObjectMother
-import no.nav.tms.event.api.beskjed.Beskjed
-import no.nav.tms.event.api.beskjed.BeskjedConsumer
-import no.nav.tms.event.api.beskjed.BeskjedDTO
-import no.nav.tms.event.api.beskjed.BeskjedEventService
 import org.amshove.kluent.`should be equal to`
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -22,7 +24,7 @@ class BeskjedEventServiceTest {
     private val tokenFetcher: AzureTokenFetcher = mockk()
 
     private val beskjedEventService = BeskjedEventService(beskjedConsumer, tokenFetcher)
-    private val bruker = InnloggetBrukerObjectMother.createInnloggetBruker("123")
+    private val fnr = "123"
 
     private val azureToken = AzureToken("tokenValue")
 
@@ -47,7 +49,7 @@ class BeskjedEventServiceTest {
         } returns azureToken
 
         coEvery {
-            beskjedConsumer.getActiveEvents(azureToken, bruker.fodselsnummer)
+            beskjedConsumer.getActiveEvents(azureToken, fnr)
         } returns mockedEvents
 
         every {
@@ -55,14 +57,14 @@ class BeskjedEventServiceTest {
         } returns transformedEvents
 
         val result = runBlocking {
-            beskjedEventService.getActiveCachedEventsForUser(bruker)
+            beskjedEventService.getActiveCachedEventsForUser(fnr)
         }
 
         result `should be equal to` transformedEvents
 
         verify(exactly = 1) { BeskjedTransformer.toBeskjedDTO(mockedEvents) }
         coVerify(exactly = 1) { tokenFetcher.fetchTokenForEventHandler() }
-        coVerify(exactly = 1) { beskjedConsumer.getActiveEvents(azureToken, bruker.fodselsnummer) }
+        coVerify(exactly = 1) { beskjedConsumer.getActiveEvents(azureToken, fnr) }
     }
 
     @Test
@@ -72,7 +74,7 @@ class BeskjedEventServiceTest {
         } returns azureToken
 
         coEvery {
-            beskjedConsumer.getInactiveEvents(azureToken, bruker.fodselsnummer)
+            beskjedConsumer.getInactiveEvents(azureToken, fnr)
         } returns mockedEvents
 
         every {
@@ -80,14 +82,14 @@ class BeskjedEventServiceTest {
         } returns transformedEvents
 
         val result = runBlocking {
-            beskjedEventService.getInactiveCachedEventsForUser(bruker)
+            beskjedEventService.getInactiveCachedEventsForUser(fnr)
         }
 
         result `should be equal to` transformedEvents
 
         verify(exactly = 1) { BeskjedTransformer.toBeskjedDTO(mockedEvents) }
         coVerify(exactly = 1) { tokenFetcher.fetchTokenForEventHandler() }
-        coVerify(exactly = 1) { beskjedConsumer.getInactiveEvents(azureToken, bruker.fodselsnummer) }
+        coVerify(exactly = 1) { beskjedConsumer.getInactiveEvents(azureToken, fnr) }
     }
 
     @Test
@@ -97,7 +99,7 @@ class BeskjedEventServiceTest {
         } returns azureToken
 
         coEvery {
-            beskjedConsumer.getAllEvents(azureToken, bruker.fodselsnummer)
+            beskjedConsumer.getAllEvents(azureToken, fnr)
         } returns mockedEvents
 
         every {
@@ -105,13 +107,13 @@ class BeskjedEventServiceTest {
         } returns transformedEvents
 
         val result = runBlocking {
-            beskjedEventService.getAllCachedEventsForUser(bruker)
+            beskjedEventService.getAllCachedEventsForUser(fnr)
         }
 
         result `should be equal to` transformedEvents
 
         verify(exactly = 1) { BeskjedTransformer.toBeskjedDTO(mockedEvents) }
         coVerify(exactly = 1) { tokenFetcher.fetchTokenForEventHandler() }
-        coVerify(exactly = 1) { beskjedConsumer.getAllEvents(azureToken, bruker.fodselsnummer) }
+        coVerify(exactly = 1) { beskjedConsumer.getAllEvents(azureToken, fnr) }
     }
 }

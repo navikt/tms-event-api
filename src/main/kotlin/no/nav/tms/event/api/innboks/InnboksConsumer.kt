@@ -1,6 +1,6 @@
 package no.nav.tms.event.api.innboks
 
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 import no.nav.tms.event.api.common.AzureToken
 import no.nav.tms.event.api.common.retryOnConnectionLost
 import no.nav.tms.event.api.config.getWithAzureAndFnr

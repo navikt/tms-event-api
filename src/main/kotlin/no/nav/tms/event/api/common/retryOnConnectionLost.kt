@@ -23,4 +23,4 @@ inline fun <reified T> retryOnConnectionLost(retries: Int = 3, outgoingCall: () 
     throw ConnectionFailedException("Klarte ikke hente data etter $attempts forsøk. Viser info for siste feil.", lastError)
 }
 
-class ConnectionFailedException(message: String, cause: Exception): Exception(message, cause)
+class ConnectionFailedException(message: String, cause: Exception) : Exception(message, cause)

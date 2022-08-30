@@ -1,6 +1,6 @@
 package no.nav.tms.event.api.beskjed
 
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 import no.nav.tms.event.api.common.AzureToken
 import no.nav.tms.event.api.common.retryOnConnectionLost
 import no.nav.tms.event.api.config.getWithAzureAndFnr
@@ -37,4 +37,3 @@ class BeskjedConsumer(
         return client.getWithAzureAndFnr(completePathToEndpoint, accessToken, fnr)
     }
 }
-

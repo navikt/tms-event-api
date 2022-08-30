@@ -10,6 +10,9 @@ plugins {
     id(Shadow.pluginId) version (Shadow.version)
     // Apply the application plugin to add support for building a CLI application.
     application
+
+    // Ktlint
+    id("org.jlleitschuh.gradle.ktlint").version("10.3.0")
 }
 
 tasks.withType<KotlinCompile> {
@@ -50,6 +53,10 @@ dependencies {
     testImplementation(Kluent.kluent)
     testImplementation(Mockk.mockk)
     testImplementation(Jjwt.api)
+    testImplementation(Ktor.serverTestHost)
+    testImplementation(Tms.KtorTokenSupport.authenticationInstallerMock)
+    testImplementation(Tms.KtorTokenSupport.tokenXValidationMock)
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
 
     testRuntimeOnly(Bouncycastle.bcprovJdk15on)
     testRuntimeOnly(Jjwt.impl)
@@ -57,7 +64,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("io.ktor.server.netty.EngineMain")
+    mainClass.set("no.nav.tms.event.api.config.AppKt")
 }
 
 tasks {

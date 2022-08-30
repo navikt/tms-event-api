@@ -1,5 +1,8 @@
 package no.nav.tms.event.api.config
 
+import io.ktor.application.Application
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
 import no.nav.tms.event.api.beskjed.BeskjedConsumer
 import no.nav.tms.event.api.beskjed.BeskjedEventService
 import no.nav.tms.event.api.common.AzureTokenFetcher
@@ -9,14 +12,13 @@ import no.nav.tms.event.api.innboks.InnboksEventService
 import no.nav.tms.event.api.oppgave.OppgaveConsumer
 import no.nav.tms.event.api.oppgave.OppgaveEventService
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
+import no.nav.tms.token.support.azure.validation.installAzureAuth
 import java.net.URL
 
-class ApplicationContext {
-
+fun main() {
     val environment = Environment()
 
     val httpClient = HttpClientBuilder.build()
-    val healthService = HealthService(this)
 
     val azureService = AzureServiceBuilder.buildAzureService(enableDefaultProxy = true)
     val azureTokenFetcher = AzureTokenFetcher(azureService, environment.eventHandlerClientId)
@@ -30,4 +32,20 @@ class ApplicationContext {
     val innboksConsumer = InnboksConsumer(httpClient, URL(environment.eventHandlerUrl))
     val innboksEventService = InnboksEventService(innboksConsumer, azureTokenFetcher)
 
+    embeddedServer(Netty, port = 8080) {
+        api(
+            healthService = HealthService(),
+            beskjedEventService = beskjedEventService,
+            oppgaveEventService = oppgaveEventService,
+            innboksEventService = innboksEventService,
+            authConfig = authConfigBuilder(),
+            httpClient = httpClient
+        )
+    }.start(wait = true)
+}
+
+private fun authConfigBuilder(): Application.() -> Unit = {
+    installAzureAuth {
+        setAsDefault = true
+    }
 }

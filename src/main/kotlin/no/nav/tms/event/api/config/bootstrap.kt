@@ -1,39 +1,53 @@
 package no.nav.tms.event.api.config
 
-import io.ktor.application.*
-import io.ktor.auth.*
-import io.ktor.client.*
-import io.ktor.features.*
-import io.ktor.routing.*
-import io.ktor.serialization.*
+import io.ktor.application.Application
+import io.ktor.application.ApplicationStopping
+import io.ktor.application.install
+import io.ktor.auth.authenticate
+import io.ktor.client.HttpClient
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.DefaultHeaders
+import io.ktor.routing.route
+import io.ktor.routing.routing
+import io.ktor.serialization.json
+import no.nav.tms.event.api.beskjed.BeskjedEventService
 import no.nav.tms.event.api.beskjed.beskjedApi
+import no.nav.tms.event.api.health.HealthService
 import no.nav.tms.event.api.health.healthApi
+import no.nav.tms.event.api.innboks.InnboksEventService
 import no.nav.tms.event.api.innboks.innboksApi
+import no.nav.tms.event.api.oppgave.OppgaveEventService
 import no.nav.tms.event.api.oppgave.oppgaveApi
-import no.nav.tms.token.support.azure.validation.installAzureAuth
 
-fun Application.mainModule(appContext: ApplicationContext = ApplicationContext()) {
+fun Application.api(
+    healthService: HealthService,
+    beskjedEventService: BeskjedEventService,
+    oppgaveEventService: OppgaveEventService,
+    innboksEventService: InnboksEventService,
+    httpClient: HttpClient,
+    authConfig: Application.() -> Unit
+) {
 
     install(DefaultHeaders)
 
-    installAzureAuth {
-        setAsDefault = true
-    }
+    authConfig()
 
     install(ContentNegotiation) {
         json(jsonConfig())
     }
 
     routing {
-        healthApi(appContext.healthService)
-        authenticate {
-            oppgaveApi(appContext.oppgaveEventService)
-            beskjedApi(appContext.beskjedEventService)
-            innboksApi(appContext.innboksEventService)
+        route("/tms-event-api") {
+            healthApi(healthService)
+            authenticate {
+                oppgaveApi(oppgaveEventService)
+                beskjedApi(beskjedEventService)
+                innboksApi(innboksEventService)
+            }
         }
     }
 
-    configureShutdownHook(appContext.httpClient)
+    configureShutdownHook(httpClient)
 }
 
 private fun Application.configureShutdownHook(httpClient: HttpClient) {
