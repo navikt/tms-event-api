@@ -18,7 +18,7 @@ fun Route.innboksApi(varselReader: VarselReader) {
     get("/innboks/aktive") {
         doIfValidRequest { fnr ->
             try {
-                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr,aktiveVarslerEndpoint))
+                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, aktiveVarslerEndpoint))
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
@@ -28,7 +28,7 @@ fun Route.innboksApi(varselReader: VarselReader) {
     get("/innboks/inaktive") {
         doIfValidRequest { fnr ->
             try {
-                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr,inaktiveVarslerEndpoint))
+                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, inaktiveVarslerEndpoint))
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
@@ -38,7 +38,7 @@ fun Route.innboksApi(varselReader: VarselReader) {
     get("/innboks/all") {
         doIfValidRequest { fnr ->
             try {
-                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr,alleVarslerEndpoint))
+                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, alleVarslerEndpoint))
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }

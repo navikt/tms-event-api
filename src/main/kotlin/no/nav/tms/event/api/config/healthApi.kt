@@ -2,7 +2,6 @@ package no.nav.tms.event.api.config
 
 import io.ktor.application.call
 import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
 import io.ktor.response.respondText
 import io.ktor.routing.Route
 import io.ktor.routing.get

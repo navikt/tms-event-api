@@ -12,7 +12,6 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.mockk.mockk
 import no.nav.tms.event.api.config.AzureTokenFetcher
-
 import no.nav.tms.event.api.varsel.VarselReader
 import no.nav.tms.token.support.authentication.installer.mock.installMockedAuthenticators
 import no.nav.tms.token.support.tokenx.validation.mock.SecurityLevel
@@ -25,7 +24,8 @@ fun mockApi(
     return fun Application.() {
         api(
             authConfig = authConfig,
-            httpClient = httpClient, varselReader = VarselReader(
+            httpClient = httpClient,
+            varselReader = VarselReader(
                 azureTokenFetcher = azureTokenFetcher,
                 client = httpClient,
                 eventHandlerBaseURL = "https://test.noe"
@@ -47,7 +47,7 @@ fun mockAuthBuilder(): Application.() -> Unit = {
     }
 }
 
-fun mockClient(aktivMockContent: String,inaktivMockContent:String, alleMockContent: String) = HttpClient(
+fun mockClient(aktivMockContent: String, inaktivMockContent: String, alleMockContent: String) = HttpClient(
     MockEngine() {
         when {
             it.url.encodedPath.contains("/aktiv") -> respond(

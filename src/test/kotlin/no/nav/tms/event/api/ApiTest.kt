@@ -138,16 +138,14 @@ private fun assertContent(content: String?, expectedResult: List<VarselDTO>) {
         assertZonedDateTime(resultObject, expectedObject.synligFremTil, "synligFremTil")
         assertZonedDateTime(resultObject, expectedObject.forstBehandlet, "forstBehandlet")
         assertZonedDateTime(resultObject, expectedObject.sistOppdatert, "sistOppdatert")
-
     }
 }
 
 fun assertZonedDateTime(jsonNode: JsonNode?, expectedDate: ZonedDateTime?, key: String) {
     if (expectedDate != null) {
         val resultDate = ZonedDateTime.parse(jsonNode?.get(key)?.textValue()).truncatedTo(ChronoUnit.MINUTES)
-        assertFalse(resultDate == null,"$key skal ikke være null")
-        resultDate.toString() shouldBeEqualTo  expectedDate.truncatedTo(ChronoUnit.MINUTES).toString()
-
+        assertFalse(resultDate == null, "$key skal ikke være null")
+        resultDate.toString() shouldBeEqualTo expectedDate.truncatedTo(ChronoUnit.MINUTES).toString()
     } else {
         jsonNode?.get(key)?.textValue() shouldBe null
     }

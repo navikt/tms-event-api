@@ -20,7 +20,6 @@ class VarselReader(
         val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
         return retryOnConnectionLost<List<Varsel>> {
             client.getWithAzureAndFnr(completePathToEndpoint, azureToken, fnr)
-
         }.map { beskjed -> beskjed.toDTO() }
     }
 }

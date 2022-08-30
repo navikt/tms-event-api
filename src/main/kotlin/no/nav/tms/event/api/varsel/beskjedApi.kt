@@ -20,7 +20,7 @@ fun Route.beskjedApi(varselReader: VarselReader) {
     get("/beskjed/aktive") {
         doIfValidRequest { fnr ->
             try {
-                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr,aktiveVarslerPath))
+                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, aktiveVarslerPath))
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
@@ -30,7 +30,7 @@ fun Route.beskjedApi(varselReader: VarselReader) {
     get("/beskjed/inaktive") {
         doIfValidRequest { fnr ->
             try {
-                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr,inaktiveVarslerPath))
+                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, inaktiveVarslerPath))
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
@@ -40,7 +40,7 @@ fun Route.beskjedApi(varselReader: VarselReader) {
     get("/beskjed/all") {
         doIfValidRequest { fnr ->
             try {
-                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr,alleVarslerPath))
+                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, alleVarslerPath))
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
