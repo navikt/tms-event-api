@@ -1,5 +1,6 @@
 package no.nav.tms.event.api
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.application.feature
 import io.ktor.http.HttpMethod
@@ -11,17 +12,17 @@ import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.withTestApplication
 import io.mockk.coEvery
 import io.mockk.mockk
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import no.nav.tms.event.api.config.AzureToken
 import no.nav.tms.event.api.config.AzureTokenFetcher
-import no.nav.tms.event.api.varsel.Varsel
 import no.nav.tms.event.api.varsel.VarselDTO
+import org.amshove.kluent.internal.assertFalse
+import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 
 private val objectmapper = ObjectMapper()
 
@@ -33,7 +34,7 @@ class ApiTest {
     fun `setter opp api ruter`() {
         withTestApplication(
             mockApi(
-                httpClient = mockClient(""),
+                httpClient = mockClient("", "", ""),
                 azureTokenFetcher = tokenFetchMock
             )
         ) {
@@ -46,7 +47,7 @@ class ApiTest {
     fun `bad request for ugyldig fødselsnummer i header`(varselType: String) {
         withTestApplication(
             mockApi(
-                httpClient = mockClient(""),
+                httpClient = mockClient("", "", ""),
                 azureTokenFetcher = tokenFetchMock
             )
         ) {
@@ -65,14 +66,34 @@ class ApiTest {
         }
     }
 
-    @Test
-    fun beskjedvarsler() {
+    @ParameterizedTest
+    @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
+    fun `Henter varsler fra eventhandler og gjør de om til DTO`(type: String) {
         val dummyFnr = "12345678910"
-        val rootPath = "/tms-event-api/beskjed"
+        val rootPath = "/tms-event-api/$type"
 
-        val (mockresponse, expectedResult) = mockContent(
+        val (aktiveMockresponse, aktiveExpectedResult) = mockContent(
             ZonedDateTime.now().minusDays(1),
-            ZonedDateTime.now()
+            ZonedDateTime.now(),
+            ZonedDateTime.now().plusDays(10),
+            5
+        )
+        val (inaktivMockresponse, inaktiveExpectedResult) = mockContent(
+            ZonedDateTime.now().minusDays(1),
+            ZonedDateTime.now(),
+            null,
+            2
+        )
+        val (alleMockresponse, alleExpectedResult) = mockContent(
+            ZonedDateTime.now().minusDays(1),
+            ZonedDateTime.now(),
+            ZonedDateTime.now().plusDays(3),
+            6
+        )
+        val mockClient = mockClient(
+            aktiveMockresponse,
+            inaktivMockresponse,
+            alleMockresponse
         )
 
         coEvery {
@@ -81,56 +102,54 @@ class ApiTest {
 
         withTestApplication(
             mockApi(
-                httpClient =mockClient(Json.encodeToString(mockresponse)),
+                httpClient = mockClient,
                 azureTokenFetcher = tokenFetchMock
             )
         ) {
-            assertVarselApiCall("$rootPath/inaktive", dummyFnr, 5)
-            assertVarselApiCall("$rootPath/aktive", dummyFnr, 1)
-            assertVarselApiCall("$rootPath/all", dummyFnr, 6)
+            assertVarselApiCall("$rootPath/aktive", dummyFnr, aktiveExpectedResult)
+            assertVarselApiCall("$rootPath/inaktive", dummyFnr, inaktiveExpectedResult)
+            assertVarselApiCall("$rootPath/all", dummyFnr, alleExpectedResult)
         }
     }
-    /*
-        @Test
-        fun oppgavevarsler() {
-            val dummyFnr = "16045571871"
-            val oppgaveVarselReader = mockk<OppgaveVarselReader>()
-            val rootPath = "/tms-event-api/oppgave"
-            coEvery { oppgaveVarselReader.inaktiveVarsler(dummyFnr) } returns dummyVarsel(5)
-            coEvery { oppgaveVarselReader.aktiveVarsler(dummyFnr) } returns dummyVarsel(1)
-            coEvery { oppgaveVarselReader.alleVarsler(dummyFnr) } returns dummyVarsel(6)
-
-            withTestApplication(mockApi(oppgaveVarselReader = oppgaveVarselReader)) {
-                assertVarselApiCall("$rootPath/inaktive", dummyFnr, 5)
-                assertVarselApiCall("$rootPath/aktive", dummyFnr, 1)
-                assertVarselApiCall("$rootPath/all", dummyFnr, 6)
-            }
-        }
-
-        @Test
-        fun innboksvarsler() {
-            val dummyFnr = "16045571871"
-            val varselReader = mockk<VarselReader>()
-            val rootPath = "/tms-event-api/innboks"
-          //  coEvery { varselReader.inaktiveVarsler(dummyFnr) } returns dummyVarsel(3)
-          //  coEvery { varselReader.aktiveVarsler(dummyFnr) } returns dummyVarsel(1)
-          //  coEvery { varselReader.alleVarsler(dummyFnr) } returns dummyVarsel(6)
-
-            withTestApplication(mockApi(varselReader = varselReader)) {
-                assertVarselApiCall("$rootPath/inaktive", dummyFnr, 3)
-                assertVarselApiCall("$rootPath/aktive", dummyFnr, 1)
-                assertVarselApiCall("$rootPath/all", dummyFnr, 6)
-            }
-        }*/
 }
 
-private fun TestApplicationEngine.assertVarselApiCall(endpoint: String, fnr: String, expectedSize: Int) {
+private fun TestApplicationEngine.assertVarselApiCall(endpoint: String, fnr: String, expectedResult: List<VarselDTO>) {
     handleRequest(HttpMethod.Get, endpoint) {
         addHeader("fodselsnummer", fnr)
     }.also {
-        println(it.response.content)
         it.response.status() shouldBeEqualTo HttpStatusCode.OK
-        objectmapper.readTree(it.response.content).size() shouldBeEqualTo expectedSize
+        assertContent(it.response.content, expectedResult)
+    }
+}
+
+private fun assertContent(content: String?, expectedResult: List<VarselDTO>) {
+    val jsonObjects = objectmapper.readTree(content)
+    jsonObjects.size() shouldBeEqualTo expectedResult.size
+    val expectedObject = expectedResult.first()
+    jsonObjects.first().also { resultObject ->
+        resultObject["fodselsnummer"].textValue() shouldBeEqualTo expectedObject.fodselsnummer
+        resultObject["grupperingsId"].textValue() shouldBeEqualTo expectedObject.grupperingsId
+        resultObject["eventId"].textValue() shouldBeEqualTo expectedObject.eventId
+        resultObject["produsent"].textValue() shouldBeEqualTo expectedObject.produsent
+        resultObject["sikkerhetsnivaa"].asInt() shouldBeEqualTo expectedObject.sikkerhetsnivaa
+        resultObject["tekst"].textValue() shouldBeEqualTo expectedObject.tekst
+        resultObject["link"].textValue() shouldBeEqualTo expectedObject.link
+        resultObject["aktiv"].asBoolean() shouldBeEqualTo expectedObject.aktiv
+        assertZonedDateTime(resultObject, expectedObject.synligFremTil, "synligFremTil")
+        assertZonedDateTime(resultObject, expectedObject.forstBehandlet, "forstBehandlet")
+        assertZonedDateTime(resultObject, expectedObject.sistOppdatert, "sistOppdatert")
+
+    }
+}
+
+fun assertZonedDateTime(jsonNode: JsonNode?, expectedDate: ZonedDateTime?, key: String) {
+    if (expectedDate != null) {
+        val resultDate = ZonedDateTime.parse(jsonNode?.get(key)?.textValue()).truncatedTo(ChronoUnit.MINUTES)
+        assertFalse(resultDate == null,"$key skal ikke være null")
+        resultDate.toString() shouldBeEqualTo  expectedDate.truncatedTo(ChronoUnit.MINUTES).toString()
+
+    } else {
+        jsonNode?.get(key)?.textValue() shouldBe null
     }
 }
 
@@ -141,25 +160,29 @@ fun allRoutes(root: Route): List<Route> {
 
 private fun mockContent(
     førstBehandlet: ZonedDateTime,
-    sistOppdatert: ZonedDateTime
-): Pair<List<Varsel>, List<VarselDTO>> {
+    sistOppdatert: ZonedDateTime,
+    synligFremTil: ZonedDateTime? = null,
+    size: Int
+): Pair<String, List<VarselDTO>> {
+    val synligFremTilString = synligFremTil?.let {
+        """"${synligFremTil.withFixedOffsetZone()}""""
+    } ?: "null"
     return Pair(
-        Varsel(
-            fodselsnummer = "123",
-            grupperingsId = "",
-            eventId = "",
-            forstBehandlet = førstBehandlet,
-            produsent = "",
-            sikkerhetsnivaa = 0,
-            sistOppdatert = sistOppdatert,
-            tekst = "Tadda vi tester",
-            link = "",
-            aktiv = false,
-            eksternVarslingSendt = false,
-            eksternVarslingKanaler = listOf(),
-            synligFremTil = sistOppdatert
-
-        ).createListFromObject(5),
+        """  {
+        "fodselsnummer": "123",
+        "grupperingsId": "",
+        "eventId": "",
+        "forstBehandlet": "${førstBehandlet.withFixedOffsetZone()}",
+        "produsent": "",
+        "sikkerhetsnivaa": 0,
+        "sistOppdatert": "${sistOppdatert.withFixedOffsetZone()}",
+        "synligFremTil": $synligFremTilString
+        "tekst": "Tadda vi tester",
+        "link": "",
+        "aktiv": false
+        "eksternVarslingSendt": true
+        "eksternVarslingKanaler":[]
+      }""".jsonArray(size),
         VarselDTO(
             fodselsnummer = "123",
             grupperingsId = "",
@@ -170,8 +193,17 @@ private fun mockContent(
             sistOppdatert = sistOppdatert.withFixedOffsetZone(),
             tekst = "Tadda vi tester",
             link = "",
-            aktiv = false
-        ).createListFromObject(5)
-
+            aktiv = false,
+            synligFremTil = synligFremTil?.withFixedOffsetZone()
+        ).createListFromObject(size)
     )
 }
+
+private fun String.jsonArray(size: Int): String = StringBuilder("[").also { stringBuilder ->
+    for (i in 1..size) {
+        stringBuilder.append(this)
+        if (i != size) {
+            stringBuilder.append(",")
+        }
+    }
+}.append("]").toString()

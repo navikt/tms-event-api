@@ -33,7 +33,8 @@ data class Varsel(
         sistOppdatert = sistOppdatert,
         sikkerhetsnivaa = sikkerhetsnivaa,
         aktiv = aktiv,
-        grupperingsId = grupperingsId
+        grupperingsId = grupperingsId,
+        synligFremTil = synligFremTil
     )
 }
 
