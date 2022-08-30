@@ -141,7 +141,7 @@ private fun assertContent(content: String?, expectedResult: List<VarselDTO>) {
     }
 }
 
-fun assertZonedDateTime(jsonNode: JsonNode?, expectedDate: ZonedDateTime?, key: String) {
+private fun assertZonedDateTime(jsonNode: JsonNode?, expectedDate: ZonedDateTime?, key: String) {
     if (expectedDate != null) {
         val resultDate = ZonedDateTime.parse(jsonNode?.get(key)?.textValue()).truncatedTo(ChronoUnit.MINUTES)
         assertFalse(resultDate == null, "$key skal ikke være null")
@@ -151,7 +151,7 @@ fun assertZonedDateTime(jsonNode: JsonNode?, expectedDate: ZonedDateTime?, key: 
     }
 }
 
-fun allRoutes(root: Route): List<Route> {
+private fun allRoutes(root: Route): List<Route> {
     return listOf(root) + root.children.flatMap { allRoutes(it) }
         .filter { it.toString().contains("method") && it.toString() != "/" }
 }
@@ -165,6 +165,7 @@ private fun mockContent(
     val synligFremTilString = synligFremTil?.let {
         """"${synligFremTil.withFixedOffsetZone()}""""
     } ?: "null"
+
     return Pair(
         """  {
         "fodselsnummer": "123",
@@ -197,11 +198,5 @@ private fun mockContent(
     )
 }
 
-private fun String.jsonArray(size: Int): String = StringBuilder("[").also { stringBuilder ->
-    for (i in 1..size) {
-        stringBuilder.append(this)
-        if (i != size) {
-            stringBuilder.append(",")
-        }
-    }
-}.append("]").toString()
+private fun String.jsonArray(size: Int): String =
+    (1..size).joinToString(separator = ",", prefix = "[", postfix = "]") { this }

@@ -13,19 +13,18 @@ import io.ktor.serialization.json
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import no.nav.personbruker.dittnav.common.util.config.StringEnvVar
-import no.nav.tms.event.api.api.beskjedApi
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.HttpClientBuilder
 import no.nav.tms.event.api.config.healthApi
 import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.VarselReader
+import no.nav.tms.event.api.varsel.beskjedApi
 import no.nav.tms.event.api.varsel.innboksApi
 import no.nav.tms.event.api.varsel.oppgaveApi
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
 import no.nav.tms.token.support.azure.validation.installAzureAuth
 
 fun main() {
-
     val eventHandlerUrl: String = StringEnvVar.getEnvVar("EVENT_HANDLER_URL")
     val eventHandlerClientId: String = StringEnvVar.getEnvVar("EVENT_HANDLER_CLIENT_ID")
 
@@ -35,7 +34,7 @@ fun main() {
     val varselReader = VarselReader(
         azureTokenFetcher = azureTokenFetcher,
         client = httpClient,
-        eventHandlerBaseURL = eventHandlerUrl,
+        eventHandlerBaseURL = eventHandlerUrl
     )
 
     embeddedServer(Netty, port = 8080) {

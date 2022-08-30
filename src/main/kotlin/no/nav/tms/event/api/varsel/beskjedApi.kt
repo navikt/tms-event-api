@@ -1,4 +1,4 @@
-package no.nav.tms.event.api.api
+package no.nav.tms.event.api.varsel
 
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
@@ -7,7 +7,6 @@ import io.ktor.routing.Route
 import io.ktor.routing.get
 import no.nav.tms.event.api.config.doIfValidRequest
 import no.nav.tms.event.api.config.respondWithError
-import no.nav.tms.event.api.varsel.VarselReader
 import org.slf4j.LoggerFactory
 
 fun Route.beskjedApi(varselReader: VarselReader) {

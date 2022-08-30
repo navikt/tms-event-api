@@ -10,7 +10,6 @@ import no.nav.tms.event.api.config.respondWithError
 import org.slf4j.LoggerFactory
 
 fun Route.innboksApi(varselReader: VarselReader) {
-
     val log = LoggerFactory.getLogger(VarselReader::class.java)
     val aktiveVarslerEndpoint = "fetch/modia/innboks/aktive"
     val inaktiveVarslerEndpoint = "fetch/modia/innboks/inaktive"

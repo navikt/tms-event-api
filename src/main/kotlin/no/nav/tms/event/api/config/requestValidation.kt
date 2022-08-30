@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory
 val log = LoggerFactory.getLogger("requestValidation.tk")
 
 suspend inline fun PipelineContext<Unit, ApplicationCall>.doIfValidRequest(handler: (fnr: String) -> Unit) {
-
     val headerName = "fodselsnummer"
     val fnrHeader = call.request.headers[headerName]
     when {
