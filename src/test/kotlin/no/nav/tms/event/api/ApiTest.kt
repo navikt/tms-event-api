@@ -18,7 +18,9 @@ import no.nav.tms.event.api.varsel.VarselDTO
 import org.amshove.kluent.internal.assertFalse
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
+import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.ZonedDateTime
@@ -26,15 +28,25 @@ import java.time.temporal.ChronoUnit
 
 private val objectmapper = ObjectMapper()
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApiTest {
     private val tokenFetchMock = mockk<AzureTokenFetcher>(relaxed = true)
     private val azureToken = AzureToken("TokenSmoken")
+
+    private val dummyFnr = "12345678910"
+
+    @BeforeAll
+    fun setup() {
+        coEvery {
+            tokenFetchMock.fetchTokenForEventHandler()
+        } returns azureToken
+    }
 
     @Test
     fun `setter opp api ruter`() {
         withTestApplication(
             mockApi(
-                httpClient = mockClient("", "", ""),
+                httpClient = mockClient(""),
                 azureTokenFetcher = tokenFetchMock
             )
         ) {
@@ -47,7 +59,7 @@ class ApiTest {
     fun `bad request for ugyldig fødselsnummer i header`(varselType: String) {
         withTestApplication(
             mockApi(
-                httpClient = mockClient("", "", ""),
+                httpClient = mockClient(""),
                 azureTokenFetcher = tokenFetchMock
             )
         ) {
@@ -68,37 +80,16 @@ class ApiTest {
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
-    fun `Henter varsler fra eventhandler og gjør de om til DTO`(type: String) {
-        val dummyFnr = "12345678910"
-        val rootPath = "/tms-event-api/$type"
-
+    fun `Henter aktive varsler fra eventhandler og gjør de om til DTO`(type: String) {
         val (aktiveMockresponse, aktiveExpectedResult) = mockContent(
             ZonedDateTime.now().minusDays(1),
             ZonedDateTime.now(),
             ZonedDateTime.now().plusDays(10),
             5
         )
-        val (inaktivMockresponse, inaktiveExpectedResult) = mockContent(
-            ZonedDateTime.now().minusDays(1),
-            ZonedDateTime.now(),
-            null,
-            2
-        )
-        val (alleMockresponse, alleExpectedResult) = mockContent(
-            ZonedDateTime.now().minusDays(1),
-            ZonedDateTime.now(),
-            ZonedDateTime.now().plusDays(3),
-            6
-        )
         val mockClient = mockClient(
-            aktiveMockresponse,
-            inaktivMockresponse,
-            alleMockresponse
+            aktiveMockresponse
         )
-
-        coEvery {
-            tokenFetchMock.fetchTokenForEventHandler()
-        } returns azureToken
 
         withTestApplication(
             mockApi(
@@ -106,9 +97,53 @@ class ApiTest {
                 azureTokenFetcher = tokenFetchMock
             )
         ) {
-            assertVarselApiCall("$rootPath/aktive", dummyFnr, aktiveExpectedResult)
-            assertVarselApiCall("$rootPath/inaktive", dummyFnr, inaktiveExpectedResult)
-            assertVarselApiCall("$rootPath/all", dummyFnr, alleExpectedResult)
+            assertVarselApiCall("/tms-event-api/$type/aktive", dummyFnr, aktiveExpectedResult)
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
+    fun `Henter inaktive varsler fra eventhandler og gjør de om til DTO`(type: String) {
+        val (inaktivMockresponse, inaktiveExpectedResult) = mockContent(
+            ZonedDateTime.now().minusDays(1),
+            ZonedDateTime.now(),
+            null,
+            2
+        )
+        val mockClient = mockClient(
+            inaktivMockresponse,
+        )
+
+        withTestApplication(
+            mockApi(
+                httpClient = mockClient,
+                azureTokenFetcher = tokenFetchMock
+            )
+        ) {
+            assertVarselApiCall("/tms-event-api/$type/inaktive", dummyFnr, inaktiveExpectedResult)
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
+    fun `Henter alle varsler fra eventhandler og gjør de om til DTO`(type: String) {
+        val (alleMockresponse, alleExpectedResult) = mockContent(
+            ZonedDateTime.now().minusDays(1),
+            ZonedDateTime.now(),
+            ZonedDateTime.now().plusDays(3),
+            6
+        )
+        val mockClient = mockClient(
+            alleMockresponse
+        )
+
+        withTestApplication(
+            mockApi(
+                httpClient = mockClient,
+                azureTokenFetcher = tokenFetchMock
+            )
+        ) {
+            assertVarselApiCall("/tms-event-api/$type/all", dummyFnr, alleExpectedResult)
         }
     }
 }

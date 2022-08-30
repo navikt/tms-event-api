@@ -47,30 +47,15 @@ fun mockAuthBuilder(): Application.() -> Unit = {
     }
 }
 
-fun mockClient(aktivMockContent: String, inaktivMockContent: String, alleMockContent: String) = HttpClient(
-    MockEngine() {
-        when {
-            it.url.encodedPath.contains("/aktiv") -> respond(
-                content = aktivMockContent,
-                status = HttpStatusCode.OK,
-                headersOf(HttpHeaders.ContentType, "application/json")
-            )
-
-            it.url.encodedPath.contains("/inaktiv") -> respond(
-                content = inaktivMockContent,
-                status = HttpStatusCode.OK,
-                headersOf(HttpHeaders.ContentType, "application/json")
-            )
-
-            it.url.encodedPath.contains("/all") -> respond(
-                content = alleMockContent,
-                status = HttpStatusCode.OK,
-                headersOf(HttpHeaders.ContentType, "application/json")
-            )
-
-            else -> respond("", HttpStatusCode.NotFound)
-        }
+fun mockClient(mockContent: String) = HttpClient(
+    MockEngine {
+        respond(
+            content = mockContent,
+            status = HttpStatusCode.OK,
+            headersOf(HttpHeaders.ContentType, "application/json")
+        )
     }
+
 ) {
     install(JsonFeature) {
         serializer = KotlinxSerializer()
