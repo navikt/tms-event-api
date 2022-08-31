@@ -63,17 +63,15 @@ class ApiTest {
                 azureTokenFetcher = tokenFetchMock
             )
         ) {
-            handleRequest {
-                handleRequest(HttpMethod.Get, "/tms-event-api/$varselType/aktive").also {
-                    it.response.status() shouldBeEqualTo HttpStatusCode.BadRequest
-                    it.response.content shouldBeEqualTo "Requesten mangler header-en 'fodselsnummer'"
-                }
-                handleRequest(HttpMethod.Get, "/tms-event-api/$varselType/inaktive") {
-                    addHeader("fodselsnummer", "1234")
-                }.also {
-                    it.response.status() shouldBeEqualTo HttpStatusCode.BadRequest
-                    it.response.content shouldBeEqualTo "Header-en 'fodselsnummer' inneholder ikke et gyldig fødselsnummer."
-                }
+            handleRequest(HttpMethod.Get, "/tms-event-api/$varselType/aktive").also {
+                it.response.status() shouldBeEqualTo HttpStatusCode.BadRequest
+                it.response.content shouldBeEqualTo "Requesten mangler header-en 'fodselsnummer'"
+            }
+            handleRequest(HttpMethod.Get, "/tms-event-api/$varselType/inaktive") {
+                addHeader("fodselsnummer", "1234")
+            }.also {
+                it.response.status() shouldBeEqualTo HttpStatusCode.BadRequest
+                it.response.content shouldBeEqualTo "Header-en 'fodselsnummer' inneholder ikke et gyldig fødselsnummer."
             }
         }
     }
