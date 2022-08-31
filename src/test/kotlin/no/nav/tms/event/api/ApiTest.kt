@@ -12,7 +12,6 @@ import io.ktor.server.testing.handleRequest
 import io.ktor.server.testing.withTestApplication
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.tms.event.api.config.AzureToken
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.varsel.VarselDTO
 import org.amshove.kluent.internal.assertFalse
@@ -31,7 +30,7 @@ private val objectmapper = ObjectMapper()
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApiTest {
     private val tokenFetchMock = mockk<AzureTokenFetcher>(relaxed = true)
-    private val azureToken = AzureToken("TokenSmoken")
+    private val azureToken = "TokenSmoken"
 
     private val dummyFnr = "12345678910"
 
