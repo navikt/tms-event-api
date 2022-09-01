@@ -7,11 +7,14 @@ import io.ktor.auth.authenticate
 import io.ktor.client.HttpClient
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
+import io.ktor.metrics.micrometer.MicrometerMetrics
 import io.ktor.routing.route
 import io.ktor.routing.routing
 import io.ktor.serialization.json
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import io.micrometer.prometheus.PrometheusConfig
+import io.micrometer.prometheus.PrometheusMeterRegistry
 import no.nav.personbruker.dittnav.common.util.config.StringEnvVar
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.HttpClientBuilder
@@ -55,6 +58,9 @@ fun Application.api(
     authConfig()
     install(ContentNegotiation) {
         json(jsonConfig())
+    }
+    install(MicrometerMetrics) {
+        registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     }
 
     routing {
