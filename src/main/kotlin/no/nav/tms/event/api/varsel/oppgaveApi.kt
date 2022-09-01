@@ -1,22 +1,25 @@
-package no.nav.tms.event.api.oppgave
+package no.nav.tms.event.api.varsel
 
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
-import no.nav.tms.event.api.common.respondWithError
 import no.nav.tms.event.api.config.doIfValidRequest
+import no.nav.tms.event.api.config.respondWithError
 import org.slf4j.LoggerFactory
 
-fun Route.oppgaveApi(oppgaveEventService: OppgaveEventService) {
+fun Route.oppgaveApi(varselReader: VarselReader) {
+    val aktiveVarslerEndpoint = "fetch/modia/oppgave/aktive"
+    val inaktiveVarslerEndpoint = "fetch/modia/oppgave/inaktive"
+    val alleVarslerEndpoint = "fetch/modia/oppgave/all"
 
-    val log = LoggerFactory.getLogger(OppgaveEventService::class.java)
+    val log = LoggerFactory.getLogger(VarselReader::class.java)
 
     get("/oppgave/aktive") {
         doIfValidRequest { fnr ->
             try {
-                val aktiveOppgaveEvents = oppgaveEventService.getActiveCachedEventsForUser(fnr)
+                val aktiveOppgaveEvents = varselReader.fetchVarsel(fnr, aktiveVarslerEndpoint)
                 call.respond(HttpStatusCode.OK, aktiveOppgaveEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
@@ -27,7 +30,7 @@ fun Route.oppgaveApi(oppgaveEventService: OppgaveEventService) {
     get("/oppgave/inaktive") {
         doIfValidRequest { fnr ->
             try {
-                val inaktiveOppgaveEvents = oppgaveEventService.getInactiveCachedEventsForUser(fnr)
+                val inaktiveOppgaveEvents = varselReader.fetchVarsel(fnr, inaktiveVarslerEndpoint)
                 call.respond(HttpStatusCode.OK, inaktiveOppgaveEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
@@ -38,7 +41,7 @@ fun Route.oppgaveApi(oppgaveEventService: OppgaveEventService) {
     get("/oppgave/all") {
         doIfValidRequest { fnr ->
             try {
-                val oppgaveEvents = oppgaveEventService.getAllCachedEventsForUser(fnr)
+                val oppgaveEvents = varselReader.fetchVarsel(fnr, alleVarslerEndpoint)
                 call.respond(HttpStatusCode.OK, oppgaveEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)

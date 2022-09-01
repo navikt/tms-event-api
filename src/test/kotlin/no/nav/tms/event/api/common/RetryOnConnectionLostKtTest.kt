@@ -3,6 +3,8 @@ package no.nav.tms.event.api.common
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
+import no.nav.tms.event.api.config.ConnectionFailedException
+import no.nav.tms.event.api.config.retryOnConnectionLost
 import org.amshove.kluent.coInvoking
 import org.amshove.kluent.`should be equal to`
 import org.amshove.kluent.shouldThrow

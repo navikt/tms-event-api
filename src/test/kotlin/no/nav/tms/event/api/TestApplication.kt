@@ -1,33 +1,35 @@
 package no.nav.tms.event.api
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.application.Application
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.mock.MockEngine
+import io.ktor.client.engine.mock.respond
+import io.ktor.client.features.HttpTimeout
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.json.serializer.KotlinxSerializer
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.headersOf
 import io.mockk.mockk
-import no.nav.tms.event.api.beskjed.BeskjedEventService
-import no.nav.tms.event.api.config.api
-import no.nav.tms.event.api.health.HealthService
-import no.nav.tms.event.api.innboks.InnboksEventService
-import no.nav.tms.event.api.oppgave.OppgaveEventService
+import no.nav.tms.event.api.config.AzureTokenFetcher
+import no.nav.tms.event.api.varsel.VarselReader
 import no.nav.tms.token.support.authentication.installer.mock.installMockedAuthenticators
 import no.nav.tms.token.support.tokenx.validation.mock.SecurityLevel
 
-val objectmapper = ObjectMapper()
 fun mockApi(
     authConfig: Application.() -> Unit = mockAuthBuilder(),
     httpClient: HttpClient = mockk(relaxed = true),
-    innboksEventService: InnboksEventService = mockk(relaxed = true),
-    beskjedEventService: BeskjedEventService = mockk(relaxed = true),
-    oppgaveEventService: OppgaveEventService = mockk(relaxed = true),
-    healthService: HealthService = mockk(relaxed = true)
+    azureTokenFetcher: AzureTokenFetcher
 ): Application.() -> Unit {
     return fun Application.() {
         api(
             authConfig = authConfig,
             httpClient = httpClient,
-            innboksEventService = innboksEventService,
-            oppgaveEventService = oppgaveEventService,
-            beskjedEventService = beskjedEventService, healthService = healthService
+            varselReader = VarselReader(
+                azureTokenFetcher = azureTokenFetcher,
+                client = httpClient,
+                eventHandlerBaseURL = "https://test.noe"
+            )
         )
     }
 }
@@ -42,5 +44,27 @@ fun mockAuthBuilder(): Application.() -> Unit = {
             staticSecurityLevel = SecurityLevel.LEVEL_4
         }
         installAzureAuthMock { }
+    }
+}
+
+fun mockClient(mockContent: String) = HttpClient(
+    MockEngine {
+        respond(
+            content = mockContent,
+            status = HttpStatusCode.OK,
+            headersOf(HttpHeaders.ContentType, "application/json")
+        )
+    }
+
+) {
+    install(JsonFeature) {
+        serializer = KotlinxSerializer()
+    }
+    install(HttpTimeout)
+}
+
+internal fun <T> T.createListFromObject(size: Int): List<T> = mutableListOf<T>().also { list ->
+    for (i in 1..size) {
+        list.add(this)
     }
 }

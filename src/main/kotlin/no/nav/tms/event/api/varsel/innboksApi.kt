@@ -1,23 +1,23 @@
-package no.nav.tms.event.api.innboks
+package no.nav.tms.event.api.varsel
 
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
-import no.nav.tms.event.api.common.respondWithError
 import no.nav.tms.event.api.config.doIfValidRequest
+import no.nav.tms.event.api.config.respondWithError
 import org.slf4j.LoggerFactory
 
-fun Route.innboksApi(innboksEventService: InnboksEventService) {
-
-    val log = LoggerFactory.getLogger(InnboksEventService::class.java)
-
+fun Route.innboksApi(varselReader: VarselReader) {
+    val log = LoggerFactory.getLogger(VarselReader::class.java)
+    val aktiveVarslerEndpoint = "fetch/modia/innboks/aktive"
+    val inaktiveVarslerEndpoint = "fetch/modia/innboks/inaktive"
+    val alleVarslerEndpoint = "fetch/modia/innboks/all"
     get("/innboks/aktive") {
         doIfValidRequest { fnr ->
             try {
-                val aktiveInnboksEvents = innboksEventService.getActiveCachedEventsForUser(fnr)
-                call.respond(HttpStatusCode.OK, aktiveInnboksEvents)
+                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, aktiveVarslerEndpoint))
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
@@ -27,8 +27,7 @@ fun Route.innboksApi(innboksEventService: InnboksEventService) {
     get("/innboks/inaktive") {
         doIfValidRequest { fnr ->
             try {
-                val inaktiveInnboksEvents = innboksEventService.getInactiveCachedEventsForUser(fnr)
-                call.respond(HttpStatusCode.OK, inaktiveInnboksEvents)
+                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, inaktiveVarslerEndpoint))
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
@@ -38,8 +37,7 @@ fun Route.innboksApi(innboksEventService: InnboksEventService) {
     get("/innboks/all") {
         doIfValidRequest { fnr ->
             try {
-                val innboksEvents = innboksEventService.getAllCachedEventsForUser(fnr)
-                call.respond(HttpStatusCode.OK, innboksEvents)
+                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, alleVarslerEndpoint))
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }

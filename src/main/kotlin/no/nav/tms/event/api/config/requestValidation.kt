@@ -5,12 +5,12 @@ import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import io.ktor.util.pipeline.PipelineContext
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 val log = LoggerFactory.getLogger("requestValidation.tk")
 
 suspend inline fun PipelineContext<Unit, ApplicationCall>.doIfValidRequest(handler: (fnr: String) -> Unit) {
-
     val headerName = "fodselsnummer"
     val fnrHeader = call.request.headers[headerName]
     when {
@@ -26,3 +26,8 @@ suspend fun PipelineContext<Unit, ApplicationCall>.respondWithBadRequest(msg: St
 }
 
 fun isFodselsnummerOfValidLength(fnrHeader: String) = fnrHeader.isNotEmpty() && fnrHeader.length == 11
+
+suspend fun respondWithError(call: ApplicationCall, log: Logger, exception: Exception) {
+    call.respond(HttpStatusCode.InternalServerError)
+    log.error("Ukjent feil oppstod ved henting av eventer fra cache. Returnerer feilkode.", exception)
+}
