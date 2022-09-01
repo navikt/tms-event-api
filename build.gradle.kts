@@ -64,7 +64,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("no.nav.tms.event.api.config.AppKt")
+    mainClass.set("no.nav.tms.event.api.AppKt")
 }
 
 tasks {
