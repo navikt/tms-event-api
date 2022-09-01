@@ -13,7 +13,7 @@ import io.ktor.server.testing.withTestApplication
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.tms.event.api.config.AzureTokenFetcher
-import no.nav.tms.event.api.varsel.VarselDTO
+import no.nav.tms.event.api.varsel.Varsel
 import org.amshove.kluent.internal.assertFalse
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
@@ -145,7 +145,7 @@ class ApiTest {
     }
 }
 
-private fun TestApplicationEngine.assertVarselApiCall(endpoint: String, fnr: String, expectedResult: List<VarselDTO>) {
+private fun TestApplicationEngine.assertVarselApiCall(endpoint: String, fnr: String, expectedResult: List<Varsel>) {
     handleRequest(HttpMethod.Get, endpoint) {
         addHeader("fodselsnummer", fnr)
     }.also {
@@ -154,7 +154,7 @@ private fun TestApplicationEngine.assertVarselApiCall(endpoint: String, fnr: Str
     }
 }
 
-private fun assertContent(content: String?, expectedResult: List<VarselDTO>) {
+private fun assertContent(content: String?, expectedResult: List<Varsel>) {
     val jsonObjects = objectmapper.readTree(content)
     jsonObjects.size() shouldBeEqualTo expectedResult.size
     val expectedObject = expectedResult.first()
@@ -193,7 +193,7 @@ private fun mockContent(
     sistOppdatert: ZonedDateTime,
     synligFremTil: ZonedDateTime? = null,
     size: Int
-): Pair<String, List<VarselDTO>> {
+): Pair<String, List<Varsel>> {
     val synligFremTilString = synligFremTil?.let {
         """"${synligFremTil.withFixedOffsetZone()}""""
     } ?: "null"
@@ -212,9 +212,9 @@ private fun mockContent(
         "link": "",
         "aktiv": false
         "eksternVarslingSendt": true
-        "eksternVarslingKanaler":[]
+        "eksternVarslingKanaler":["SMS", "EPOST"]
       }""".jsonArray(size),
-        VarselDTO(
+        Varsel(
             fodselsnummer = "123",
             grupperingsId = "",
             eventId = "",
@@ -225,7 +225,9 @@ private fun mockContent(
             tekst = "Tadda vi tester",
             link = "",
             aktiv = false,
-            synligFremTil = synligFremTil?.withFixedOffsetZone()
+            synligFremTil = synligFremTil?.withFixedOffsetZone(),
+            eksternVarslingSendt = true,
+            eksternVarslingKanaler = listOf("SMS", "EPOST")
         ).createListFromObject(size)
     )
 }

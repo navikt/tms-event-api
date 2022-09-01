@@ -13,8 +13,6 @@ import io.ktor.http.HttpMethod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.tms.token.support.azure.exchange.service.AzureHeader
-import org.apache.http.ConnectionClosedException
-import java.net.SocketException
 import java.net.URL
 
 object HttpClientBuilder {
@@ -42,25 +40,3 @@ suspend inline fun <reified T> HttpClient.getWithAzureAndFnr(url: URL, accessTok
         }
     }
 }
-
-inline fun <reified T> retryOnConnectionLost(retries: Int = 3, outgoingCall: () -> T): T {
-    var attempts = 0
-
-    lateinit var lastError: Exception
-
-    while (attempts < retries) {
-        try {
-            return outgoingCall()
-        } catch (e: ConnectionClosedException) {
-            attempts++
-            lastError = e
-        } catch (e: SocketException) {
-            attempts++
-            lastError = e
-        }
-    }
-
-    throw ConnectionFailedException("Klarte ikke hente data etter $attempts forsøk. Viser info for siste feil.", lastError)
-}
-
-class ConnectionFailedException(message: String, cause: Exception) : Exception(message, cause)

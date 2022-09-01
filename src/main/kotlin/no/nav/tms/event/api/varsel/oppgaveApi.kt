@@ -10,16 +10,17 @@ import no.nav.tms.event.api.config.respondWithError
 import org.slf4j.LoggerFactory
 
 fun Route.oppgaveApi(varselReader: VarselReader) {
-    val aktiveVarslerEndpoint = "fetch/modia/oppgave/aktive"
-    val inaktiveVarslerEndpoint = "fetch/modia/oppgave/inaktive"
-    val alleVarslerEndpoint = "fetch/modia/oppgave/all"
+
+    val aktiveVarslerPath = "fetch/modia/oppgave/aktive"
+    val inaktiveVarslerPath = "fetch/modia/oppgave/inaktive"
+    val alleVarslerPath = "fetch/modia/oppgave/all"
 
     val log = LoggerFactory.getLogger(VarselReader::class.java)
 
     get("/oppgave/aktive") {
         doIfValidRequest { fnr ->
             try {
-                val aktiveOppgaveEvents = varselReader.fetchVarsel(fnr, aktiveVarslerEndpoint)
+                val aktiveOppgaveEvents = varselReader.fetchVarsel(fnr, aktiveVarslerPath)
                 call.respond(HttpStatusCode.OK, aktiveOppgaveEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
@@ -30,7 +31,7 @@ fun Route.oppgaveApi(varselReader: VarselReader) {
     get("/oppgave/inaktive") {
         doIfValidRequest { fnr ->
             try {
-                val inaktiveOppgaveEvents = varselReader.fetchVarsel(fnr, inaktiveVarslerEndpoint)
+                val inaktiveOppgaveEvents = varselReader.fetchVarsel(fnr, inaktiveVarslerPath)
                 call.respond(HttpStatusCode.OK, inaktiveOppgaveEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
@@ -41,7 +42,7 @@ fun Route.oppgaveApi(varselReader: VarselReader) {
     get("/oppgave/all") {
         doIfValidRequest { fnr ->
             try {
-                val oppgaveEvents = varselReader.fetchVarsel(fnr, alleVarslerEndpoint)
+                val oppgaveEvents = varselReader.fetchVarsel(fnr, alleVarslerPath)
                 call.respond(HttpStatusCode.OK, oppgaveEvents)
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)

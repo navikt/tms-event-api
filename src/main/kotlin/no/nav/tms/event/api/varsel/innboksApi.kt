@@ -10,14 +10,17 @@ import no.nav.tms.event.api.config.respondWithError
 import org.slf4j.LoggerFactory
 
 fun Route.innboksApi(varselReader: VarselReader) {
+
+    val aktiveVarslerPath = "fetch/modia/innboks/aktive"
+    val inaktiveVarslerPath = "fetch/modia/innboks/inaktive"
+    val alleVarslerPath = "fetch/modia/innboks/all"
+
     val log = LoggerFactory.getLogger(VarselReader::class.java)
-    val aktiveVarslerEndpoint = "fetch/modia/innboks/aktive"
-    val inaktiveVarslerEndpoint = "fetch/modia/innboks/inaktive"
-    val alleVarslerEndpoint = "fetch/modia/innboks/all"
+
     get("/innboks/aktive") {
         doIfValidRequest { fnr ->
             try {
-                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, aktiveVarslerEndpoint))
+                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, aktiveVarslerPath))
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
@@ -27,7 +30,7 @@ fun Route.innboksApi(varselReader: VarselReader) {
     get("/innboks/inaktive") {
         doIfValidRequest { fnr ->
             try {
-                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, inaktiveVarslerEndpoint))
+                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, inaktiveVarslerPath))
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
@@ -37,7 +40,7 @@ fun Route.innboksApi(varselReader: VarselReader) {
     get("/innboks/all") {
         doIfValidRequest { fnr ->
             try {
-                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, alleVarslerEndpoint))
+                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, alleVarslerPath))
             } catch (exception: Exception) {
                 respondWithError(call, log, exception)
             }
