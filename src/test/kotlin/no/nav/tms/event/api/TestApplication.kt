@@ -65,6 +65,29 @@ fun mockClient(mockContent: String) = HttpClient(
     install(HttpTimeout)
 }
 
+fun mockClientWithEndpointValidation(endpointValidation: String, mockContent: String) = HttpClient(
+    MockEngine { request ->
+        if (request.url.toString().contains(endpointValidation)) {
+            respond(
+                content = mockContent,
+                status = HttpStatusCode.OK,
+                headersOf(HttpHeaders.ContentType, "application/json")
+            )
+        } else {
+            respond(
+                content = "ukjent url",
+                status = HttpStatusCode.NotFound,
+            )
+        }
+    }
+
+) {
+    install(ContentNegotiation) {
+        json(jsonConfig())
+    }
+    install(HttpTimeout)
+}
+
 internal fun <T> T.createListFromObject(size: Int): List<T> = mutableListOf<T>().also { list ->
     for (i in 1..size) {
         list.add(this)

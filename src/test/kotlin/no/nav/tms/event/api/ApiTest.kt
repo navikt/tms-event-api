@@ -81,13 +81,15 @@ class ApiTest {
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter aktive varsler fra eventhandler og gjør de om til DTO`(type: String) {
+        val endpoint = "/tms-event-api/$type/aktive"
         val (aktiveMockresponse, aktiveExpectedResult) = mockContent(
             ZonedDateTime.now().minusDays(1),
             ZonedDateTime.now(),
             ZonedDateTime.now().plusDays(10),
             5
         )
-        val mockClient = mockClient(
+        val mockClient = mockClientWithEndpointValidation(
+            "/aktiv",
             aktiveMockresponse
         )
 
@@ -96,7 +98,7 @@ class ApiTest {
                 httpClient = mockClient,
                 azureTokenFetcher = tokenFetchMock
             )
-            assertVarselApiCall("/tms-event-api/$type/aktive", dummyFnr, aktiveExpectedResult)
+            assertVarselApiCall(endpoint, dummyFnr, aktiveExpectedResult)
         }
     }
 
@@ -109,8 +111,9 @@ class ApiTest {
             null,
             2
         )
-        val mockClient = mockClient(
-            inaktivMockresponse,
+        val mockClient = mockClientWithEndpointValidation(
+            "inaktive",
+            inaktivMockresponse
         )
 
         testApplication {
@@ -131,7 +134,8 @@ class ApiTest {
             ZonedDateTime.now().plusDays(3),
             6
         )
-        val mockClient = mockClient(
+        val mockClient = mockClientWithEndpointValidation(
+            "all",
             alleMockresponse
         )
 
