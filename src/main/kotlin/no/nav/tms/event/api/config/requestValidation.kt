@@ -1,9 +1,9 @@
 package no.nav.tms.event.api.config
 
-import io.ktor.application.ApplicationCall
-import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
-import io.ktor.response.respond
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.call
+import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

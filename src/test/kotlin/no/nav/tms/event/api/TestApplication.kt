@@ -1,27 +1,29 @@
 package no.nav.tms.event.api
 
-import io.ktor.application.Application
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
-import io.ktor.client.features.HttpTimeout
-import io.ktor.client.features.json.JsonFeature
-import io.ktor.client.features.json.serializer.KotlinxSerializer
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
+import io.ktor.serialization.kotlinx.json.json
+import io.ktor.server.application.Application
+import io.ktor.server.testing.TestApplicationBuilder
 import io.mockk.mockk
 import no.nav.tms.event.api.config.AzureTokenFetcher
+import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.VarselReader
 import no.nav.tms.token.support.authentication.installer.mock.installMockedAuthenticators
 import no.nav.tms.token.support.tokenx.validation.mock.SecurityLevel
 
-fun mockApi(
+fun TestApplicationBuilder.mockApi(
     authConfig: Application.() -> Unit = mockAuthBuilder(),
     httpClient: HttpClient = mockk(relaxed = true),
     azureTokenFetcher: AzureTokenFetcher
-): Application.() -> Unit {
-    return fun Application.() {
+) {
+    return application {
         api(
             authConfig = authConfig,
             httpClient = httpClient,
@@ -57,8 +59,31 @@ fun mockClient(mockContent: String) = HttpClient(
     }
 
 ) {
-    install(JsonFeature) {
-        serializer = KotlinxSerializer()
+    install(ContentNegotiation) {
+        json(jsonConfig())
+    }
+    install(HttpTimeout)
+}
+
+fun mockClientWithEndpointValidation(endpointValidation: String, mockContent: String) = HttpClient(
+    MockEngine { request ->
+        if (request.url.toString().contains(endpointValidation)) {
+            respond(
+                content = mockContent,
+                status = HttpStatusCode.OK,
+                headersOf(HttpHeaders.ContentType, "application/json")
+            )
+        } else {
+            respond(
+                content = "ukjent url",
+                status = HttpStatusCode.NotFound,
+            )
+        }
+    }
+
+) {
+    install(ContentNegotiation) {
+        json(jsonConfig())
     }
     install(HttpTimeout)
 }
