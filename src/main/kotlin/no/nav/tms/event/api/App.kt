@@ -5,7 +5,6 @@ import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStopping
 import io.ktor.server.application.install
-import io.ktor.server.auth.authenticate
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.metrics.micrometer.MicrometerMetrics
 import io.ktor.server.netty.Netty
@@ -42,7 +41,7 @@ fun main() {
 
     embeddedServer(Netty, port = 8080) {
         api(
-            authConfig = authConfigBuilder(),
+            // authConfig = authConfigBuilder(),
             httpClient = httpClient,
             varselReader = varselReader
         )
@@ -52,12 +51,12 @@ fun main() {
 fun Application.api(
     varselReader: VarselReader,
     httpClient: HttpClient,
-    authConfig: Application.() -> Unit
+    //  authConfig: Application.() -> Unit = {}
 ) {
     val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
 
     install(DefaultHeaders)
-    authConfig()
+    // authConfig()
     install(ContentNegotiation) {
         json(jsonConfig())
     }
@@ -68,11 +67,11 @@ fun Application.api(
     routing {
         route("/tms-event-api") {
             healthApi(prometheusMeterRegistry)
-            authenticate {
-                oppgaveApi(varselReader)
-                beskjedApi(varselReader)
-                innboksApi(varselReader)
-            }
+            //      authenticate {
+            oppgaveApi(varselReader)
+            beskjedApi(varselReader)
+            innboksApi(varselReader)
+            //       }
         }
     }
 

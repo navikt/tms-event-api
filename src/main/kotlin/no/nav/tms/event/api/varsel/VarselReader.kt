@@ -19,7 +19,7 @@ class VarselReader(
         varselPath: String
     ): List<VarselDTO> {
         val completePathToEndpoint = URL("$eventHandlerBaseURL/$varselPath")
-        log.debug("Forsøker å hente  $varselPath")
+        log.debug("Forsøker å hente $varselPath fra $eventHandlerBaseURL")
         val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
         log.debug("hentet token")
         return retryOnConnectionLost {
