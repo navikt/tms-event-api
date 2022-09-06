@@ -9,6 +9,7 @@ import io.ktor.client.plugins.timeout
 import io.ktor.client.request.header
 import io.ktor.client.request.request
 import io.ktor.client.request.url
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpMethod
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -42,6 +43,8 @@ suspend inline fun HttpClient.getWithAzureAndFnr(url: URL, accessToken: String, 
                 connectTimeoutMillis = 10000
                 requestTimeoutMillis = 40000
             }
+        }.also {
+            log.info(it.bodyAsText())
         }.body()
     }
 
