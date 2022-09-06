@@ -49,7 +49,7 @@ class ApiTest {
                 azureTokenFetcher = tokenFetchMock
             )
         ) {
-            allRoutes(this.application.feature(Routing)).size shouldBeEqualTo 13
+            allRoutes(this.application.feature(Routing)).size shouldBeEqualTo 14
         }
     }
 

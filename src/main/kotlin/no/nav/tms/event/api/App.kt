@@ -54,18 +54,20 @@ fun Application.api(
     httpClient: HttpClient,
     authConfig: Application.() -> Unit
 ) {
+    val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+
     install(DefaultHeaders)
     authConfig()
     install(ContentNegotiation) {
         json(jsonConfig())
     }
     install(MicrometerMetrics) {
-        registry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+        registry = prometheusMeterRegistry
     }
 
     routing {
         route("/tms-event-api") {
-            healthApi()
+            healthApi(prometheusMeterRegistry)
             authenticate {
                 oppgaveApi(varselReader)
                 beskjedApi(varselReader)
