@@ -25,6 +25,7 @@ import no.nav.tms.event.api.varsel.beskjedApi
 import no.nav.tms.event.api.varsel.innboksApi
 import no.nav.tms.event.api.varsel.oppgaveApi
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
+import no.nav.tms.token.support.azure.validation.installAzureAuth
 
 fun main() {
     val eventHandlerUrl: String = StringEnvVar.getEnvVar("EVENT_HANDLER_URL")
@@ -85,7 +86,7 @@ private fun Application.configureShutdownHook(httpClient: HttpClient) {
 }
 
 private fun authConfigBuilder(): Application.() -> Unit = {
-   /* installAzureAuth {
+    installAzureAuth {
         setAsDefault = true
-    }*/
+    }
 }
