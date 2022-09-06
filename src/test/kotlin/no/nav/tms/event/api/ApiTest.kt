@@ -2,14 +2,16 @@ package no.nav.tms.event.api
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.ktor.application.feature
-import io.ktor.http.HttpMethod
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.url
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
-import io.ktor.routing.Route
-import io.ktor.routing.Routing
-import io.ktor.server.testing.TestApplicationEngine
-import io.ktor.server.testing.handleRequest
-import io.ktor.server.testing.withTestApplication
+import io.ktor.server.application.plugin
+import io.ktor.server.routing.Route
+import io.ktor.server.routing.Routing
+import io.ktor.server.testing.ApplicationTestBuilder
+import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.tms.event.api.config.AzureTokenFetcher
@@ -43,34 +45,35 @@ class ApiTest {
 
     @Test
     fun `setter opp api ruter`() {
-        withTestApplication(
+        testApplication {
             mockApi(
                 httpClient = mockClient(""),
                 azureTokenFetcher = tokenFetchMock
             )
-        ) {
-            allRoutes(this.application.feature(Routing)).size shouldBeEqualTo 13
+            this.application {
+                allRoutes(plugin(Routing)).size shouldBeEqualTo 13
+            }
         }
     }
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `bad request for ugyldig fødselsnummer i header`(varselType: String) {
-        withTestApplication(
+        testApplication {
             mockApi(
                 httpClient = mockClient(""),
                 azureTokenFetcher = tokenFetchMock
             )
-        ) {
-            handleRequest(HttpMethod.Get, "/tms-event-api/$varselType/aktive").also {
-                it.response.status() shouldBeEqualTo HttpStatusCode.BadRequest
-                it.response.content shouldBeEqualTo "Requesten mangler header-en 'fodselsnummer'"
+            client.get("/tms-event-api/$varselType/aktive").also {
+                it.status shouldBeEqualTo HttpStatusCode.BadRequest
+                it.bodyAsText() shouldBeEqualTo "Requesten mangler header-en 'fodselsnummer'"
             }
-            handleRequest(HttpMethod.Get, "/tms-event-api/$varselType/inaktive") {
-                addHeader("fodselsnummer", "1234")
+            client.get {
+                url("/tms-event-api/$varselType/inaktive")
+                header("fodselsnummer", "1234")
             }.also {
-                it.response.status() shouldBeEqualTo HttpStatusCode.BadRequest
-                it.response.content shouldBeEqualTo "Header-en 'fodselsnummer' inneholder ikke et gyldig fødselsnummer."
+                it.status shouldBeEqualTo HttpStatusCode.BadRequest
+                it.bodyAsText() shouldBeEqualTo "Header-en 'fodselsnummer' inneholder ikke et gyldig fødselsnummer."
             }
         }
     }
@@ -88,12 +91,11 @@ class ApiTest {
             aktiveMockresponse
         )
 
-        withTestApplication(
+        testApplication {
             mockApi(
                 httpClient = mockClient,
                 azureTokenFetcher = tokenFetchMock
             )
-        ) {
             assertVarselApiCall("/tms-event-api/$type/aktive", dummyFnr, aktiveExpectedResult)
         }
     }
@@ -111,12 +113,11 @@ class ApiTest {
             inaktivMockresponse,
         )
 
-        withTestApplication(
+        testApplication {
             mockApi(
                 httpClient = mockClient,
                 azureTokenFetcher = tokenFetchMock
             )
-        ) {
             assertVarselApiCall("/tms-event-api/$type/inaktive", dummyFnr, inaktiveExpectedResult)
         }
     }
@@ -134,23 +135,27 @@ class ApiTest {
             alleMockresponse
         )
 
-        withTestApplication(
+        testApplication {
             mockApi(
                 httpClient = mockClient,
                 azureTokenFetcher = tokenFetchMock
             )
-        ) {
             assertVarselApiCall("/tms-event-api/$type/all", dummyFnr, alleExpectedResult)
         }
     }
 }
 
-private fun TestApplicationEngine.assertVarselApiCall(endpoint: String, fnr: String, expectedResult: List<VarselDTO>) {
-    handleRequest(HttpMethod.Get, endpoint) {
-        addHeader("fodselsnummer", fnr)
+private suspend fun ApplicationTestBuilder.assertVarselApiCall(
+    endpoint: String,
+    fnr: String,
+    expectedResult: List<VarselDTO>
+) {
+    client.get {
+        url(endpoint)
+        header("fodselsnummer", fnr)
     }.also {
-        it.response.status() shouldBeEqualTo HttpStatusCode.OK
-        assertContent(it.response.content, expectedResult)
+        it.status shouldBeEqualTo HttpStatusCode.OK
+        assertContent(it.bodyAsText(), expectedResult)
     }
 }
 
