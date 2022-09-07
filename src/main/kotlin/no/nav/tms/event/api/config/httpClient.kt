@@ -2,7 +2,7 @@ package no.nav.tms.event.api.config
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.cio.CIO
+import io.ktor.client.engine.apache.Apache
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.timeout
@@ -14,7 +14,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.charset
-import io.ktor.server.application.Application
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.tms.event.api.varsel.Varsel
@@ -26,7 +25,7 @@ import java.net.URL
 object HttpClientBuilder {
 
     fun build(): HttpClient {
-        return HttpClient(CIO) {
+        return HttpClient(Apache) {
             install(ContentNegotiation) {
                 jsonConfig()
             }
