@@ -42,6 +42,7 @@ dependencies {
     implementation(Ktor2.Server.contentNegotiation)
     implementation(Ktor2.Client.core)
     implementation(Ktor2.Client.apache)
+    implementation("io.ktor:ktor-client-cio:2.1.0")
     implementation(Ktor2.Client.contentNegotiation)
     implementation(Ktor2.TmsTokenSupport.tokenXValidation)
     implementation(Ktor2.TmsTokenSupport.authenticationInstaller)
