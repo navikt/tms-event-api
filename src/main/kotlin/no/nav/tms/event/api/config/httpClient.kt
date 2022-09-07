@@ -1,7 +1,6 @@
 package no.nav.tms.event.api.config
 
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -13,9 +12,10 @@ import io.ktor.client.request.url
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
-import io.ktor.http.charset
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import no.nav.tms.event.api.varsel.Varsel
 import no.nav.tms.token.support.azure.validation.AzureHeader
 import org.apache.http.ConnectionClosedException
@@ -47,12 +47,9 @@ suspend inline fun HttpClient.getWithAzureAndFnr(url: URL, accessToken: String, 
                 connectTimeoutMillis = 10000
                 requestTimeoutMillis = 40000
             }
-        }.also {
-            log.info(it.version.name)
-            log.info(it.headers.toString())
-            log.info("charset: ${it.charset()?.name()}")
-            log.info(it.bodyAsText())
-        }.body()
+        }.let {
+            Json.decodeFromString(it.bodyAsText())
+        }
     }
 
 inline fun <reified T> retryOnConnectionLost(retries: Int = 3, outgoingCall: () -> T): T {
