@@ -13,6 +13,7 @@ import io.ktor.client.request.url
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
+import io.ktor.http.charset
 import io.ktor.server.application.Application
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -48,6 +49,9 @@ suspend inline fun HttpClient.getWithAzureAndFnr(url: URL, accessToken: String, 
                 requestTimeoutMillis = 40000
             }
         }.also {
+            log.info(it.version.name)
+            log.info(it.headers.toString())
+            log.info("charset: ${it.charset()?.name()}")
             log.info(it.bodyAsText())
         }.body()
     }
