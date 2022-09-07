@@ -12,16 +12,16 @@ class VarselReader(
     private val client: HttpClient,
     private val eventHandlerBaseURL: String
 ) {
-    val log = LoggerFactory.getLogger(VarselReader::class.java)
-
     suspend fun fetchVarsel(
         fnr: String,
         varselPath: String
     ): List<VarselDTO> {
         val completePathToEndpoint = URL("$eventHandlerBaseURL/$varselPath")
+<<<<<<< Updated upstream
         log.debug("Forsøker å hente  $varselPath")
+=======
+>>>>>>> Stashed changes
         val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
-        log.debug("hentet token")
         return retryOnConnectionLost {
             client.getWithAzureAndFnr(completePathToEndpoint, azureToken, fnr)
         }.map { varsel -> varsel.toDTO() }
