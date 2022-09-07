@@ -25,7 +25,7 @@ fun TestApplicationBuilder.mockApi(
 ) {
     return application {
         api(
-            // authConfig = authConfig,
+            authConfig = authConfig,
             httpClient = httpClient,
             varselReader = VarselReader(
                 azureTokenFetcher = azureTokenFetcher,
