@@ -61,7 +61,7 @@ dependencies {
     testImplementation(Kluent.kluent)
     testImplementation(Mockk.mockk)
     testImplementation(Jjwt.api)
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.9.0")
+    testImplementation(Junit.params)
 
     testRuntimeOnly(Bouncycastle.bcprovJdk15on)
     testRuntimeOnly(Jjwt.impl)
