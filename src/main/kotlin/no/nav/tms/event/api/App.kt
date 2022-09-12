@@ -54,6 +54,8 @@ fun Application.api(
     httpClient: HttpClient,
     authConfig: Application.() -> Unit
 ) {
+    val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+
     install(DefaultHeaders)
     authConfig()
     install(ContentNegotiation) {
@@ -65,7 +67,7 @@ fun Application.api(
 
     routing {
         route("/tms-event-api") {
-            healthApi()
+            healthApi(prometheusMeterRegistry)
             authenticate {
                 oppgaveApi(varselReader)
                 beskjedApi(varselReader)
