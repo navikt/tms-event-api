@@ -19,7 +19,6 @@ import no.nav.tms.event.api.varsel.VarselDTO
 import org.amshove.kluent.internal.assertFalse
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
-import org.intellij.lang.annotations.Language
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
@@ -84,10 +83,10 @@ class ApiTest {
     fun `Henter aktive varsler fra eventhandler og gjør de om til DTO`(type: String) {
         val endpoint = "/tms-event-api/$type/aktive"
         val (aktiveMockresponse, aktiveExpectedResult) = mockContent(
-            ZonedDateTime.now().minusDays(1),
-            ZonedDateTime.now(),
-            ZonedDateTime.now().plusDays(10),
-            5
+            førstBehandlet = ZonedDateTime.now().minusDays(1),
+            sistOppdatert = ZonedDateTime.now(),
+            synligFremTil = ZonedDateTime.now().plusDays(10),
+            size = 5
         )
         val mockClient = mockClientWithEndpointValidation(
             "/aktiv",
@@ -107,10 +106,10 @@ class ApiTest {
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter inaktive varsler fra eventhandler og gjør de om til DTO`(type: String) {
         val (inaktivMockresponse, inaktiveExpectedResult) = mockContent(
-            ZonedDateTime.now().minusDays(1),
-            ZonedDateTime.now(),
-            null,
-            2
+            førstBehandlet = ZonedDateTime.now().minusDays(1),
+            sistOppdatert = ZonedDateTime.now(),
+            synligFremTil = null,
+            size = 2
         )
         val mockClient = mockClientWithEndpointValidation(
             "inaktive",
@@ -130,10 +129,10 @@ class ApiTest {
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter alle varsler fra eventhandler og gjør de om til DTO`(type: String) {
         val (alleMockresponse, alleExpectedResult) = mockContent(
-            ZonedDateTime.now().minusDays(1),
-            ZonedDateTime.now(),
-            ZonedDateTime.now().plusDays(3),
-            6
+            førstBehandlet = ZonedDateTime.now().minusDays(1),
+            sistOppdatert = ZonedDateTime.now(),
+            synligFremTil = ZonedDateTime.now().plusDays(3),
+            size = 6
         )
         val mockClient = mockClientWithEndpointValidation(
             "all",
@@ -146,35 +145,6 @@ class ApiTest {
                 azureTokenFetcher = tokenFetchMock
             )
             assertVarselApiCall("/tms-event-api/$type/all", dummyFnr, alleExpectedResult)
-        }
-    }
-
-    @Test
-    fun `debug test`() {
-        testApplication {
-            mockApi(
-                httpClient = mockClient(debugContent),
-                azureTokenFetcher = tokenFetchMock
-            )
-            client.get {
-                url("/tms-event-api/oppgave/all")
-                header("fodselsnummer", dummyFnr)
-            }.also {
-                it.status shouldBeEqualTo HttpStatusCode.OK
-            }
-        }
-
-        testApplication {
-            mockApi(
-                httpClient = mockClient("[]"),
-                azureTokenFetcher = tokenFetchMock
-            )
-            client.get {
-                url("/tms-event-api/beskjed/aktive")
-                header("fodselsnummer", dummyFnr)
-            }.also {
-                it.status shouldBeEqualTo HttpStatusCode.OK
-            }
         }
     }
 }
@@ -265,44 +235,9 @@ private fun mockContent(
             link = "",
             aktiv = false,
             synligFremTil = synligFremTil?.withFixedOffsetZone()
-        ).createListFromObject(size)
+        ) * size
     )
 }
-
-@Language("JSON")
-private val debugContent =
-    """
-        [
-          {
-            "produsent": "tms-event-test-producer",
-            "forstBehandlet": "2022-09-02T09:59:23.420+02:00[Europe/Oslo]",
-            "fodselsnummer": "***********",
-            "eventId": "242b82ad-e236-4788-a47d-2679f894d6e7",
-            "grupperingsId": "asjkfljsfl",
-            "tekst": "sajklfjla",
-            "link": "https://www.dev.nav.no/person/dittnav/hendelser",
-            "sikkerhetsnivaa": 4,
-            "sistOppdatert": "2022-09-02T09:59:23.435856+02:00[Europe/Oslo]",
-            "aktiv": true,
-            "eksternVarslingSendt": false,
-            "eksternVarslingKanaler": []
-          },
-          {
-            "produsent": "tms-event-test-producer",
-            "forstBehandlet": "2022-09-02T09:59:06.570+02:00[Europe/Oslo]",
-            "fodselsnummer": "***********",
-            "eventId": "c60b1131-62dc-4e92-b09a-2fbc565eabff",
-            "grupperingsId": "N/A",
-            "tekst": "Tadda!",
-            "link": "https://www.dev.nav.no/person/dittnav/hendelser",
-            "sikkerhetsnivaa": 4,
-            "sistOppdatert": "2022-09-02T09:59:06.590313+02:00[Europe/Oslo]",
-            "aktiv": true,
-            "eksternVarslingSendt": false,
-            "eksternVarslingKanaler": []
-          }
-        ]
-    """.trimIndent()
 
 private fun String.jsonArray(size: Int): String =
     (1..size).joinToString(separator = ",", prefix = "[", postfix = "]") { this }
