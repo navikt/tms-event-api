@@ -10,14 +10,12 @@ class VarselReader(
     private val client: HttpClient,
     private val eventHandlerBaseURL: String
 ) {
-
     suspend fun fetchVarsel(
         fnr: String,
         varselPath: String
     ): List<Varsel> {
         val completePathToEndpoint = URL("$eventHandlerBaseURL/$varselPath")
         val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
-
         return client.getWithAzureAndFnr(completePathToEndpoint, azureToken, fnr)
     }
 }
