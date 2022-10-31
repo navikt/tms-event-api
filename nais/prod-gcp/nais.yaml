@@ -40,6 +40,9 @@ spec:
         - application: salesforce
           namespace: teamcrm
           cluster: prod-external
+        - application: modiapersonoversikt-api
+          namespace: personoversikt
+          cluster: prod-fss
     outbound:
       rules:
         - application: dittnav-event-handler
