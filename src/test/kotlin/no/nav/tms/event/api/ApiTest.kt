@@ -7,20 +7,16 @@ import io.ktor.client.request.header
 import io.ktor.client.request.url
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.plugin
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.Routing
 import io.ktor.server.testing.ApplicationTestBuilder
 import io.ktor.server.testing.testApplication
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.tms.event.api.config.AzureTokenFetcher
-import no.nav.tms.event.api.varsel.VarselDTO
+import no.nav.tms.event.api.varsel.Varsel
 import org.amshove.kluent.internal.assertFalse
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -43,22 +39,9 @@ class ApiTest {
         } returns azureToken
     }
 
-    @Test
-    fun `setter opp api ruter`() {
-        testApplication {
-            mockApi(
-                httpClient = mockClient(""),
-                azureTokenFetcher = tokenFetchMock
-            )
-            this.application {
-                allRoutes(plugin(Routing)).size shouldBeEqualTo 14
-            }
-        }
-    }
-
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
-    fun `Henter aktive varsler fra eventhandler og gjør de om til DTO`(type: String) {
+    fun `Henter aktive varsler fra eventhandler`(type: String) {
         val endpoint = "/tms-event-api/$type/aktive"
         val (aktiveMockresponse, aktiveExpectedResult) = mockContent(
             førstBehandlet = ZonedDateTime.now().minusDays(1),
@@ -149,7 +132,7 @@ class ApiTest {
 private suspend fun ApplicationTestBuilder.assertVarselApiCall(
     endpoint: String,
     fnr: String,
-    expectedResult: List<VarselDTO>
+    expectedResult: List<Varsel>
 ) {
     client.get {
         url(endpoint)
@@ -160,7 +143,7 @@ private suspend fun ApplicationTestBuilder.assertVarselApiCall(
     }
 }
 
-private fun assertContent(content: String?, expectedResult: List<VarselDTO>) {
+private fun assertContent(content: String?, expectedResult: List<Varsel>) {
     val jsonObjects = objectmapper.readTree(content)
     jsonObjects.size() shouldBeEqualTo expectedResult.size
     val expectedObject = expectedResult.first()
@@ -189,17 +172,12 @@ private fun assertZonedDateTime(jsonNode: JsonNode?, expectedDate: ZonedDateTime
     }
 }
 
-private fun allRoutes(root: Route): List<Route> {
-    return listOf(root) + root.children.flatMap { allRoutes(it) }
-        .filter { it.toString().contains("method") && it.toString() != "/" }
-}
-
 private fun mockContent(
     førstBehandlet: ZonedDateTime,
     sistOppdatert: ZonedDateTime,
     synligFremTil: ZonedDateTime? = null,
     size: Int
-): Pair<String, List<VarselDTO>> {
+): Pair<String, List<Varsel>> {
     val synligFremTilString = synligFremTil?.let {
         """"${synligFremTil.withFixedOffsetZone()}""""
     } ?: "null"
@@ -218,9 +196,9 @@ private fun mockContent(
         "link": "",
         "aktiv": false
         "eksternVarslingSendt": true
-        "eksternVarslingKanaler":[]
+        "eksternVarslingKanaler":["SMS", "EPOST"]
       }""".jsonArray(size),
-        VarselDTO(
+        Varsel(
             fodselsnummer = "123",
             grupperingsId = "",
             eventId = "",
@@ -231,7 +209,9 @@ private fun mockContent(
             tekst = "Tadda vi tester",
             link = "",
             aktiv = false,
-            synligFremTil = synligFremTil?.withFixedOffsetZone()
+            synligFremTil = synligFremTil?.withFixedOffsetZone(),
+            eksternVarslingSendt = true,
+            eksternVarslingKanaler = listOf("SMS", "EPOST")
         ) * size
     )
 }

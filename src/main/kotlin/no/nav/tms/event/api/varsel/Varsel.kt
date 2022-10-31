@@ -22,33 +22,4 @@ data class Varsel(
     val aktiv: Boolean,
     val eksternVarslingSendt: Boolean,
     val eksternVarslingKanaler: List<String>
-) {
-    internal fun toDTO() = VarselDTO(
-        forstBehandlet = forstBehandlet,
-        eventId = eventId,
-        fodselsnummer = fodselsnummer,
-        tekst = tekst,
-        link = link,
-        produsent = produsent,
-        sistOppdatert = sistOppdatert,
-        sikkerhetsnivaa = sikkerhetsnivaa,
-        aktiv = aktiv,
-        grupperingsId = grupperingsId,
-        synligFremTil = synligFremTil
-    )
-}
-
-@Serializable
-data class VarselDTO(
-    val fodselsnummer: String,
-    val grupperingsId: String,
-    val eventId: String,
-    val forstBehandlet: ZonedDateTime,
-    val produsent: String,
-    val sikkerhetsnivaa: Int,
-    val sistOppdatert: ZonedDateTime,
-    val synligFremTil: ZonedDateTime? = null,
-    val tekst: String,
-    val link: String,
-    val aktiv: Boolean
 )

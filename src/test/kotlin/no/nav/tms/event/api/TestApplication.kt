@@ -14,7 +14,7 @@ import io.ktor.server.testing.TestApplicationBuilder
 import io.mockk.mockk
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.jsonConfig
-import no.nav.tms.event.api.varsel.VarselDTO
+import no.nav.tms.event.api.varsel.Varsel
 import no.nav.tms.event.api.varsel.VarselReader
 import no.nav.tms.token.support.authentication.installer.mock.installMockedAuthenticators
 import no.nav.tms.token.support.tokenx.validation.mock.SecurityLevel
@@ -89,7 +89,7 @@ fun mockClientWithEndpointValidation(endpointValidation: String, mockContent: St
     install(HttpTimeout)
 }
 
-internal operator fun VarselDTO.times(size: Int): List<VarselDTO> = mutableListOf<VarselDTO>().also { list ->
+internal operator fun Varsel.times(size: Int): List<Varsel> = mutableListOf<Varsel>().also { list ->
     for (i in 1..size) {
         list.add(this)
     }

@@ -10,6 +10,7 @@ import no.nav.tms.event.api.config.respondWithError
 import org.slf4j.LoggerFactory
 
 fun Route.beskjedApi(varselReader: VarselReader) {
+
     val aktiveVarslerPath = "fetch/modia/beskjed/aktive"
     val inaktiveVarslerPath = "fetch/modia/beskjed/inaktive"
     val alleVarslerPath = "fetch/modia/beskjed/all"
