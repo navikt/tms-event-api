@@ -194,8 +194,9 @@ private fun mockContent(
         "synligFremTil": $synligFremTilString
         "tekst": "Tadda vi tester",
         "link": "",
-        "aktiv": false
-        "eksternVarslingSendt": true
+        "appnavn": "appappapp",
+        "aktiv": false,
+        "eksternVarslingSendt": true,
         "eksternVarslingKanaler":["SMS", "EPOST"]
       }""".jsonArray(size),
         Varsel(
