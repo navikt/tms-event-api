@@ -13,6 +13,7 @@ plugins {
 
     // Ktlint
     id("org.jlleitschuh.gradle.ktlint").version("10.3.0")
+    id("com.faire.gradle.analyze") version "1.0.9"
 }
 
 tasks.withType<KotlinCompile> {
@@ -21,19 +22,14 @@ tasks.withType<KotlinCompile> {
 
 repositories {
     mavenCentral()
-    maven("https://packages.confluent.io/maven")
     maven("https://jitpack.io")
     mavenLocal()
 }
-val ktorVersion by extra("2.1.0")
-val tmsKtorSupportversion by extra("2.0.0")
-val tmsGroupId by extra("com.github.navikt.tms-ktor-token-support")
 
 dependencies {
-    implementation(DittNAV.Common.logging)
-    implementation(DittNAV.Common.utils)
+    implementation(DittNAVCommonLib.utils)
+    implementation(KotlinLogging.logging)
     implementation(Kotlinx.coroutines)
-    implementation(Kotlinx.htmlJvm)
     implementation(Ktor2.Server.core)
     implementation(Ktor2.Server.netty)
     implementation(Ktor2.Server.metricsMicrometer)
@@ -43,24 +39,22 @@ dependencies {
     implementation(Ktor2.Client.core)
     implementation(Ktor2.Client.apache)
     implementation(Ktor2.Client.contentNegotiation)
-    implementation(Ktor2.TmsTokenSupport.tokenXValidation)
-    implementation(Ktor2.TmsTokenSupport.authenticationInstaller)
-    implementation(Ktor2.TmsTokenSupport.azureExchange)
-    implementation(Ktor2.TmsTokenSupport.azureValidation)
-    implementation(Ktor2.kotlinX)
+    implementation(TmsKtorTokenSupport.azureExchange)
+    implementation(TmsKtorTokenSupport.azureValidation)
+    implementation(Ktor2.Serialization.kotlinX)
 
     implementation(Micrometer.registryPrometheus)
     implementation(Logback.classic)
     implementation(Logstash.logbackEncoder)
 
     testImplementation(Junit.api)
+    testImplementation(Ktor2.Serialization.jackson)
     testImplementation(Ktor2.Test.clientMock)
     testImplementation(Ktor2.Test.serverTestHost)
-    testImplementation(Ktor2.TmsTokenSupport.authenticationInstallerMock)
-    testImplementation(Ktor2.TmsTokenSupport.tokenXValidationMock)
+    testImplementation(TmsKtorTokenSupport.authenticationInstallerMock)
+    testImplementation(TmsKtorTokenSupport.tokenXValidationMock)
     testImplementation(Kluent.kluent)
     testImplementation(Mockk.mockk)
-    testImplementation(Jjwt.api)
     testImplementation(Junit.params)
 
     testRuntimeOnly(Bouncycastle.bcprovJdk15on)
@@ -79,17 +73,6 @@ tasks {
             exceptionFormat = TestExceptionFormat.FULL
             events("passed", "skipped", "failed")
         }
-    }
-
-    register("runServer", JavaExec::class) {
-
-        environment("CORS_ALLOWED_ORIGINS", "localhost:9002")
-
-        environment("NAIS_CLUSTER_NAME", "dev-gcp")
-        environment("NAIS_NAMESPACE", "personbruker")
-
-        main = application.mainClass.get()
-        classpath = sourceSets["main"].runtimeClasspath
     }
 }
 
