@@ -25,6 +25,7 @@ spec:
   azure:
     application:
       enabled: true
+      allowAllUsers: true
   ingresses:
     - "https://tms-event-api.ekstern.dev.nav.no/tms-event-api"
   resources:
