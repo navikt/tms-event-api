@@ -1,20 +1,22 @@
 package no.nav.tms.event.api
 
 import io.ktor.client.HttpClient
-import io.ktor.serialization.kotlinx.json.json
-import io.ktor.server.application.Application
-import io.ktor.server.application.ApplicationStopping
-import io.ktor.server.application.install
-import io.ktor.server.auth.authenticate
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.metrics.micrometer.MicrometerMetrics
-import io.ktor.server.netty.Netty
-import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.plugins.defaultheaders.DefaultHeaders
-import io.ktor.server.routing.route
-import io.ktor.server.routing.routing
+import io.ktor.http.HttpStatusCode
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.engine.*
+import io.ktor.server.metrics.micrometer.*
+import io.ktor.server.netty.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.defaultheaders.*
+import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
+import mu.KotlinLogging
 import no.nav.personbruker.dittnav.common.util.config.StringEnvVar
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.HttpClientBuilder
@@ -37,14 +39,14 @@ fun main() {
     val varselReader = VarselReader(
         azureTokenFetcher = azureTokenFetcher,
         client = httpClient,
-        eventHandlerBaseURL = eventHandlerUrl
+        eventHandlerBaseURL = eventHandlerUrl,
     )
 
     embeddedServer(Netty, port = 8080) {
         api(
             authConfig = authConfigBuilder(),
             httpClient = httpClient,
-            varselReader = varselReader
+            varselReader = varselReader,
         )
     }.start(wait = true)
 }
@@ -52,9 +54,11 @@ fun main() {
 fun Application.api(
     varselReader: VarselReader,
     httpClient: HttpClient,
-    authConfig: Application.() -> Unit
+    authConfig: Application.() -> Unit,
 ) {
     val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
+    val log = KotlinLogging.logger {}
+    val securelog = KotlinLogging.logger("secureLog")
 
     install(DefaultHeaders)
     authConfig()
@@ -63,6 +67,14 @@ fun Application.api(
     }
     install(MicrometerMetrics) {
         registry = prometheusMeterRegistry
+    }
+
+    install(StatusPages) {
+        exception<Throwable> { call, cause ->
+            log.error { "Kall til ${call.request.uri} feilet: ${cause.message}" }
+            securelog.error { "Kall til ${call.request.uri} feilet: \n ${cause.stackTrace}" }
+            call.respond(HttpStatusCode.InternalServerError)
+        }
     }
 
     routing {

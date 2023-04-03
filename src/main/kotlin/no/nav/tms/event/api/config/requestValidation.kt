@@ -6,9 +6,9 @@ import io.ktor.server.application.call
 import io.ktor.server.response.respond
 import io.ktor.util.pipeline.PipelineContext
 import mu.KotlinLogging
-import org.slf4j.Logger
 
 val log = KotlinLogging.logger {}
+val securelog = KotlinLogging.logger("secureLog")
 
 suspend inline fun PipelineContext<Unit, ApplicationCall>.doIfValidRequest(handler: (fnr: String) -> Unit) {
     val headerName = "fodselsnummer"
@@ -26,8 +26,3 @@ suspend fun PipelineContext<Unit, ApplicationCall>.respondWithBadRequest(msg: St
 }
 
 fun isFodselsnummerOfValidLength(fnrHeader: String) = fnrHeader.isNotEmpty() && fnrHeader.length == 11
-
-suspend fun respondWithError(call: ApplicationCall, log: Logger, exception: Exception) {
-    call.respond(HttpStatusCode.InternalServerError)
-    log.error("Ukjent feil oppstod ved henting av eventer fra cache. Returnerer feilkode.", exception)
-}

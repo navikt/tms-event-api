@@ -21,5 +21,5 @@ data class Varsel(
     val link: String,
     val aktiv: Boolean,
     val eksternVarslingSendt: Boolean,
-    val eksternVarslingKanaler: List<String>
+    val eksternVarslingKanaler: List<String>,
 )

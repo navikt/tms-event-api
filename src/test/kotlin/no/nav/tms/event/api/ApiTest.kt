@@ -47,16 +47,16 @@ class ApiTest {
             førstBehandlet = ZonedDateTime.now().minusDays(1),
             sistOppdatert = ZonedDateTime.now(),
             synligFremTil = ZonedDateTime.now().plusDays(10),
-            size = 5
+            size = 5,
         )
 
         testApplication {
             mockApi(
                 httpClient = mockClientWithEndpointValidation(
                     "/aktiv",
-                    aktiveMockresponse
+                    aktiveMockresponse,
                 ),
-                azureTokenFetcher = tokenFetchMock
+                azureTokenFetcher = tokenFetchMock,
             )
             assertVarselApiCall(endpoint, dummyFnr, aktiveExpectedResult)
         }
@@ -69,16 +69,16 @@ class ApiTest {
             førstBehandlet = ZonedDateTime.now().minusDays(1),
             sistOppdatert = ZonedDateTime.now(),
             synligFremTil = null,
-            size = 2
+            size = 2,
         )
 
         testApplication {
             mockApi(
                 httpClient = mockClientWithEndpointValidation(
                     "inaktive",
-                    inaktivMockresponse
+                    inaktivMockresponse,
                 ),
-                azureTokenFetcher = tokenFetchMock
+                azureTokenFetcher = tokenFetchMock,
             )
             assertVarselApiCall("/tms-event-api/$type/inaktive", dummyFnr, inaktiveExpectedResult)
         }
@@ -91,16 +91,16 @@ class ApiTest {
             førstBehandlet = ZonedDateTime.now().minusDays(1),
             sistOppdatert = ZonedDateTime.now(),
             synligFremTil = ZonedDateTime.now().plusDays(3),
-            size = 6
+            size = 6,
         )
 
         testApplication {
             mockApi(
                 httpClient = mockClientWithEndpointValidation(
                     "all",
-                    alleMockresponse
+                    alleMockresponse,
                 ),
-                azureTokenFetcher = tokenFetchMock
+                azureTokenFetcher = tokenFetchMock,
             )
             assertVarselApiCall("/tms-event-api/$type/all", dummyFnr, alleExpectedResult)
         }
@@ -112,7 +112,7 @@ class ApiTest {
         testApplication {
             mockApi(
                 httpClient = mockClient(""),
-                azureTokenFetcher = tokenFetchMock
+                azureTokenFetcher = tokenFetchMock,
             )
             client.get("/tms-event-api/$varselType/aktive").also {
                 it.status shouldBeEqualTo HttpStatusCode.BadRequest
@@ -132,7 +132,7 @@ class ApiTest {
 private suspend fun ApplicationTestBuilder.assertVarselApiCall(
     endpoint: String,
     fnr: String,
-    expectedResult: List<Varsel>
+    expectedResult: List<Varsel>,
 ) {
     client.get {
         url(endpoint)
@@ -176,7 +176,7 @@ private fun mockContent(
     førstBehandlet: ZonedDateTime,
     sistOppdatert: ZonedDateTime,
     synligFremTil: ZonedDateTime? = null,
-    size: Int
+    size: Int,
 ): Pair<String, List<Varsel>> {
     val synligFremTilString = synligFremTil?.let {
         """"${synligFremTil.withFixedOffsetZone()}""""
@@ -212,8 +212,8 @@ private fun mockContent(
             aktiv = false,
             synligFremTil = synligFremTil?.withFixedOffsetZone(),
             eksternVarslingSendt = true,
-            eksternVarslingKanaler = listOf("SMS", "EPOST")
-        ) * size
+            eksternVarslingKanaler = listOf("SMS", "EPOST"),
+        ) * size,
     )
 }
 

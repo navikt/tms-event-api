@@ -1,16 +1,13 @@
 package no.nav.tms.event.api.varsel
 
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.call
-import io.ktor.server.response.respond
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.get
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import no.nav.tms.event.api.config.doIfValidRequest
-import no.nav.tms.event.api.config.respondWithError
 import org.slf4j.LoggerFactory
 
 fun Route.innboksApi(varselReader: VarselReader) {
-
     val aktiveVarslerPath = "fetch/modia/innboks/aktive"
     val inaktiveVarslerPath = "fetch/modia/innboks/inaktive"
     val alleVarslerPath = "fetch/modia/innboks/all"
@@ -19,31 +16,19 @@ fun Route.innboksApi(varselReader: VarselReader) {
 
     get("/innboks/aktive") {
         doIfValidRequest { fnr ->
-            try {
-                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, aktiveVarslerPath))
-            } catch (exception: Exception) {
-                respondWithError(call, log, exception)
-            }
+            call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, aktiveVarslerPath))
         }
     }
 
     get("/innboks/inaktive") {
         doIfValidRequest { fnr ->
-            try {
-                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, inaktiveVarslerPath))
-            } catch (exception: Exception) {
-                respondWithError(call, log, exception)
-            }
+            call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, inaktiveVarslerPath))
         }
     }
 
     get("/innboks/all") {
         doIfValidRequest { fnr ->
-            try {
-                call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, alleVarslerPath))
-            } catch (exception: Exception) {
-                respondWithError(call, log, exception)
-            }
+            call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, alleVarslerPath))
         }
     }
 }

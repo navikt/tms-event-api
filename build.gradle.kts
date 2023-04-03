@@ -10,10 +10,6 @@ plugins {
     id(Shadow.pluginId) version (Shadow.version)
     // Apply the application plugin to add support for building a CLI application.
     application
-
-    // Ktlint
-    id("org.jlleitschuh.gradle.ktlint").version("10.3.0")
-    id("com.faire.gradle.analyze") version "1.0.9"
 }
 
 tasks.withType<KotlinCompile> {
@@ -36,6 +32,7 @@ dependencies {
     implementation(Ktor2.Server.defaultHeaders)
     implementation(Ktor2.Server.auth)
     implementation(Ktor2.Server.contentNegotiation)
+    implementation(Ktor2.Server.statusPages)
     implementation(Ktor2.Client.core)
     implementation(Ktor2.Client.apache)
     implementation(Ktor2.Client.contentNegotiation)
