@@ -1,21 +1,20 @@
 package no.nav.tms.event.api.config
 
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
-import io.ktor.server.response.respond
-import io.ktor.util.pipeline.PipelineContext
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.util.pipeline.*
 import mu.KotlinLogging
 
 val log = KotlinLogging.logger {}
-val securelog = KotlinLogging.logger("secureLog")
 
 suspend inline fun PipelineContext<Unit, ApplicationCall>.doIfValidRequest(handler: (fnr: String) -> Unit) {
     val headerName = "fodselsnummer"
     val fnrHeader = call.request.headers[headerName]
     when {
-        fnrHeader == null -> respondWithBadRequest("Requesten mangler header-en '$headerName'")
-        !isFodselsnummerOfValidLength(fnrHeader) -> respondWithBadRequest("Header-en '$headerName' inneholder ikke et gyldig fødselsnummer.")
+        fnrHeader == null -> respondWithBadRequest("Request til ${call.request.uri} mangler header-en '$headerName'")
+        !isFodselsnummerOfValidLength(fnrHeader) -> respondWithBadRequest("'header $headerName' i request til ${call.request.uri}  inneholder ikke et gyldig fødselsnummer.")
         else -> handler.invoke(fnrHeader)
     }
 }

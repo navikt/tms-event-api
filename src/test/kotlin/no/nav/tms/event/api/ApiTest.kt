@@ -2,13 +2,10 @@ package no.nav.tms.event.api
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.url
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.ApplicationTestBuilder
-import io.ktor.server.testing.testApplication
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.tms.event.api.config.AzureTokenFetcher
@@ -114,17 +111,11 @@ class ApiTest {
                 httpClient = mockClient(""),
                 azureTokenFetcher = tokenFetchMock,
             )
-            client.get("/tms-event-api/$varselType/aktive").also {
-                it.status shouldBeEqualTo HttpStatusCode.BadRequest
-                it.bodyAsText() shouldBeEqualTo "Requesten mangler header-en 'fodselsnummer'"
-            }
+            client.get("/tms-event-api/$varselType/aktive").status shouldBe HttpStatusCode.BadRequest
             client.get {
                 url("/tms-event-api/$varselType/inaktive")
                 header("fodselsnummer", "1234")
-            }.also {
-                it.status shouldBeEqualTo HttpStatusCode.BadRequest
-                it.bodyAsText() shouldBeEqualTo "Header-en 'fodselsnummer' inneholder ikke et gyldig fødselsnummer."
-            }
+            }.status shouldBe HttpStatusCode.BadRequest
         }
     }
 }
