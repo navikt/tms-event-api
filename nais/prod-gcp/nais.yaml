@@ -6,8 +6,6 @@ metadata:
   labels:
     team: min-side
 spec:
-  envFrom:
-    - secret: tms-event-api-secrets
   image: {{version}}
   port: 8080
   liveness:
@@ -47,3 +45,9 @@ spec:
     outbound:
       rules:
         - application: dittnav-event-handler
+  env:
+    - name: EVENT_HANDLER_CLIENT_ID
+      value: prod-gcp.min-side.dittnav-event-handler
+    - name: EVENT_HANDLER_URL
+      value: http://dittnav-event-handler/dittnav-event-handler
+
