@@ -41,6 +41,9 @@ dependencies {
     implementation(Ktor2.Serialization.kotlinX)
 
     implementation(Micrometer.registryPrometheus)
+    implementation(Prometheus.common)
+    implementation(Prometheus.hotspot)
+    implementation(Prometheus.logback)
     implementation(Logback.classic)
     implementation(Logstash.logbackEncoder)
 

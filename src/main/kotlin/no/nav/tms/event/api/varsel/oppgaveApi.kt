@@ -5,14 +5,11 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.tms.event.api.config.doIfValidRequest
-import org.slf4j.LoggerFactory
 
 fun Route.oppgaveApi(varselReader: VarselReader) {
     val aktiveVarslerPath = "fetch/modia/oppgave/aktive"
     val inaktiveVarslerPath = "fetch/modia/oppgave/inaktive"
     val alleVarslerPath = "fetch/modia/oppgave/all"
-
-    val log = LoggerFactory.getLogger(VarselReader::class.java)
 
     get("/oppgave/aktive") {
         doIfValidRequest { fnr ->
