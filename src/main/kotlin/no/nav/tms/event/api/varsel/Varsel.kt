@@ -20,6 +20,27 @@ data class Varsel(
     val tekst: String,
     val link: String,
     val aktiv: Boolean,
-    val eksternVarslingSendt: Boolean,
-    val eksternVarslingKanaler: List<String>,
+    val eksternVarsling: EksternVarsling? = null,
+) {
+    val eksternVarslingSendt = eksternVarsling?.sendt ?: false
+    val eksternVarslingKanaler = eksternVarsling?.sendteKanaler ?: emptyList()
+}
+
+@Serializable
+data class EksternVarsling(
+    val sendt: Boolean,
+    val renotifikasjonSendt: Boolean,
+    val prefererteKanaler: List<String>,
+    val sendteKanaler: List<String>,
+    val historikk: List<EksternVarslingHistorikkEntry>,
+)
+
+@Serializable
+data class EksternVarslingHistorikkEntry(
+    val melding: String,
+    val status: String,
+    val distribusjonsId: Long? = null,
+    val kanal: String? = null,
+    val renotifikasjon: Boolean? = null,
+    val tidspunkt: ZonedDateTime,
 )
