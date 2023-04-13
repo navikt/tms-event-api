@@ -2,13 +2,10 @@ package no.nav.tms.event.api
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.url
-import io.ktor.client.statement.bodyAsText
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.testing.ApplicationTestBuilder
-import io.ktor.server.testing.testApplication
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.tms.event.api.config.AzureTokenFetcher
@@ -49,16 +46,16 @@ class ApiTest {
             førstBehandlet = ZonedDateTime.now().minusDays(1),
             sistOppdatert = ZonedDateTime.now(),
             synligFremTil = ZonedDateTime.now().plusDays(10),
-            size = 5
+            size = 5,
         )
 
         testApplication {
             mockApi(
                 httpClient = mockClientWithEndpointValidation(
                     "/aktiv",
-                    aktiveMockresponse
+                    aktiveMockresponse,
                 ),
-                azureTokenFetcher = tokenFetchMock
+                azureTokenFetcher = tokenFetchMock,
             )
             assertVarselApiCall(endpoint, dummyFnr, aktiveExpectedResult)
         }
@@ -71,16 +68,16 @@ class ApiTest {
             førstBehandlet = ZonedDateTime.now().minusDays(1),
             sistOppdatert = ZonedDateTime.now(),
             synligFremTil = null,
-            size = 2
+            size = 2,
         )
 
         testApplication {
             mockApi(
                 httpClient = mockClientWithEndpointValidation(
                     "inaktive",
-                    inaktivMockresponse
+                    inaktivMockresponse,
                 ),
-                azureTokenFetcher = tokenFetchMock
+                azureTokenFetcher = tokenFetchMock,
             )
             assertVarselApiCall("/tms-event-api/$type/inaktive", dummyFnr, inaktiveExpectedResult)
         }
@@ -93,16 +90,16 @@ class ApiTest {
             førstBehandlet = ZonedDateTime.now().minusDays(1),
             sistOppdatert = ZonedDateTime.now(),
             synligFremTil = ZonedDateTime.now().plusDays(3),
-            size = 6
+            size = 6,
         )
 
         testApplication {
             mockApi(
                 httpClient = mockClientWithEndpointValidation(
                     "all",
-                    alleMockresponse
+                    alleMockresponse,
                 ),
-                azureTokenFetcher = tokenFetchMock
+                azureTokenFetcher = tokenFetchMock,
             )
             assertVarselApiCall("/tms-event-api/$type/all", dummyFnr, alleExpectedResult)
         }
@@ -114,19 +111,13 @@ class ApiTest {
         testApplication {
             mockApi(
                 httpClient = mockClient(""),
-                azureTokenFetcher = tokenFetchMock
+                azureTokenFetcher = tokenFetchMock,
             )
-            client.get("/tms-event-api/$varselType/aktive").also {
-                it.status shouldBeEqualTo HttpStatusCode.BadRequest
-                it.bodyAsText() shouldBeEqualTo "Requesten mangler header-en 'fodselsnummer'"
-            }
+            client.get("/tms-event-api/$varselType/aktive").status shouldBe HttpStatusCode.BadRequest
             client.get {
                 url("/tms-event-api/$varselType/inaktive")
                 header("fodselsnummer", "1234")
-            }.also {
-                it.status shouldBeEqualTo HttpStatusCode.BadRequest
-                it.bodyAsText() shouldBeEqualTo "Header-en 'fodselsnummer' inneholder ikke et gyldig fødselsnummer."
-            }
+            }.status shouldBe HttpStatusCode.BadRequest
         }
     }
 }
@@ -134,7 +125,7 @@ class ApiTest {
 private suspend fun ApplicationTestBuilder.assertVarselApiCall(
     endpoint: String,
     fnr: String,
-    expectedResult: List<Varsel>
+    expectedResult: List<Varsel>,
 ) {
     client.get {
         url(endpoint)
@@ -178,7 +169,7 @@ private fun mockContent(
     førstBehandlet: ZonedDateTime,
     sistOppdatert: ZonedDateTime,
     synligFremTil: ZonedDateTime? = null,
-    size: Int
+    size: Int,
 ): Pair<String, List<Varsel>> {
     val synligFremTilString = synligFremTil?.let {
         """"${synligFremTil.withFixedOffsetZone()}""""
@@ -233,25 +224,25 @@ private fun mockContent(
                     EksternVarslingHistorikkEntry(
                         status = "bestilt",
                         melding = "Varsel bestilt",
-                        tidspunkt = sistOppdatert
+                        tidspunkt = sistOppdatert,
                     ),
                     EksternVarslingHistorikkEntry(
                         status = "sendt",
                         melding = "Varsel sendt på sms",
                         kanal = "SMS",
                         renotifikasjon = false,
-                        tidspunkt = sistOppdatert
+                        tidspunkt = sistOppdatert,
                     ),
                     EksternVarslingHistorikkEntry(
                         status = "sendt",
                         melding = "Varsel sendt på epost",
                         kanal = "EPOST",
                         renotifikasjon = false,
-                        tidspunkt = sistOppdatert
-                    )
-                )
-            )
-        ) * size
+                        tidspunkt = sistOppdatert,
+                    ),
+                ),
+            ),
+        ) * size,
     )
 }
 

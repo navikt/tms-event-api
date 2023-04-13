@@ -20,7 +20,7 @@ data class Varsel(
     val tekst: String,
     val link: String,
     val aktiv: Boolean,
-    val eksternVarsling: EksternVarsling? = null
+    val eksternVarsling: EksternVarsling? = null,
 ) {
     val eksternVarslingSendt = eksternVarsling?.sendt ?: false
     val eksternVarslingKanaler = eksternVarsling?.sendteKanaler ?: emptyList()
@@ -32,7 +32,7 @@ data class EksternVarsling(
     val renotifikasjonSendt: Boolean,
     val prefererteKanaler: List<String>,
     val sendteKanaler: List<String>,
-    val historikk: List<EksternVarslingHistorikkEntry>
+    val historikk: List<EksternVarslingHistorikkEntry>,
 )
 
 @Serializable
@@ -42,5 +42,5 @@ data class EksternVarslingHistorikkEntry(
     val distribusjonsId: Long? = null,
     val kanal: String? = null,
     val renotifikasjon: Boolean? = null,
-    val tidspunkt: ZonedDateTime
+    val tidspunkt: ZonedDateTime,
 )

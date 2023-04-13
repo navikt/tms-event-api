@@ -22,7 +22,7 @@ import no.nav.tms.token.support.tokenx.validation.mock.SecurityLevel
 fun TestApplicationBuilder.mockApi(
     authConfig: Application.() -> Unit = mockAuthBuilder(),
     httpClient: HttpClient = mockk(relaxed = true),
-    azureTokenFetcher: AzureTokenFetcher
+    azureTokenFetcher: AzureTokenFetcher,
 ) {
     return application {
         api(
@@ -31,8 +31,8 @@ fun TestApplicationBuilder.mockApi(
             varselReader = VarselReader(
                 azureTokenFetcher = azureTokenFetcher,
                 client = httpClient,
-                eventHandlerBaseURL = "https://test.noe"
-            )
+                eventHandlerBaseURL = "https://test.noe",
+            ),
         )
     }
 }
@@ -55,9 +55,9 @@ fun mockClient(mockContent: String) = HttpClient(
         respond(
             content = mockContent,
             status = HttpStatusCode.OK,
-            headersOf(HttpHeaders.ContentType, "application/json")
+            headersOf(HttpHeaders.ContentType, "application/json"),
         )
-    }
+    },
 
 ) {
     install(ContentNegotiation) {
@@ -72,7 +72,7 @@ fun mockClientWithEndpointValidation(endpointValidation: String, mockContent: St
             respond(
                 content = mockContent,
                 status = HttpStatusCode.OK,
-                headersOf(HttpHeaders.ContentType, "application/json")
+                headersOf(HttpHeaders.ContentType, "application/json"),
             )
         } else {
             respond(
@@ -80,7 +80,7 @@ fun mockClientWithEndpointValidation(endpointValidation: String, mockContent: St
                 status = HttpStatusCode.NotFound,
             )
         }
-    }
+    },
 
 ) {
     install(ContentNegotiation) {

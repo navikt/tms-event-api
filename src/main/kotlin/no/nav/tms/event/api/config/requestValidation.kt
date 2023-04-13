@@ -1,12 +1,11 @@
 package no.nav.tms.event.api.config
 
-import io.ktor.http.HttpStatusCode
-import io.ktor.server.application.ApplicationCall
-import io.ktor.server.application.call
-import io.ktor.server.response.respond
-import io.ktor.util.pipeline.PipelineContext
+import io.ktor.http.*
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
+import io.ktor.util.pipeline.*
 import mu.KotlinLogging
-import org.slf4j.Logger
 
 val log = KotlinLogging.logger {}
 
@@ -14,8 +13,8 @@ suspend inline fun PipelineContext<Unit, ApplicationCall>.doIfValidRequest(handl
     val headerName = "fodselsnummer"
     val fnrHeader = call.request.headers[headerName]
     when {
-        fnrHeader == null -> respondWithBadRequest("Requesten mangler header-en '$headerName'")
-        !isFodselsnummerOfValidLength(fnrHeader) -> respondWithBadRequest("Header-en '$headerName' inneholder ikke et gyldig fødselsnummer.")
+        fnrHeader == null -> respondWithBadRequest("Request til ${call.request.uri} mangler header-en '$headerName'")
+        !isFodselsnummerOfValidLength(fnrHeader) -> respondWithBadRequest("'header $headerName' i request til ${call.request.uri}  inneholder ikke et gyldig fødselsnummer.")
         else -> handler.invoke(fnrHeader)
     }
 }
@@ -26,8 +25,3 @@ suspend fun PipelineContext<Unit, ApplicationCall>.respondWithBadRequest(msg: St
 }
 
 fun isFodselsnummerOfValidLength(fnrHeader: String) = fnrHeader.isNotEmpty() && fnrHeader.length == 11
-
-suspend fun respondWithError(call: ApplicationCall, log: Logger, exception: Exception) {
-    call.respond(HttpStatusCode.InternalServerError)
-    log.error("Ukjent feil oppstod ved henting av eventer fra cache. Returnerer feilkode.", exception)
-}
