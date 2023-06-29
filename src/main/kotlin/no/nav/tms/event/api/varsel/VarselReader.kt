@@ -14,26 +14,26 @@ import java.net.URL
 class VarselReader(
     private val azureTokenFetcher: AzureTokenFetcher,
     private val client: HttpClient,
-    private val eventHandlerBaseURL: String,
+    private val varselAuthorityUrl: String,
 ) {
     suspend fun fetchVarsel(
         fnr: String,
         varselPath: String,
-    ): List<Varsel> {
-        val completePathToEndpoint = URL("$eventHandlerBaseURL/$varselPath")
-        val azureToken = azureTokenFetcher.fetchTokenForEventHandler()
+    ): List<DetaljertVarsel> {
+        val completePathToEndpoint = URL("$varselAuthorityUrl/$varselPath")
+        val azureToken = azureTokenFetcher.fetchTokenForVarselAuthority()
         return client.getWithAzureAndFnr(completePathToEndpoint, azureToken, fnr)
     }
 }
 
-suspend inline fun HttpClient.getWithAzureAndFnr(url: URL, accessToken: String, fnr: String): List<Varsel> =
+suspend inline fun HttpClient.getWithAzureAndFnr(url: URL, accessToken: String, fnr: String): List<DetaljertVarsel> =
     withContext(Dispatchers.IO) {
         request {
             url(url)
             method = HttpMethod.Get
             accept(ContentType.Application.Json)
             header(AzureHeader.Authorization, "Bearer $accessToken")
-            header("fodselsnummer", fnr)
+            header("ident", fnr)
             timeout {
                 socketTimeoutMillis = 30000
                 connectTimeoutMillis = 10000
