@@ -44,12 +44,14 @@ fun main() {
             authConfig = authConfigBuilder(),
             httpClient = httpClient,
             varselReader = varselReader,
+            tokenFetcher = azureTokenFetcher
         )
     }.start(wait = true)
 }
 
 fun Application.api(
     varselReader: VarselReader,
+    tokenFetcher: AzureTokenFetcher,
     httpClient: HttpClient,
     authConfig: Application.() -> Unit,
 ) {
@@ -88,6 +90,11 @@ fun Application.api(
                 beskjedApi(varselReader)
                 innboksApi(varselReader)
                 varselApi(varselReader)
+                get("/token") {
+                    val token = tokenFetcher.fetchTokenForVarselAuthority()
+
+                    call.respond(token)
+                }
             }
         }
     }
