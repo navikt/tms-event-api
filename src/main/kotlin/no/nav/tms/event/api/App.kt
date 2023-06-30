@@ -83,6 +83,12 @@ fun Application.api(
                 innboksApi(varselReader)
                 varselApi(varselReader)
             }
+            route("/debug") {
+                oppgaveApi(varselReader)
+                beskjedApi(varselReader)
+                innboksApi(varselReader)
+                varselApi(varselReader)
+            }
         }
     }
 
