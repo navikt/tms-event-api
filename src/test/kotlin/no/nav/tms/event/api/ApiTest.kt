@@ -9,13 +9,12 @@ import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.tms.event.api.config.AzureTokenFetcher
-import no.nav.tms.event.api.varsel.EksternVarsling
-import no.nav.tms.event.api.varsel.EksternVarslingHistorikkEntry
-import no.nav.tms.event.api.varsel.Varsel
+import no.nav.tms.event.api.varsel.*
 import org.amshove.kluent.internal.assertFalse
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -34,7 +33,7 @@ class ApiTest {
     @BeforeAll
     fun setup() {
         coEvery {
-            tokenFetchMock.fetchTokenForEventHandler()
+            tokenFetchMock.fetchTokenForVarselAuthority()
         } returns azureToken
     }
 
@@ -42,7 +41,8 @@ class ApiTest {
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter aktive varsler fra eventhandler`(type: String) {
         val endpoint = "/tms-event-api/$type/aktive"
-        val (aktiveMockresponse, aktiveExpectedResult) = mockContent(
+        val (aktiveMockresponse, aktiveExpectedResult) = mockContentLegacy(
+            type = type,
             førstBehandlet = ZonedDateTime.now().minusDays(1),
             sistOppdatert = ZonedDateTime.now(),
             synligFremTil = ZonedDateTime.now().plusDays(10),
@@ -57,14 +57,15 @@ class ApiTest {
                 ),
                 azureTokenFetcher = tokenFetchMock,
             )
-            assertVarselApiCall(endpoint, dummyFnr, aktiveExpectedResult)
+            assertVarselApiCallLegacy(endpoint, dummyFnr, aktiveExpectedResult)
         }
     }
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter inaktive varsler fra eventhandler og gjør de om til DTO`(type: String) {
-        val (inaktivMockresponse, inaktiveExpectedResult) = mockContent(
+        val (inaktivMockresponse, inaktiveExpectedResult) = mockContentLegacy(
+            type = type,
             førstBehandlet = ZonedDateTime.now().minusDays(1),
             sistOppdatert = ZonedDateTime.now(),
             synligFremTil = null,
@@ -79,14 +80,15 @@ class ApiTest {
                 ),
                 azureTokenFetcher = tokenFetchMock,
             )
-            assertVarselApiCall("/tms-event-api/$type/inaktive", dummyFnr, inaktiveExpectedResult)
+            assertVarselApiCallLegacy("/tms-event-api/$type/inaktive", dummyFnr, inaktiveExpectedResult)
         }
     }
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter alle varsler fra eventhandler og gjør de om til DTO`(type: String) {
-        val (alleMockresponse, alleExpectedResult) = mockContent(
+        val (alleMockresponse, alleExpectedResult) = mockContentLegacy(
+            type = type,
             førstBehandlet = ZonedDateTime.now().minusDays(1),
             sistOppdatert = ZonedDateTime.now(),
             synligFremTil = ZonedDateTime.now().plusDays(3),
@@ -101,7 +103,7 @@ class ApiTest {
                 ),
                 azureTokenFetcher = tokenFetchMock,
             )
-            assertVarselApiCall("/tms-event-api/$type/all", dummyFnr, alleExpectedResult)
+            assertVarselApiCallLegacy("/tms-event-api/$type/all", dummyFnr, alleExpectedResult)
         }
     }
 
@@ -120,12 +122,50 @@ class ApiTest {
             }.status shouldBe HttpStatusCode.BadRequest
         }
     }
+
+    @Test
+    fun `henter aktive varsler`() = testApplication {
+        val endpoint = "/tms-event-api/varsel/aktive"
+        val reponseAndExpected = mockContent(
+            opprettet = ZonedDateTime.now().minusDays(1),
+            inaktivert = ZonedDateTime.now(),
+            aktivFremTil = ZonedDateTime.now().plusDays(10),
+            "beskjed", "beskjed", "oppgave", "innboks"
+        )
+
+        val jsonResponse = reponseAndExpected.map { it.first }.jsonArray()
+
+        val expectedResult = reponseAndExpected.map { it.second }
+
+        mockApi(
+            httpClient = mockClientWithEndpointValidation(
+                "/aktiv",
+                jsonResponse,
+            ),
+            azureTokenFetcher = tokenFetchMock,
+        )
+        assertVarselApiCall(endpoint, dummyFnr, expectedResult)
+    }
+}
+
+private suspend fun ApplicationTestBuilder.assertVarselApiCallLegacy(
+    endpoint: String,
+    fnr: String,
+    expectedResult: List<LegacyVarsel>,
+) {
+    client.get {
+        url(endpoint)
+        header("fodselsnummer", fnr)
+    }.also {
+        it.status shouldBeEqualTo HttpStatusCode.OK
+        assertLegacyContent(it.bodyAsText(), expectedResult)
+    }
 }
 
 private suspend fun ApplicationTestBuilder.assertVarselApiCall(
     endpoint: String,
     fnr: String,
-    expectedResult: List<Varsel>,
+    expectedResult: List<DetaljertVarsel>,
 ) {
     client.get {
         url(endpoint)
@@ -136,7 +176,7 @@ private suspend fun ApplicationTestBuilder.assertVarselApiCall(
     }
 }
 
-private fun assertContent(content: String?, expectedResult: List<Varsel>) {
+private fun assertLegacyContent(content: String?, expectedResult: List<LegacyVarsel>) {
     val jsonObjects = objectmapper.readTree(content)
     jsonObjects.size() shouldBeEqualTo expectedResult.size
     val expectedObject = expectedResult.first()
@@ -155,6 +195,24 @@ private fun assertContent(content: String?, expectedResult: List<Varsel>) {
     }
 }
 
+private fun assertContent(content: String?, expectedResult: List<DetaljertVarsel>) {
+    val jsonObjects = objectmapper.readTree(content)
+    jsonObjects.size() shouldBeEqualTo expectedResult.size
+    val expectedObject = expectedResult.first()
+    jsonObjects.first().also { resultObject ->
+        resultObject["varselId"].textValue() shouldBeEqualTo expectedObject.varselId
+        resultObject["produsent"]["namespace"].textValue() shouldBeEqualTo expectedObject.produsent.namespace
+        resultObject["produsent"]["appnavn"].textValue() shouldBeEqualTo expectedObject.produsent.appnavn
+        resultObject["sensitivitet"].textValue() shouldBeEqualTo expectedObject.sensitivitet.name
+        resultObject["innhold"]["tekst"].textValue() shouldBeEqualTo expectedObject.innhold.tekst
+        resultObject["innhold"]["link"].textValue() shouldBeEqualTo expectedObject.innhold.link
+        resultObject["aktiv"].asBoolean() shouldBeEqualTo expectedObject.aktiv
+        assertZonedDateTime(resultObject, expectedObject.aktivFremTil, "aktivFremTil")
+        assertZonedDateTime(resultObject, expectedObject.opprettet, "opprettet")
+        assertZonedDateTime(resultObject, expectedObject.inaktivert, "inaktivert")
+    }
+}
+
 private fun assertZonedDateTime(jsonNode: JsonNode?, expectedDate: ZonedDateTime?, key: String) {
     if (expectedDate != null) {
         val resultDate = ZonedDateTime.parse(jsonNode?.get(key)?.textValue()).truncatedTo(ChronoUnit.MINUTES)
@@ -165,75 +223,71 @@ private fun assertZonedDateTime(jsonNode: JsonNode?, expectedDate: ZonedDateTime
     }
 }
 
-private fun mockContent(
+private fun mockContentLegacy(
+    type: String,
     førstBehandlet: ZonedDateTime,
     sistOppdatert: ZonedDateTime,
     synligFremTil: ZonedDateTime? = null,
     size: Int,
-): Pair<String, List<Varsel>> {
+): Pair<String, List<LegacyVarsel>> {
     val synligFremTilString = synligFremTil?.let {
         """"${synligFremTil.withFixedOffsetZone()}""""
     } ?: "null"
 
     return Pair(
-        """  {
-        "fodselsnummer": "123",
-        "grupperingsId": "",
-        "eventId": "",
-        "forstBehandlet": "${førstBehandlet.withFixedOffsetZone()}",
-        "produsent": "",
-        "sikkerhetsnivaa": 0,
-        "sistOppdatert": "${sistOppdatert.withFixedOffsetZone()}",
-        "synligFremTil": $synligFremTilString
-        "tekst": "Tadda vi tester",
-        "link": "",
-        "appnavn": "appappapp",
+        """{
+        "type": "$type",
+        "varselId": "abc-123",
+        "opprettet": "${førstBehandlet.withFixedOffsetZone()}",
+        "produsent": { "namespace": "ns", "appnavn": "app" },
+        "sensitivitet": "substantial",
+        "inaktivert": "${sistOppdatert.withFixedOffsetZone()}",
+        "aktivFremTil": $synligFremTilString,
+        "innhold": { "tekst": "Tadda vi tester" },
         "aktiv": false,
-        "eksternVarslingSendt": true,
-        "eksternVarslingKanaler":["SMS", "EPOST"],
         "eksternVarsling": {
             "sendt": true,
             "renotifikasjonSendt": true,
-            "sendteKanaler": ["SMS", "EPOST"],
-            "prefererteKanaler": [],
+            "kanaler": ["SMS", "EPOST"],
             "historikk": [
                 { "status": "bestilt", "melding": "Varsel bestilt", "tidspunkt": "$sistOppdatert" },
                 { "status": "sendt", "melding": "Varsel sendt på sms", "kanal": "SMS", "renotifikasjon": false, "tidspunkt": "$sistOppdatert" },
                 { "status": "sendt", "melding": "Varsel sendt på epost", "kanal": "EPOST", "renotifikasjon": false, "tidspunkt": "$sistOppdatert" }
-            ]
+            ],
+            "sistOppdatert": "${sistOppdatert.withFixedOffsetZone()}"
         }
       }""".jsonArray(size),
-        Varsel(
-            fodselsnummer = "123",
+        LegacyVarsel(
+            fodselsnummer = "",
             grupperingsId = "",
-            eventId = "",
+            eventId = "abc-123",
             forstBehandlet = førstBehandlet.withFixedOffsetZone(),
-            produsent = "",
-            sikkerhetsnivaa = 0,
+            produsent = "app",
+            sikkerhetsnivaa = 3,
             sistOppdatert = sistOppdatert.withFixedOffsetZone(),
             tekst = "Tadda vi tester",
             link = "",
             aktiv = false,
             synligFremTil = synligFremTil?.withFixedOffsetZone(),
-            eksternVarsling = EksternVarsling(
+            eksternVarsling = LegacyEksternVarsling(
                 sendt = true,
                 renotifikasjonSendt = false,
                 sendteKanaler = listOf("SMS", "EPOST"),
                 prefererteKanaler = emptyList(),
                 historikk = listOf(
-                    EksternVarslingHistorikkEntry(
+                    LegacyEksternVarslingHistorikkEntry(
                         status = "bestilt",
                         melding = "Varsel bestilt",
                         tidspunkt = sistOppdatert,
                     ),
-                    EksternVarslingHistorikkEntry(
+                    LegacyEksternVarslingHistorikkEntry(
                         status = "sendt",
                         melding = "Varsel sendt på sms",
                         kanal = "SMS",
                         renotifikasjon = false,
                         tidspunkt = sistOppdatert,
                     ),
-                    EksternVarslingHistorikkEntry(
+                    LegacyEksternVarslingHistorikkEntry(
                         status = "sendt",
                         melding = "Varsel sendt på epost",
                         kanal = "EPOST",
@@ -246,5 +300,80 @@ private fun mockContent(
     )
 }
 
+private fun mockContent(
+    opprettet: ZonedDateTime,
+    inaktivert: ZonedDateTime? = null,
+    aktivFremTil: ZonedDateTime? = null,
+    vararg typer: String
+): List<Pair<String, DetaljertVarsel>> {
+
+    return typer.map { type ->
+        Pair(
+            """{
+            "type": "$type",
+            "varselId": "abc-123",
+            "opprettet": "${opprettet.withFixedOffsetZone()}",
+            "produsent": { "namespace": "ns", "appnavn": "app" },
+            "sensitivitet": "substantial",
+            "inaktivert": ${inaktivert?.let { """"${it.withFixedOffsetZone()}"""" } ?: "null" },
+            "aktivFremTil": ${aktivFremTil?.let { """"${it.withFixedOffsetZone()}"""" } ?: "null" },
+            "innhold": { "tekst": "Tadda vi tester" },
+            "aktiv": false,
+            "eksternVarsling": {
+                "sendt": true,
+                "renotifikasjonSendt": true,
+                "kanaler": ["SMS", "EPOST"],
+                "historikk": [
+                    { "status": "bestilt", "melding": "Varsel bestilt", "tidspunkt": "$opprettet" },
+                    { "status": "sendt", "melding": "Varsel sendt på sms", "kanal": "SMS", "renotifikasjon": false, "tidspunkt": "$opprettet" },
+                    { "status": "sendt", "melding": "Varsel sendt på epost", "kanal": "EPOST", "renotifikasjon": false, "tidspunkt": "$opprettet" }
+                ],
+                "sistOppdatert": "${opprettet.withFixedOffsetZone()}"
+            }
+          }""",
+            DetaljertVarsel(
+                type = type,
+                varselId = "abc-123",
+                opprettet = opprettet.withFixedOffsetZone(),
+                produsent = Produsent("ns", "app"),
+                sensitivitet = Sensitivitet.substantial,
+                innhold = Innhold("Tadda vi tester"),
+                aktiv = false,
+                inaktivert = inaktivert?.withFixedOffsetZone(),
+                aktivFremTil = aktivFremTil?.withFixedOffsetZone(),
+                eksternVarsling = EksternVarslingStatus(
+                    sendt = true,
+                    renotifikasjonSendt = false,
+                    kanaler = listOf("SMS", "EPOST"),
+                    historikk = listOf(
+                        EksternVarslingHistorikkEntry(
+                            status = "bestilt",
+                            melding = "Varsel bestilt",
+                            tidspunkt = opprettet,
+                        ),
+                        EksternVarslingHistorikkEntry(
+                            status = "sendt",
+                            melding = "Varsel sendt på sms",
+                            kanal = "SMS",
+                            renotifikasjon = false,
+                            tidspunkt = opprettet,
+                        ),
+                        EksternVarslingHistorikkEntry(
+                            status = "sendt",
+                            melding = "Varsel sendt på epost",
+                            kanal = "EPOST",
+                            renotifikasjon = false,
+                            tidspunkt = opprettet,
+                        )
+                    ),
+                    sistOppdatert = opprettet
+                )
+            )
+        )
+    }
+}
+
 private fun String.jsonArray(size: Int): String =
     (1..size).joinToString(separator = ",", prefix = "[", postfix = "]") { this }
+
+private fun List<String>.jsonArray() = joinToString(separator = ",", prefix = "[", postfix = "]")

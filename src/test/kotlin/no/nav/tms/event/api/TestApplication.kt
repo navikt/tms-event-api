@@ -14,7 +14,7 @@ import io.ktor.server.testing.TestApplicationBuilder
 import io.mockk.mockk
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.jsonConfig
-import no.nav.tms.event.api.varsel.Varsel
+import no.nav.tms.event.api.varsel.LegacyVarsel
 import no.nav.tms.event.api.varsel.VarselReader
 import no.nav.tms.token.support.authentication.installer.mock.installMockedAuthenticators
 import no.nav.tms.token.support.tokenx.validation.mock.SecurityLevel
@@ -31,7 +31,7 @@ fun TestApplicationBuilder.mockApi(
             varselReader = VarselReader(
                 azureTokenFetcher = azureTokenFetcher,
                 client = httpClient,
-                eventHandlerBaseURL = "https://test.noe",
+                varselAuthorityUrl = "https://test.noe",
             ),
         )
     }
@@ -89,7 +89,7 @@ fun mockClientWithEndpointValidation(endpointValidation: String, mockContent: St
     install(HttpTimeout)
 }
 
-internal operator fun Varsel.times(size: Int): List<Varsel> = mutableListOf<Varsel>().also { list ->
+internal operator fun LegacyVarsel.times(size: Int): List<LegacyVarsel> = mutableListOf<LegacyVarsel>().also { list ->
     for (i in 1..size) {
         list.add(this)
     }

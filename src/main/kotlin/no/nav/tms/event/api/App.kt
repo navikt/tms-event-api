@@ -22,24 +22,21 @@ import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.HttpClientBuilder
 import no.nav.tms.event.api.config.healthApi
 import no.nav.tms.event.api.config.jsonConfig
-import no.nav.tms.event.api.varsel.VarselReader
-import no.nav.tms.event.api.varsel.beskjedApi
-import no.nav.tms.event.api.varsel.innboksApi
-import no.nav.tms.event.api.varsel.oppgaveApi
+import no.nav.tms.event.api.varsel.*
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
 import no.nav.tms.token.support.azure.validation.installAzureAuth
 
 fun main() {
-    val eventHandlerUrl: String = StringEnvVar.getEnvVar("EVENT_HANDLER_URL")
-    val eventHandlerClientId: String = StringEnvVar.getEnvVar("EVENT_HANDLER_CLIENT_ID")
+    val varselAuthorityUrl = "http://tms-varsel-authority"
+    val varselAuthorityClientId: String = StringEnvVar.getEnvVar("VARSEL_AUTHORITY_CLIENT_ID")
 
     val httpClient = HttpClientBuilder.build()
     val azureService = AzureServiceBuilder.buildAzureService(enableDefaultProxy = true)
-    val azureTokenFetcher = AzureTokenFetcher(azureService, eventHandlerClientId)
+    val azureTokenFetcher = AzureTokenFetcher(azureService, varselAuthorityClientId)
     val varselReader = VarselReader(
         azureTokenFetcher = azureTokenFetcher,
         client = httpClient,
-        eventHandlerBaseURL = eventHandlerUrl,
+        varselAuthorityUrl = varselAuthorityUrl,
     )
 
     embeddedServer(Netty, port = 8080) {
@@ -84,6 +81,7 @@ fun Application.api(
                 oppgaveApi(varselReader)
                 beskjedApi(varselReader)
                 innboksApi(varselReader)
+                varselApi(varselReader)
             }
         }
     }

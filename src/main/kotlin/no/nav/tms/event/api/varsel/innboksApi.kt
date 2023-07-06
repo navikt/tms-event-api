@@ -7,25 +7,25 @@ import io.ktor.server.routing.*
 import no.nav.tms.event.api.config.doIfValidRequest
 
 fun Route.innboksApi(varselReader: VarselReader) {
-    val aktiveVarslerPath = "fetch/modia/innboks/aktive"
-    val inaktiveVarslerPath = "fetch/modia/innboks/inaktive"
-    val alleVarslerPath = "fetch/modia/innboks/all"
+    val aktiveVarslerPath = "innboks/detaljert/aktive"
+    val inaktiveVarslerPath = "innboks/detaljert/inaktive"
+    val alleVarslerPath = "innboks/detaljert/alle"
 
     get("/innboks/aktive") {
         doIfValidRequest { fnr ->
-            call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, aktiveVarslerPath))
+            call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, aktiveVarslerPath).toLegacyVarsler())
         }
     }
 
     get("/innboks/inaktive") {
         doIfValidRequest { fnr ->
-            call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, inaktiveVarslerPath))
+            call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, inaktiveVarslerPath).toLegacyVarsler())
         }
     }
 
     get("/innboks/all") {
         doIfValidRequest { fnr ->
-            call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, alleVarslerPath))
+            call.respond(HttpStatusCode.OK, varselReader.fetchVarsel(fnr, alleVarslerPath).toLegacyVarsler())
         }
     }
 }
