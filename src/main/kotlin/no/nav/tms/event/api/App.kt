@@ -41,13 +41,19 @@ fun main() {
         varselAuthorityUrl = varselAuthorityUrl,
     )
 
-    embeddedServer(Netty, port = 8080) {
-        api(
-            authConfig = authConfigBuilder(),
-            httpClient = httpClient,
-            varselReader = varselReader,
-        )
-    }.start(wait = true)
+    embeddedServer(factory = Netty, environment = applicationEngineEnvironment {
+        rootPath = "tms-event-api"
+        module {
+            api(
+                authConfig = authConfigBuilder(),
+                httpClient = httpClient,
+                varselReader = varselReader,
+            )
+        }
+        connector {
+            port = 8080
+        }
+    }).start(wait = true)
 }
 
 fun Application.api(
@@ -78,14 +84,12 @@ fun Application.api(
     }
 
     routing {
-        route("/tms-event-api") {
-            healthApi()
-            authenticate {
-                oppgaveApi(varselReader)
-                beskjedApi(varselReader)
-                innboksApi(varselReader)
-                varselApi(varselReader)
-            }
+        healthApi()
+        authenticate {
+            oppgaveApi(varselReader)
+            beskjedApi(varselReader)
+            innboksApi(varselReader)
+            varselApi(varselReader)
         }
     }
 

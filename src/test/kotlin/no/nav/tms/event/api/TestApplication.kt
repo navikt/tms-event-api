@@ -24,6 +24,9 @@ fun TestApplicationBuilder.mockApi(
     httpClient: HttpClient = mockk(relaxed = true),
     azureTokenFetcher: AzureTokenFetcher,
 ) {
+    environment {
+        rootPath = "tms-event-api"
+    }
     return application {
         api(
             authConfig = authConfig,
