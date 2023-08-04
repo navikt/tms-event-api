@@ -5,7 +5,7 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 
 val log = KotlinLogging.logger {}
 
@@ -20,7 +20,7 @@ suspend inline fun PipelineContext<Unit, ApplicationCall>.doIfValidRequest(handl
 }
 
 suspend fun PipelineContext<Unit, ApplicationCall>.respondWithBadRequest(msg: String) {
-    log.warn(msg)
+    log.warn { msg }
     call.respond(HttpStatusCode.BadRequest, msg)
 }
 
