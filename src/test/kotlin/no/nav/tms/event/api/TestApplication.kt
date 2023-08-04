@@ -17,7 +17,7 @@ import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.LegacyVarsel
 import no.nav.tms.event.api.varsel.VarselReader
 import no.nav.tms.token.support.authentication.installer.mock.installMockedAuthenticators
-import no.nav.tms.token.support.tokenx.validation.mock.SecurityLevel
+import no.nav.tms.token.support.tokenx.validation.mock.LevelOfAssurance
 
 fun TestApplicationBuilder.mockApi(
     authConfig: Application.() -> Unit = mockAuthBuilder(),
@@ -44,7 +44,7 @@ fun mockAuthBuilder(): Application.() -> Unit = {
 
             alwaysAuthenticated = true
             staticUserPid = "123"
-            staticSecurityLevel = SecurityLevel.LEVEL_4
+            staticLevelOfAssurance = LevelOfAssurance.LEVEL_4
         }
         installAzureAuthMock { }
     }

@@ -16,7 +16,9 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.micrometer.prometheus.PrometheusConfig
 import io.micrometer.prometheus.PrometheusMeterRegistry
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
+import nav.no.tms.common.metrics.installTmsApiMetrics
+import nav.no.tms.common.metrics.installTmsMicrometerMetrics
 import no.nav.personbruker.dittnav.common.util.config.StringEnvVar
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.HttpClientBuilder
@@ -53,7 +55,6 @@ fun Application.api(
     httpClient: HttpClient,
     authConfig: Application.() -> Unit,
 ) {
-    val prometheusMeterRegistry = PrometheusMeterRegistry(PrometheusConfig.DEFAULT)
     val log = KotlinLogging.logger {}
     val securelog = KotlinLogging.logger("secureLog")
 
@@ -62,8 +63,10 @@ fun Application.api(
     install(ContentNegotiation) {
         json(jsonConfig())
     }
-    install(MicrometerMetrics) {
-        registry = prometheusMeterRegistry
+
+    installTmsMicrometerMetrics {
+        setupMetricsRoute = true
+        installMicrometerPlugin = true
     }
 
     install(StatusPages) {
@@ -76,7 +79,7 @@ fun Application.api(
 
     routing {
         route("/tms-event-api") {
-            healthApi(prometheusMeterRegistry)
+            healthApi()
             authenticate {
                 oppgaveApi(varselReader)
                 beskjedApi(varselReader)
