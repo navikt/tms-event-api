@@ -26,7 +26,7 @@ import no.nav.tms.event.api.config.healthApi
 import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.*
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
-import no.nav.tms.token.support.azure.validation.installAzureAuth
+import no.nav.tms.token.support.azure.validation.azure
 
 fun main() {
     val varselAuthorityUrl = "http://tms-varsel-authority"
@@ -103,7 +103,9 @@ private fun Application.configureShutdownHook(httpClient: HttpClient) {
 }
 
 private fun authConfigBuilder(): Application.() -> Unit = {
-    installAzureAuth {
-        setAsDefault = true
+    authentication {
+        azure {
+            setAsDefault = true
+        }
     }
 }

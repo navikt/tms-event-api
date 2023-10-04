@@ -10,14 +10,14 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
+import io.ktor.server.auth.*
 import io.ktor.server.testing.TestApplicationBuilder
 import io.mockk.mockk
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.LegacyVarsel
 import no.nav.tms.event.api.varsel.VarselReader
-import no.nav.tms.token.support.authentication.installer.mock.installMockedAuthenticators
-import no.nav.tms.token.support.tokenx.validation.mock.LevelOfAssurance
+import no.nav.tms.token.support.azure.validation.mock.azureMock
 
 fun TestApplicationBuilder.mockApi(
     authConfig: Application.() -> Unit = mockAuthBuilder(),
@@ -41,15 +41,11 @@ fun TestApplicationBuilder.mockApi(
 }
 
 fun mockAuthBuilder(): Application.() -> Unit = {
-    installMockedAuthenticators {
-        installTokenXAuthMock {
+    authentication {
+        azureMock {
             setAsDefault = true
-
             alwaysAuthenticated = true
-            staticUserPid = "123"
-            staticLevelOfAssurance = LevelOfAssurance.LEVEL_4
         }
-        installAzureAuthMock { }
     }
 }
 
