@@ -2,6 +2,8 @@ package default
 
 // Managed by tms-dependency-admin. Overrides and additions should be placed in separate file
 
+// Test
+
 interface DependencyGroup {
     val groupId: String? get() = null
     val version: String? get() = null
