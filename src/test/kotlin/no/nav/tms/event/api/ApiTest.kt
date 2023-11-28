@@ -130,7 +130,10 @@ class ApiTest {
             opprettet = ZonedDateTime.now().minusDays(1),
             inaktivert = ZonedDateTime.now(),
             aktivFremTil = ZonedDateTime.now().plusDays(10),
-            "beskjed", "beskjed", "oppgave", "innboks"
+            "beskjed",
+            "beskjed",
+            "oppgave",
+            "innboks",
         )
 
         val jsonResponse = reponseAndExpected.map { it.first }.jsonArray()
@@ -304,9 +307,8 @@ private fun mockContent(
     opprettet: ZonedDateTime,
     inaktivert: ZonedDateTime? = null,
     aktivFremTil: ZonedDateTime? = null,
-    vararg typer: String
+    vararg typer: String,
 ): List<Pair<String, DetaljertVarsel>> {
-
     return typer.map { type ->
         Pair(
             """{
@@ -364,11 +366,11 @@ private fun mockContent(
                             kanal = "EPOST",
                             renotifikasjon = false,
                             tidspunkt = opprettet,
-                        )
+                        ),
                     ),
-                    sistOppdatert = opprettet
-                )
-            )
+                    sistOppdatert = opprettet,
+                ),
+            ),
         )
     }
 }

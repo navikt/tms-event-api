@@ -1,5 +1,6 @@
 package no.nav.tms.event.api
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.HttpClient
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.*
@@ -14,7 +15,6 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.github.oshai.kotlinlogging.KotlinLogging
 import nav.no.tms.common.metrics.installTmsMicrometerMetrics
 import no.nav.tms.common.util.config.StringEnvVar
 import no.nav.tms.event.api.config.AzureTokenFetcher
@@ -24,6 +24,7 @@ import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.*
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
 import no.nav.tms.token.support.azure.validation.azure
+import observability.ApiMdc
 
 fun main() {
     val varselAuthorityUrl = "http://tms-varsel-authority"
@@ -38,19 +39,22 @@ fun main() {
         varselAuthorityUrl = varselAuthorityUrl,
     )
 
-    embeddedServer(factory = Netty, environment = applicationEngineEnvironment {
-        rootPath = "tms-event-api"
-        module {
-            api(
-                authConfig = authConfigBuilder(),
-                httpClient = httpClient,
-                varselReader = varselReader,
-            )
-        }
-        connector {
-            port = 8080
-        }
-    }).start(wait = true)
+    embeddedServer(
+        factory = Netty,
+        environment = applicationEngineEnvironment {
+            rootPath = "tms-event-api"
+            module {
+                api(
+                    authConfig = authConfigBuilder(),
+                    httpClient = httpClient,
+                    varselReader = varselReader,
+                )
+            }
+            connector {
+                port = 8080
+            }
+        },
+    ).start(wait = true)
 }
 
 fun Application.api(
@@ -62,6 +66,7 @@ fun Application.api(
     val securelog = KotlinLogging.logger("secureLog")
 
     install(DefaultHeaders)
+    install(ApiMdc)
     authConfig()
     install(ContentNegotiation) {
         json(jsonConfig())
@@ -75,7 +80,7 @@ fun Application.api(
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             log.error { "Kall til ${call.request.uri} feilet: ${cause.message}" }
-            securelog.error { "Kall til ${call.request.uri} feilet: \n ${cause.stackTrace}" }
+            securelog.error(cause) { "Kall til ${call.request.uri} feilet" }
             call.respond(HttpStatusCode.InternalServerError)
         }
     }

@@ -16,13 +16,12 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "17"
 }
 
-
 repositories {
     mavenCentral()
     maven("https://maven.pkg.github.com/navikt/*") {
         credentials {
-            username = System.getenv("GITHUB_ACTOR")?: "x-access-token"
-            password = System.getenv("GITHUB_TOKEN")?: project.findProperty("githubPassword") as String
+            username = System.getenv("GITHUB_ACTOR") ?: "x-access-token"
+            password = System.getenv("GITHUB_TOKEN") ?: project.findProperty("githubPassword") as String
         }
     }
     mavenLocal()
@@ -45,6 +44,7 @@ dependencies {
     implementation(Ktor.Serialization.kotlinX)
     implementation(TmsCommonLib.utils)
     implementation(TmsCommonLib.metrics)
+    implementation(TmsCommonLib.observability)
 
     implementation(Logstash.logbackEncoder)
 
