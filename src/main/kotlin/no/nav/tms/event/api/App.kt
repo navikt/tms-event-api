@@ -1,5 +1,6 @@
 package no.nav.tms.event.api
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.HttpClient
 import io.ktor.http.HttpStatusCode
 import io.ktor.serialization.kotlinx.json.*
@@ -14,7 +15,6 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import io.github.oshai.kotlinlogging.KotlinLogging
 import nav.no.tms.common.metrics.installTmsMicrometerMetrics
 import no.nav.tms.common.util.config.StringEnvVar
 import no.nav.tms.event.api.config.AzureTokenFetcher
@@ -38,19 +38,22 @@ fun main() {
         varselAuthorityUrl = varselAuthorityUrl,
     )
 
-    embeddedServer(factory = Netty, environment = applicationEngineEnvironment {
-        rootPath = "tms-event-api"
-        module {
-            api(
-                authConfig = authConfigBuilder(),
-                httpClient = httpClient,
-                varselReader = varselReader,
-            )
-        }
-        connector {
-            port = 8080
-        }
-    }).start(wait = true)
+    embeddedServer(
+        factory = Netty,
+        environment = applicationEngineEnvironment {
+            rootPath = "tms-event-api"
+            module {
+                api(
+                    authConfig = authConfigBuilder(),
+                    httpClient = httpClient,
+                    varselReader = varselReader,
+                )
+            }
+            connector {
+                port = 8080
+            }
+        },
+    ).start(wait = true)
 }
 
 fun Application.api(

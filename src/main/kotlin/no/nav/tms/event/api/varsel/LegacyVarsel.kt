@@ -10,7 +10,6 @@ import java.time.ZonedDateTime
 fun List<DetaljertVarsel>.toLegacyVarsler() = map { varsel ->
     val eksternVarsling = varsel.eksternVarsling?.let { mapEksternVarsling(it) }
 
-
     LegacyVarsel(
         fodselsnummer = "",
         grupperingsId = "",
@@ -23,7 +22,7 @@ fun List<DetaljertVarsel>.toLegacyVarsler() = map { varsel ->
         tekst = varsel.innhold.tekst,
         link = varsel.innhold.link ?: "",
         aktiv = varsel.aktiv,
-        eksternVarsling = eksternVarsling
+        eksternVarsling = eksternVarsling,
     )
 }
 
@@ -35,7 +34,7 @@ private fun mapEksternVarsling(eksternVarsling: EksternVarslingStatus): LegacyEk
             distribusjonsId = it.distribusjonsId,
             kanal = it.kanal,
             renotifikasjon = it.renotifikasjon,
-            tidspunkt = it.tidspunkt
+            tidspunkt = it.tidspunkt,
         )
     }
 
@@ -44,7 +43,7 @@ private fun mapEksternVarsling(eksternVarsling: EksternVarslingStatus): LegacyEk
         renotifikasjonSendt = eksternVarsling.renotifikasjonSendt,
         prefererteKanaler = emptyList(),
         sendteKanaler = eksternVarsling.kanaler,
-        historikk = historikk
+        historikk = historikk,
     )
 }
 

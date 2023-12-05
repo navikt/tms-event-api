@@ -1,11 +1,11 @@
 package no.nav.tms.event.api.config
 
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.util.pipeline.*
-import io.github.oshai.kotlinlogging.KotlinLogging
 
 val log = KotlinLogging.logger {}
 
