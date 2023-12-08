@@ -77,9 +77,17 @@ fun Application.api(
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->
-            log.error { "Kall til ${call.request.uri} feilet: ${cause.message}" }
-            securelog.error { "Kall til ${call.request.uri} feilet: \n ${cause.stackTrace}" }
-            call.respond(HttpStatusCode.InternalServerError)
+            when (cause) {
+                is VarselFetchError -> {
+                    log.error { "Kall mot ${cause.url} feiler med staus ${cause.statusCode}" }
+                    call.respond(HttpStatusCode.ServiceUnavailable)
+                }
+                else -> {
+                    log.error { "Kall til ${call.request.uri} feilet: ${cause.message}" }
+                    securelog.error { "Kall til ${call.request.uri} feilet: \n ${cause.stackTrace}" }
+                    call.respond(HttpStatusCode.InternalServerError)
+                }
+            }
         }
     }
 

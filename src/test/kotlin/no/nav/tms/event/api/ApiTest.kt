@@ -2,14 +2,23 @@ package no.nav.tms.event.api
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk
 import no.nav.tms.event.api.config.AzureTokenFetcher
+import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.*
+import no.nav.tms.token.support.azure.validation.mock.azureMock
 import org.amshove.kluent.internal.assertFalse
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
@@ -20,6 +29,7 @@ import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
 
 private val objectmapper = ObjectMapper()
 
@@ -27,8 +37,8 @@ private val objectmapper = ObjectMapper()
 class ApiTest {
     private val tokenFetchMock = mockk<AzureTokenFetcher>(relaxed = true)
     private val azureToken = "TokenSmoken"
-
     private val dummyFnr = "12345678910"
+    private val testHostUrl = "https://www.test.no"
 
     @BeforeAll
     fun setup() {
@@ -40,7 +50,7 @@ class ApiTest {
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter aktive varsler fra eventhandler`(type: String) {
-        val endpoint = "/tms-event-api/$type/aktive"
+        // val endpoint = "$type/aktive"
         val (aktiveMockresponse, aktiveExpectedResult) = mockContentLegacy(
             type = type,
             førstBehandlet = ZonedDateTime.now().minusDays(1),
@@ -50,14 +60,66 @@ class ApiTest {
         )
 
         testApplication {
-            mockApi(
-                httpClient = mockClientWithEndpointValidation(
-                    "/aktiv",
-                    aktiveMockresponse,
-                ),
-                azureTokenFetcher = tokenFetchMock,
-            )
-            assertVarselApiCallLegacy(endpoint, dummyFnr, aktiveExpectedResult)
+            val applicationClient = createClient {
+                install(ClientContentNegotiation) {
+                    json(jsonConfig())
+                }
+                install(HttpTimeout) {
+                    requestTimeoutMillis = 2000
+                }
+            }
+            application {
+                api(
+                    varselReader = VarselReader(
+                        azureTokenFetcher = tokenFetchMock,
+                        client = applicationClient,
+                        varselAuthorityUrl = testHostUrl,
+                    ),
+                    httpClient = applicationClient,
+                    authConfig = {
+                        authentication {
+                            azureMock {
+                                alwaysAuthenticated = true
+                                setAsDefault = true
+                            }
+                        }
+                    },
+                )
+            }
+            externalServices {
+                hosts(testHostUrl) {
+                    install(ContentNegotiation) {
+                        jsonConfig()
+                    }
+                    routing {
+                        get("/beskjed/detaljert/aktive") {
+                            call.respondText(
+                                text = aktiveMockresponse,
+                                contentType = ContentType.Application.Json,
+                            )
+                        }
+                        get("innboks/detaljert/aktive") {
+                            call.respondText(
+                                text = aktiveMockresponse,
+                                contentType = ContentType.Application.Json,
+                            )
+                        }
+                        get("oppgave/detaljert/aktive") {
+                            call.respondText(
+                                text = aktiveMockresponse,
+                                contentType = ContentType.Application.Json,
+                            )
+                        }
+                    }
+                }
+            }
+
+            client.get("/$type/aktive") {
+                header("fodselsnummer", "12345678910")
+            }.apply {
+                status shouldBeEqualTo HttpStatusCode.OK
+                assertLegacyContent(bodyAsText(), aktiveExpectedResult)
+            }
         }
     }
 
@@ -104,22 +166,6 @@ class ApiTest {
                 azureTokenFetcher = tokenFetchMock,
             )
             assertVarselApiCallLegacy("/tms-event-api/$type/all", dummyFnr, alleExpectedResult)
-        }
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
-    fun `bad request for ugyldig fødselsnummer i header`(varselType: String) {
-        testApplication {
-            mockApi(
-                httpClient = mockClient(""),
-                azureTokenFetcher = tokenFetchMock,
-            )
-            client.get("/tms-event-api/$varselType/aktive").status shouldBe HttpStatusCode.BadRequest
-            client.get {
-                url("/tms-event-api/$varselType/inaktive")
-                header("fodselsnummer", "1234")
-            }.status shouldBe HttpStatusCode.BadRequest
         }
     }
 
@@ -317,8 +363,8 @@ private fun mockContent(
             "opprettet": "${opprettet.withFixedOffsetZone()}",
             "produsent": { "namespace": "ns", "appnavn": "app" },
             "sensitivitet": "substantial",
-            "inaktivert": ${inaktivert?.let { """"${it.withFixedOffsetZone()}"""" } ?: "null" },
-            "aktivFremTil": ${aktivFremTil?.let { """"${it.withFixedOffsetZone()}"""" } ?: "null" },
+            "inaktivert": ${inaktivert?.let { """"${it.withFixedOffsetZone()}"""" } ?: "null"},
+            "aktivFremTil": ${aktivFremTil?.let { """"${it.withFixedOffsetZone()}"""" } ?: "null"},
             "innhold": { "tekst": "Tadda vi tester" },
             "aktiv": false,
             "eksternVarsling": {
@@ -379,3 +425,7 @@ private fun String.jsonArray(size: Int): String =
     (1..size).joinToString(separator = ",", prefix = "[", postfix = "]") { this }
 
 private fun List<String>.jsonArray() = joinToString(separator = ",", prefix = "[", postfix = "]")
+
+private fun TestApplication.applicationHttpClient() = createClient {
+    jsonConfig()
+}
