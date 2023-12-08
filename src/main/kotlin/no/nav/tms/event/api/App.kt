@@ -7,7 +7,6 @@ import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
-import io.ktor.server.metrics.micrometer.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.defaultheaders.*
@@ -94,9 +93,7 @@ fun Application.api(
     routing {
         healthApi()
         authenticate {
-            oppgaveApi(varselReader)
-            beskjedApi(varselReader)
-            innboksApi(varselReader)
+            legavyVarselApi(varselReader)
             varselApi(varselReader)
         }
     }
