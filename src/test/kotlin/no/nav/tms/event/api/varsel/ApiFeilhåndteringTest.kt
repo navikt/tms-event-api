@@ -13,7 +13,6 @@ import no.nav.tms.event.api.api
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.mockApi
-import no.nav.tms.event.api.mockClient
 import no.nav.tms.token.support.azure.validation.mock.azureMock
 import org.amshove.kluent.shouldBe
 import org.junit.jupiter.api.Test
@@ -75,7 +74,7 @@ class ApiFeilhåndteringTest {
     fun `bad request for ugyldig fødselsnummer i header`(varselType: String) {
         testApplication {
             mockApi(
-                httpClient = mockClient(""),
+                httpClient = mockk(relaxed = true),
                 azureTokenFetcher = tokenFetchMock,
             )
             client.get("/tms-event-api/$varselType/aktive").status shouldBe HttpStatusCode.BadRequest

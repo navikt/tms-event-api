@@ -2,55 +2,29 @@ package no.nav.tms.event.api
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
-import io.ktor.server.application.*
-import io.ktor.server.auth.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
 import io.ktor.server.testing.*
-import io.mockk.coEvery
-import io.mockk.mockk
-import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.*
-import no.nav.tms.token.support.azure.validation.mock.azureMock
 import org.amshove.kluent.internal.assertFalse
 import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation as ClientContentNegotiation
-
-private val objectmapper = ObjectMapper()
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApiTest {
-    private val tokenFetchMock = mockk<AzureTokenFetcher>(relaxed = true)
-    private val azureToken = "TokenSmoken"
-    private val dummyFnr = "12345678910"
-    private val testHostUrl = "https://www.test.no"
 
-    @BeforeAll
-    fun setup() {
-        coEvery {
-            tokenFetchMock.fetchTokenForVarselAuthority()
-        } returns azureToken
-    }
+    private val dummyFnr = "12345678910"
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
-    fun `Henter aktive varsler fra eventhandler`(type: String) {
-        // val endpoint = "$type/aktive"
+    fun `Henter aktive varsler fra tms-varsel-authority `(type: String) {
         val (aktiveMockresponse, aktiveExpectedResult) = mockContentLegacy(
             type = type,
             førstBehandlet = ZonedDateTime.now().minusDays(1),
@@ -58,62 +32,12 @@ class ApiTest {
             synligFremTil = ZonedDateTime.now().plusDays(10),
             size = 5,
         )
-
         testApplication {
-            val applicationClient = createClient {
-                install(ClientContentNegotiation) {
-                    json(jsonConfig())
-                }
-                install(HttpTimeout) {
-                    requestTimeoutMillis = 2000
+            eventApiSetup {
+                externalServices {
+                    tmsAuthoritySetup("/detaljert/aktive", aktiveMockresponse, fnrHeaderShouldBe = dummyFnr)
                 }
             }
-            application {
-                api(
-                    varselReader = VarselReader(
-                        azureTokenFetcher = tokenFetchMock,
-                        client = applicationClient,
-                        varselAuthorityUrl = testHostUrl,
-                    ),
-                    httpClient = applicationClient,
-                    authConfig = {
-                        authentication {
-                            azureMock {
-                                alwaysAuthenticated = true
-                                setAsDefault = true
-                            }
-                        }
-                    },
-                )
-            }
-            externalServices {
-                hosts(testHostUrl) {
-                    install(ContentNegotiation) {
-                        jsonConfig()
-                    }
-                    routing {
-                        get("/beskjed/detaljert/aktive") {
-                            call.respondText(
-                                text = aktiveMockresponse,
-                                contentType = ContentType.Application.Json,
-                            )
-                        }
-                        get("innboks/detaljert/aktive") {
-                            call.respondText(
-                                text = aktiveMockresponse,
-                                contentType = ContentType.Application.Json,
-                            )
-                        }
-                        get("oppgave/detaljert/aktive") {
-                            call.respondText(
-                                text = aktiveMockresponse,
-                                contentType = ContentType.Application.Json,
-                            )
-                        }
-                    }
-                }
-            }
-
             client.get("/$type/aktive") {
                 header("fodselsnummer", "12345678910")
             }.apply {
@@ -125,7 +49,7 @@ class ApiTest {
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
-    fun `Henter inaktive varsler fra eventhandler og gjør de om til DTO`(type: String) {
+    fun `Henter inaktive varsler fra tms-varsel-authority og gjør de om til DTO`(type: String) {
         val (inaktivMockresponse, inaktiveExpectedResult) = mockContentLegacy(
             type = type,
             førstBehandlet = ZonedDateTime.now().minusDays(1),
@@ -135,20 +59,23 @@ class ApiTest {
         )
 
         testApplication {
-            mockApi(
-                httpClient = mockClientWithEndpointValidation(
-                    "inaktive",
-                    inaktivMockresponse,
-                ),
-                azureTokenFetcher = tokenFetchMock,
-            )
-            assertVarselApiCallLegacy("/tms-event-api/$type/inaktive", dummyFnr, inaktiveExpectedResult)
+            eventApiSetup {
+                externalServices {
+                    tmsAuthoritySetup("/detaljert/inaktive", inaktivMockresponse, fnrHeaderShouldBe = dummyFnr)
+                }
+            }
+            client.get("/$type/inaktive") {
+                header("fodselsnummer", "12345678910")
+            }.apply {
+                status shouldBeEqualTo HttpStatusCode.OK
+                assertLegacyContent(bodyAsText(), inaktiveExpectedResult)
+            }
         }
     }
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
-    fun `Henter alle varsler fra eventhandler og gjør de om til DTO`(type: String) {
+    fun `Henter alle varsler fra tms-varsel-authority og gjør de om til DTO`(type: String) {
         val (alleMockresponse, alleExpectedResult) = mockContentLegacy(
             type = type,
             førstBehandlet = ZonedDateTime.now().minusDays(1),
@@ -158,73 +85,22 @@ class ApiTest {
         )
 
         testApplication {
-            mockApi(
-                httpClient = mockClientWithEndpointValidation(
-                    "all",
-                    alleMockresponse,
-                ),
-                azureTokenFetcher = tokenFetchMock,
-            )
-            assertVarselApiCallLegacy("/tms-event-api/$type/all", dummyFnr, alleExpectedResult)
+            eventApiSetup {
+                externalServices {
+                    tmsAuthoritySetup("/detaljert/inaktive", alleMockresponse, fnrHeaderShouldBe = dummyFnr)
+                }
+            }
+            client.get("/$type/inaktive") {
+                header("fodselsnummer", "12345678910")
+            }.apply {
+                status shouldBeEqualTo HttpStatusCode.OK
+                assertLegacyContent(bodyAsText(), alleExpectedResult)
+            }
         }
     }
-
-    @Test
-    fun `henter aktive varsler`() = testApplication {
-        val endpoint = "/tms-event-api/varsel/aktive"
-        val reponseAndExpected = mockContent(
-            opprettet = ZonedDateTime.now().minusDays(1),
-            inaktivert = ZonedDateTime.now(),
-            aktivFremTil = ZonedDateTime.now().plusDays(10),
-            "beskjed",
-            "beskjed",
-            "oppgave",
-            "innboks",
-        )
-
-        val jsonResponse = reponseAndExpected.map { it.first }.jsonArray()
-
-        val expectedResult = reponseAndExpected.map { it.second }
-
-        mockApi(
-            httpClient = mockClientWithEndpointValidation(
-                "/aktiv",
-                jsonResponse,
-            ),
-            azureTokenFetcher = tokenFetchMock,
-        )
-        assertVarselApiCall(endpoint, dummyFnr, expectedResult)
-    }
 }
 
-private suspend fun ApplicationTestBuilder.assertVarselApiCallLegacy(
-    endpoint: String,
-    fnr: String,
-    expectedResult: List<LegacyVarsel>,
-) {
-    client.get {
-        url(endpoint)
-        header("fodselsnummer", fnr)
-    }.also {
-        it.status shouldBeEqualTo HttpStatusCode.OK
-        assertLegacyContent(it.bodyAsText(), expectedResult)
-    }
-}
-
-private suspend fun ApplicationTestBuilder.assertVarselApiCall(
-    endpoint: String,
-    fnr: String,
-    expectedResult: List<DetaljertVarsel>,
-) {
-    client.get {
-        url(endpoint)
-        header("fodselsnummer", fnr)
-    }.also {
-        it.status shouldBeEqualTo HttpStatusCode.OK
-        assertContent(it.bodyAsText(), expectedResult)
-    }
-}
-
+private val objectmapper = ObjectMapper()
 private fun assertLegacyContent(content: String?, expectedResult: List<LegacyVarsel>) {
     val jsonObjects = objectmapper.readTree(content)
     jsonObjects.size() shouldBeEqualTo expectedResult.size
