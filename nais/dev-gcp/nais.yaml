@@ -26,25 +26,6 @@ spec:
     application:
       enabled: true
       allowAllUsers: true
-      claims:
-        extra:
-          - "NAVident"
-  gcp:
-    sqlInstances:
-      - name: event-api
-        type: POSTGRES_14
-        tier: db-f1-micro
-        diskType: SSD
-        diskSize: 10
-        diskAutoresize: false
-        autoBackupTime: "03:00"
-        databases:
-          - name: event-api
-            envVarPrefix: DB
-        maintenanceWindow:
-          day: 1
-          hour: 4
-        cascadingDelete: false
   ingresses:
     - "https://tms-event-api.ekstern.dev.nav.no/tms-event-api"
   resources:
