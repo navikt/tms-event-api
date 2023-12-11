@@ -23,6 +23,7 @@ import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.*
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
 import no.nav.tms.token.support.azure.validation.azure
+import observability.ApiMdc
 
 fun main() {
     val varselAuthorityUrl = "http://tms-varsel-authority"
@@ -73,10 +74,15 @@ fun Application.api(
         setupMetricsRoute = true
         installMicrometerPlugin = true
     }
+    install(ApiMdc)
 
     install(StatusPages) {
         exception<Throwable> { call, cause ->
             when (cause) {
+                is IllegalArgumentException -> {
+                    log.error { cause.message }
+                    call.respond(HttpStatusCode.BadRequest)
+                }
                 is VarselFetchError -> {
                     log.error { "Kall mot ${cause.url} feiler med staus ${cause.statusCode}" }
                     call.respond(HttpStatusCode.ServiceUnavailable)

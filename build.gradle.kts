@@ -44,6 +44,7 @@ dependencies {
     implementation(Ktor.Serialization.kotlinX)
     implementation(TmsCommonLib.utils)
     implementation(TmsCommonLib.metrics)
+    implementation(TmsCommonLib.observability)
 
     implementation(Logstash.logbackEncoder)
 
