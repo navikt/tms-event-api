@@ -4,6 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,6 +27,7 @@ class VarselReader(
     }
 }
 
+// TODO: fiks feilhåndtering på feilbeskjeder
 suspend inline fun HttpClient.getWithAzureAndFnr(url: URL, accessToken: String, fnr: String): List<DetaljertVarsel> =
     withContext(Dispatchers.IO) {
         request {
@@ -40,4 +42,9 @@ suspend inline fun HttpClient.getWithAzureAndFnr(url: URL, accessToken: String, 
                 requestTimeoutMillis = 40000
             }
         }
-    }.body()
+    }.let {
+        if (it.status != HttpStatusCode.OK) throw VarselFetchError(it.request.url, it.status)
+        it.body()
+    }
+
+class VarselFetchError(val url: Url, val statusCode: HttpStatusCode) : Exception()

@@ -19,21 +19,22 @@ data class DetaljertVarsel(
     val opprettet: ZonedDateTime,
     val aktivFremTil: ZonedDateTime? = null,
     val inaktivert: ZonedDateTime? = null,
-    val inaktivertAv: String? = null
+    val inaktivertAv: String? = null,
 )
 
 @Serializable
 data class Innhold(
     val tekst: String,
-    val link: String? = null
+    val link: String? = null,
 )
 
 @Serializable
 enum class Sensitivitet {
     substantial,
-    high;
+    high,
+    ;
 
-    fun loginLevel() = when(this) {
+    fun loginLevel() = when (this) {
         substantial -> 3
         high -> 4
     }
@@ -42,7 +43,7 @@ enum class Sensitivitet {
 @Serializable
 data class Produsent(
     val namespace: String,
-    val appnavn: String
+    val appnavn: String,
 )
 
 @Serializable
@@ -51,7 +52,7 @@ data class EksternVarslingStatus(
     val renotifikasjonSendt: Boolean,
     val kanaler: List<String>,
     val historikk: List<EksternVarslingHistorikkEntry>,
-    val sistOppdatert: ZonedDateTime
+    val sistOppdatert: ZonedDateTime,
 )
 
 @Serializable
@@ -61,5 +62,5 @@ data class EksternVarslingHistorikkEntry(
     val distribusjonsId: Long? = null,
     val kanal: String? = null,
     val renotifikasjon: Boolean? = null,
-    val tidspunkt: ZonedDateTime
+    val tidspunkt: ZonedDateTime,
 )
