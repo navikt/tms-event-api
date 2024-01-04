@@ -14,7 +14,7 @@ interface DependencyGroup {
     }
 }
 
-interface FlywayDefaults : DependencyGroup {
+interface FlywayDefaults: DependencyGroup {
     override val groupId get() = "org.flywaydb"
     override val version get() = "9.21.1"
 
@@ -22,21 +22,21 @@ interface FlywayDefaults : DependencyGroup {
     val core get() = dependency("flyway-core")
 }
 
-interface HikariDefaults : DependencyGroup {
+interface HikariDefaults: DependencyGroup {
     override val groupId get() = "com.zaxxer"
     override val version get() = "5.0.1"
 
     val cp get() = dependency("HikariCP")
 }
 
-interface JacksonDatatypeDefaults : DependencyGroup {
+interface JacksonDatatypeDefaults: DependencyGroup {
     override val version get() = "2.15.1"
 
     val datatypeJsr310 get() = dependency("jackson-datatype-jsr310", groupId = "com.fasterxml.jackson.datatype")
     val moduleKotlin get() = dependency("jackson-module-kotlin", groupId = "com.fasterxml.jackson.module")
 }
 
-interface JunitDefaults : DependencyGroup {
+interface JunitDefaults: DependencyGroup {
     override val groupId get() = "org.junit.jupiter"
     override val version get() = "5.10.0"
 
@@ -45,7 +45,7 @@ interface JunitDefaults : DependencyGroup {
     val params get() = dependency("junit-jupiter-params")
 }
 
-interface JjwtDefaults : DependencyGroup {
+interface JjwtDefaults: DependencyGroup {
     override val groupId get() = "io.jsonwebtoken"
     override val version get() = "0.11.5"
 
@@ -55,7 +55,7 @@ interface JjwtDefaults : DependencyGroup {
     val orgjson get() = dependency("jjwt-orgjson")
 }
 
-interface KafkaDefaults : DependencyGroup {
+interface KafkaDefaults: DependencyGroup {
     override val groupId get() = "org.apache.kafka"
     override val version get() = "3.5.0"
 
@@ -64,14 +64,14 @@ interface KafkaDefaults : DependencyGroup {
     val streams get() = dependency("kafka-streams")
 }
 
-interface KluentDefaults : DependencyGroup {
+interface KluentDefaults: DependencyGroup {
     override val groupId get() = "org.amshove.kluent"
     override val version get() = "1.72"
 
     val kluent get() = dependency("kluent")
 }
 
-interface KotestDefaults : DependencyGroup {
+interface KotestDefaults: DependencyGroup {
     override val groupId get() = "io.kotest"
     override val version get() = "5.6.1"
 
@@ -80,27 +80,27 @@ interface KotestDefaults : DependencyGroup {
     val extensions get() = dependency("kotest-extensions")
 }
 
-interface KotlinDefaults : DependencyGroup {
+interface KotlinDefaults: DependencyGroup {
     override val groupId get() = "org.jetbrains.kotlin"
     override val version get() = "1.9.0"
 
     val reflect get() = dependency("kotlin-reflect")
 }
 
-interface KotlinLoggingDefaults : DependencyGroup {
+interface KotlinLoggingDefaults: DependencyGroup {
     override val groupId get() = "io.github.oshai"
     override val version get() = "5.0.2"
 
     val logging get() = dependency("kotlin-logging")
 }
 
-interface KotlinxDefaults : DependencyGroup {
+interface KotlinxDefaults: DependencyGroup {
     override val groupId get() = "org.jetbrains.kotlinx"
 
     val coroutines get() = dependency("kotlinx-coroutines-core", version = "1.7.3")
 }
 
-interface KotliQueryDefaults : DependencyGroup {
+interface KotliQueryDefaults: DependencyGroup {
     override val groupId get() = "com.github.seratch"
     override val version get() = "1.9.0"
 
@@ -111,7 +111,7 @@ object KtorDefaults {
     val version get() = "2.3.5"
     val groupId get() = "io.ktor"
 
-    interface ServerDefaults : DependencyGroup {
+    interface ServerDefaults: DependencyGroup {
         override val groupId get() = KtorDefaults.groupId
         override val version get() = KtorDefaults.version
 
@@ -127,7 +127,7 @@ object KtorDefaults {
         val cors get() = dependency("ktor-server-cors")
     }
 
-    interface ClientDefaults : DependencyGroup {
+    interface ClientDefaults: DependencyGroup {
         override val groupId get() = KtorDefaults.groupId
         override val version get() = KtorDefaults.version
 
@@ -136,7 +136,7 @@ object KtorDefaults {
         val contentNegotiation get() = dependency("ktor-client-content-negotiation")
     }
 
-    interface SerializationDefaults : DependencyGroup {
+    interface SerializationDefaults: DependencyGroup {
         override val groupId get() = KtorDefaults.groupId
         override val version get() = KtorDefaults.version
 
@@ -144,7 +144,7 @@ object KtorDefaults {
         val jackson get() = dependency("ktor-serialization-jackson")
     }
 
-    interface TestDefaults : DependencyGroup {
+    interface TestDefaults: DependencyGroup {
         override val groupId get() = KtorDefaults.groupId
         override val version get() = KtorDefaults.version
 
@@ -153,35 +153,35 @@ object KtorDefaults {
     }
 }
 
-interface LogstashDefaults : DependencyGroup {
+interface LogstashDefaults: DependencyGroup {
     override val groupId get() = "net.logstash.logback"
     override val version get() = "7.4"
 
     val logbackEncoder get() = dependency("logstash-logback-encoder")
 }
 
-interface MicrometerDefaults : DependencyGroup {
+interface MicrometerDefaults: DependencyGroup {
     override val groupId get() = "io.micrometer"
     override val version get() = "1.11.2"
 
     val registryPrometheus get() = dependency("micrometer-registry-prometheus")
 }
 
-interface MockkDefaults : DependencyGroup {
+interface MockkDefaults: DependencyGroup {
     override val groupId get() = "io.mockk"
     override val version get() = "1.13.5"
 
     val mockk get() = dependency("mockk")
 }
 
-interface PostgresqlDefaults : DependencyGroup {
+interface PostgresqlDefaults: DependencyGroup {
     override val groupId get() = "org.postgresql"
     override val version get() = "42.6.0"
 
     val postgresql get() = dependency("postgresql")
 }
 
-interface PrometheusDefaults : DependencyGroup {
+interface PrometheusDefaults: DependencyGroup {
     override val version get() = "0.16.0"
     override val groupId get() = "io.prometheus"
 
@@ -192,20 +192,20 @@ interface PrometheusDefaults : DependencyGroup {
     val simpleClient get() = dependency("simpleclient")
 }
 
-interface RapidsAndRiversDefaults : DependencyGroup {
+interface RapidsAndRiversDefaults: DependencyGroup {
     override val groupId get() = "com.github.navikt"
-    override val version get() = "2023101613431697456627.0cdd93eb696f"
+    override val version get() = "2024010209171704183456.6d035b91ffb4"
 
     val rapidsAndRivers get() = dependency("rapids-and-rivers")
 }
 
-interface ShadowDefaults : DependencyGroup {
+interface ShadowDefaults: DependencyGroup {
     override val version get() = "7.1.2"
 
     val pluginId get() = "com.github.johnrengelman.shadow"
 }
 
-interface TestContainersDefaults : DependencyGroup {
+interface TestContainersDefaults: DependencyGroup {
     override val version get() = "1.18.3"
     override val groupId get() = "org.testcontainers"
 
@@ -214,7 +214,7 @@ interface TestContainersDefaults : DependencyGroup {
     val postgresql get() = dependency("postgresql")
 }
 
-interface TmsCommonLibDefaults : DependencyGroup {
+interface TmsCommonLibDefaults: DependencyGroup {
     override val groupId get() = "no.nav.tms.common"
     override val version get() = "3.0.0"
 
@@ -223,7 +223,7 @@ interface TmsCommonLibDefaults : DependencyGroup {
     val utils get() = dependency("utils")
 }
 
-interface TmsKtorTokenSupportDefaults : DependencyGroup {
+interface TmsKtorTokenSupportDefaults: DependencyGroup {
     override val groupId get() = "no.nav.tms.token.support"
     override val version get() = "4.0.0"
 
