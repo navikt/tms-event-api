@@ -46,7 +46,6 @@ spec:
           cluster: prod-fss
     outbound:
       rules:
-        - application: dittnav-event-handler
         - application: tms-varsel-authority
   env:
     - name: VARSEL_AUTHORITY_CLIENT_ID
