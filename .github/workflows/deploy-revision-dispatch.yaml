@@ -20,8 +20,10 @@ jobs:
     outputs:
       image: ${{ steps.docker-build-push.outputs.image }}
     steps:
-      - name: Sjekk ut prosjekt
+      - name: Sjekk ut commit
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.COMMIT_SHA }}
 
       - name: Sett opp java
         uses: actions/setup-java@v4
@@ -51,8 +53,10 @@ jobs:
       matrix:
         cluster: ${{ github.event.client_payload.clusters }}
     steps:
-      - name: Sjekk ut prosjekt
+      - name: Sjekk ut commit
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.COMMIT_SHA }}
 
       - name: 'Deploy til ${{ inputs.cluster }}'
         uses: nais/deploy/actions/deploy@v2
