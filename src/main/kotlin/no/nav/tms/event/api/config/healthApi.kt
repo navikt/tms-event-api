@@ -20,4 +20,8 @@ fun Route.healthApi() {
     get("/internal/isReady") {
         call.respondText(text = "READY", contentType = ContentType.Text.Plain)
     }
+
+    get("/internal/test") {
+        call.respondText(text = "TESTY", contentType = ContentType.Text.Plain)
+    }
 }
