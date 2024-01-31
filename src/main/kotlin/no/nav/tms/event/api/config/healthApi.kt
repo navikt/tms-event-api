@@ -7,21 +7,11 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 
 fun Route.healthApi() {
-    val pingJsonResponse = """{"ping": "pong"}"""
-
-    get("/internal/ping") {
-        call.respondText(pingJsonResponse, ContentType.Application.Json)
-    }
-
     get("/internal/isAlive") {
         call.respondText(text = "ALIVE", contentType = ContentType.Text.Plain)
     }
 
     get("/internal/isReady") {
         call.respondText(text = "READY", contentType = ContentType.Text.Plain)
-    }
-
-    get("/internal/test") {
-        call.respondText(text = "TESTY", contentType = ContentType.Text.Plain)
     }
 }

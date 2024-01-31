@@ -19,11 +19,8 @@ jobs:
       - name: Sjekk ut koden
         uses: actions/checkout@v2
 
-      - name: Sett opp java
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-          distribution: 'temurin'
+      - name: Sett opp gradle
+        uses: gradle/actions/setup-gradle@v3
 
       - name: Bygg og test prosjekt
         run: ./gradlew build
