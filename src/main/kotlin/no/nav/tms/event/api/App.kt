@@ -103,6 +103,10 @@ fun Application.api(
             legavyVarselApi(varselReader)
             varselApi(varselReader)
         }
+        route("/open") {
+            legavyVarselApi(varselReader)
+            varselApi(varselReader)
+        }
     }
 
     configureShutdownHook(httpClient)
