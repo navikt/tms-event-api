@@ -34,10 +34,11 @@ enum class Sensitivitet {
     high,
     ;
 
-    fun loginLevel() = when (this) {
-        substantial -> 3
-        high -> 4
-    }
+    fun loginLevel() =
+        when (this) {
+            substantial -> 3
+            high -> 4
+        }
 }
 
 @Serializable

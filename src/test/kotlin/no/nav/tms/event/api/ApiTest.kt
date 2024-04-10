@@ -19,19 +19,19 @@ import java.time.temporal.ChronoUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApiTest {
-
     private val dummyFnr = "12345678910"
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter aktive varsler fra tms-varsel-authority `(type: String) {
-        val (aktiveMockresponse, aktiveExpectedResult) = mockContentLegacy(
-            type = type,
-            førstBehandlet = ZonedDateTime.now().minusDays(1),
-            sistOppdatert = ZonedDateTime.now(),
-            synligFremTil = ZonedDateTime.now().plusDays(10),
-            size = 5,
-        )
+        val (aktiveMockresponse, aktiveExpectedResult) =
+            mockContentLegacy(
+                type = type,
+                førstBehandlet = ZonedDateTime.now().minusDays(1),
+                sistOppdatert = ZonedDateTime.now(),
+                synligFremTil = ZonedDateTime.now().plusDays(10),
+                size = 5,
+            )
         testApplication {
             eventApiSetup {
                 externalServices {
@@ -50,13 +50,14 @@ class ApiTest {
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter inaktive varsler fra tms-varsel-authority og gjør de om til DTO`(type: String) {
-        val (inaktivMockresponse, inaktiveExpectedResult) = mockContentLegacy(
-            type = type,
-            førstBehandlet = ZonedDateTime.now().minusDays(1),
-            sistOppdatert = ZonedDateTime.now(),
-            synligFremTil = null,
-            size = 2,
-        )
+        val (inaktivMockresponse, inaktiveExpectedResult) =
+            mockContentLegacy(
+                type = type,
+                førstBehandlet = ZonedDateTime.now().minusDays(1),
+                sistOppdatert = ZonedDateTime.now(),
+                synligFremTil = null,
+                size = 2,
+            )
 
         testApplication {
             eventApiSetup {
@@ -76,13 +77,14 @@ class ApiTest {
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter alle varsler fra tms-varsel-authority og gjør de om til DTO`(type: String) {
-        val (alleMockresponse, alleExpectedResult) = mockContentLegacy(
-            type = type,
-            førstBehandlet = ZonedDateTime.now().minusDays(1),
-            sistOppdatert = ZonedDateTime.now(),
-            synligFremTil = ZonedDateTime.now().plusDays(3),
-            size = 6,
-        )
+        val (alleMockresponse, alleExpectedResult) =
+            mockContentLegacy(
+                type = type,
+                førstBehandlet = ZonedDateTime.now().minusDays(1),
+                sistOppdatert = ZonedDateTime.now(),
+                synligFremTil = ZonedDateTime.now().plusDays(3),
+                size = 6,
+            )
 
         testApplication {
             eventApiSetup {
@@ -101,7 +103,11 @@ class ApiTest {
 }
 
 private val objectmapper = ObjectMapper()
-private fun assertLegacyContent(content: String?, expectedResult: List<LegacyVarsel>) {
+
+private fun assertLegacyContent(
+    content: String?,
+    expectedResult: List<LegacyVarsel>,
+) {
     val jsonObjects = objectmapper.readTree(content)
     jsonObjects.size() shouldBeEqualTo expectedResult.size
     val expectedObject = expectedResult.first()
@@ -120,7 +126,10 @@ private fun assertLegacyContent(content: String?, expectedResult: List<LegacyVar
     }
 }
 
-private fun assertContent(content: String?, expectedResult: List<DetaljertVarsel>) {
+private fun assertContent(
+    content: String?,
+    expectedResult: List<DetaljertVarsel>,
+) {
     val jsonObjects = objectmapper.readTree(content)
     jsonObjects.size() shouldBeEqualTo expectedResult.size
     val expectedObject = expectedResult.first()
@@ -138,7 +147,11 @@ private fun assertContent(content: String?, expectedResult: List<DetaljertVarsel
     }
 }
 
-private fun assertZonedDateTime(jsonNode: JsonNode?, expectedDate: ZonedDateTime?, key: String) {
+private fun assertZonedDateTime(
+    jsonNode: JsonNode?,
+    expectedDate: ZonedDateTime?,
+    key: String,
+) {
     if (expectedDate != null) {
         val resultDate = ZonedDateTime.parse(jsonNode?.get(key)?.textValue()).truncatedTo(ChronoUnit.MINUTES)
         assertFalse(resultDate == null, "$key skal ikke være null")
@@ -155,9 +168,10 @@ private fun mockContentLegacy(
     synligFremTil: ZonedDateTime? = null,
     size: Int,
 ): Pair<String, List<LegacyVarsel>> {
-    val synligFremTilString = synligFremTil?.let {
-        """"${synligFremTil.withFixedOffsetZone()}""""
-    } ?: "null"
+    val synligFremTilString =
+        synligFremTil?.let {
+            """"${synligFremTil.withFixedOffsetZone()}""""
+        } ?: "null"
 
     return Pair(
         """{
@@ -194,33 +208,35 @@ private fun mockContentLegacy(
             link = "",
             aktiv = false,
             synligFremTil = synligFremTil?.withFixedOffsetZone(),
-            eksternVarsling = LegacyEksternVarsling(
-                sendt = true,
-                renotifikasjonSendt = false,
-                sendteKanaler = listOf("SMS", "EPOST"),
-                prefererteKanaler = emptyList(),
-                historikk = listOf(
-                    LegacyEksternVarslingHistorikkEntry(
-                        status = "bestilt",
-                        melding = "Varsel bestilt",
-                        tidspunkt = sistOppdatert,
-                    ),
-                    LegacyEksternVarslingHistorikkEntry(
-                        status = "sendt",
-                        melding = "Varsel sendt på sms",
-                        kanal = "SMS",
-                        renotifikasjon = false,
-                        tidspunkt = sistOppdatert,
-                    ),
-                    LegacyEksternVarslingHistorikkEntry(
-                        status = "sendt",
-                        melding = "Varsel sendt på epost",
-                        kanal = "EPOST",
-                        renotifikasjon = false,
-                        tidspunkt = sistOppdatert,
-                    ),
+            eksternVarsling =
+                LegacyEksternVarsling(
+                    sendt = true,
+                    renotifikasjonSendt = false,
+                    sendteKanaler = listOf("SMS", "EPOST"),
+                    prefererteKanaler = emptyList(),
+                    historikk =
+                        listOf(
+                            LegacyEksternVarslingHistorikkEntry(
+                                status = "bestilt",
+                                melding = "Varsel bestilt",
+                                tidspunkt = sistOppdatert,
+                            ),
+                            LegacyEksternVarslingHistorikkEntry(
+                                status = "sendt",
+                                melding = "Varsel sendt på sms",
+                                kanal = "SMS",
+                                renotifikasjon = false,
+                                tidspunkt = sistOppdatert,
+                            ),
+                            LegacyEksternVarslingHistorikkEntry(
+                                status = "sendt",
+                                melding = "Varsel sendt på epost",
+                                kanal = "EPOST",
+                                renotifikasjon = false,
+                                tidspunkt = sistOppdatert,
+                            ),
+                        ),
                 ),
-            ),
         ) * size,
     )
 }
@@ -265,43 +281,45 @@ private fun mockContent(
                 aktiv = false,
                 inaktivert = inaktivert?.withFixedOffsetZone(),
                 aktivFremTil = aktivFremTil?.withFixedOffsetZone(),
-                eksternVarsling = EksternVarslingStatus(
-                    sendt = true,
-                    renotifikasjonSendt = false,
-                    kanaler = listOf("SMS", "EPOST"),
-                    historikk = listOf(
-                        EksternVarslingHistorikkEntry(
-                            status = "bestilt",
-                            melding = "Varsel bestilt",
-                            tidspunkt = opprettet,
-                        ),
-                        EksternVarslingHistorikkEntry(
-                            status = "sendt",
-                            melding = "Varsel sendt på sms",
-                            kanal = "SMS",
-                            renotifikasjon = false,
-                            tidspunkt = opprettet,
-                        ),
-                        EksternVarslingHistorikkEntry(
-                            status = "sendt",
-                            melding = "Varsel sendt på epost",
-                            kanal = "EPOST",
-                            renotifikasjon = false,
-                            tidspunkt = opprettet,
-                        ),
+                eksternVarsling =
+                    EksternVarslingStatus(
+                        sendt = true,
+                        renotifikasjonSendt = false,
+                        kanaler = listOf("SMS", "EPOST"),
+                        historikk =
+                            listOf(
+                                EksternVarslingHistorikkEntry(
+                                    status = "bestilt",
+                                    melding = "Varsel bestilt",
+                                    tidspunkt = opprettet,
+                                ),
+                                EksternVarslingHistorikkEntry(
+                                    status = "sendt",
+                                    melding = "Varsel sendt på sms",
+                                    kanal = "SMS",
+                                    renotifikasjon = false,
+                                    tidspunkt = opprettet,
+                                ),
+                                EksternVarslingHistorikkEntry(
+                                    status = "sendt",
+                                    melding = "Varsel sendt på epost",
+                                    kanal = "EPOST",
+                                    renotifikasjon = false,
+                                    tidspunkt = opprettet,
+                                ),
+                            ),
+                        sistOppdatert = opprettet,
                     ),
-                    sistOppdatert = opprettet,
-                ),
             ),
         )
     }
 }
 
-private fun String.jsonArray(size: Int): String =
-    (1..size).joinToString(separator = ",", prefix = "[", postfix = "]") { this }
+private fun String.jsonArray(size: Int): String = (1..size).joinToString(separator = ",", prefix = "[", postfix = "]") { this }
 
 private fun List<String>.jsonArray() = joinToString(separator = ",", prefix = "[", postfix = "]")
 
-private fun TestApplication.applicationHttpClient() = createClient {
-    jsonConfig()
-}
+private fun TestApplication.applicationHttpClient() =
+    createClient {
+        jsonConfig()
+    }

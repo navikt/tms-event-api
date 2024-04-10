@@ -21,43 +21,45 @@ import no.nav.tms.token.support.azure.validation.mock.azureMock
 internal val azureMockToken = "TokenSmoken"
 internal val testHostUrl = "https://www.test.no"
 
-fun ApplicationTestBuilder.eventApiSetup(
-    block: ApplicationTestBuilder.() -> Unit,
-) = run {
-    val applicationClient = createClient {
-        install(ContentNegotiation) {
-            json(jsonConfig())
-        }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 2000
-        }
-    }
-    application {
-        val tokenFetchMock = mockk<AzureTokenFetcher>(relaxed = true).also {
-            coEvery {
-                it.fetchTokenForVarselAuthority()
-            } returns azureMockToken
-        }
-        api(
-            varselReader = VarselReader(
-                azureTokenFetcher = tokenFetchMock,
-                client = applicationClient,
-                varselAuthorityUrl = testHostUrl,
-            ),
-            httpClient = applicationClient,
-            authConfig = {
-                authentication {
-                    azureMock {
-                        alwaysAuthenticated = true
-                        setAsDefault = true
-                    }
+fun ApplicationTestBuilder.eventApiSetup(block: ApplicationTestBuilder.() -> Unit) =
+    run {
+        val applicationClient =
+            createClient {
+                install(ContentNegotiation) {
+                    json(jsonConfig())
                 }
-            },
-        )
-    }
+                install(HttpTimeout) {
+                    requestTimeoutMillis = 2000
+                }
+            }
+        application {
+            val tokenFetchMock =
+                mockk<AzureTokenFetcher>(relaxed = true).also {
+                    coEvery {
+                        it.fetchTokenForVarselAuthority()
+                    } returns azureMockToken
+                }
+            api(
+                varselReader =
+                    VarselReader(
+                        azureTokenFetcher = tokenFetchMock,
+                        client = applicationClient,
+                        varselAuthorityUrl = testHostUrl,
+                    ),
+                httpClient = applicationClient,
+                authConfig = {
+                    authentication {
+                        azureMock {
+                            alwaysAuthenticated = true
+                            setAsDefault = true
+                        }
+                    }
+                },
+            )
+        }
 
-    block()
-}
+        block()
+    }
 
 fun ExternalServicesBuilder.tmsAuthoritySetup(
     endpointPostfix: String,
@@ -99,8 +101,10 @@ fun ExternalServicesBuilder.tmsAuthoritySetup(
         }
     }
 }
-internal operator fun LegacyVarsel.times(size: Int): List<LegacyVarsel> = mutableListOf<LegacyVarsel>().also { list ->
-    for (i in 1..size) {
-        list.add(this)
+
+internal operator fun LegacyVarsel.times(size: Int): List<LegacyVarsel> =
+    mutableListOf<LegacyVarsel>().also { list ->
+        for (i in 1..size) {
+            list.add(this)
+        }
     }
-}

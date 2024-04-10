@@ -26,19 +26,21 @@ class ApiFeilhåndteringTest {
     @Test
     fun `håndterer feilresponse fra baksystemer`() {
         testApplication {
-            val applicationClient = createClient {
-                jsonConfig()
-                install(HttpTimeout) {
-                    requestTimeoutMillis = 2000
+            val applicationClient =
+                createClient {
+                    jsonConfig()
+                    install(HttpTimeout) {
+                        requestTimeoutMillis = 2000
+                    }
                 }
-            }
             application {
                 api(
-                    varselReader = VarselReader(
-                        azureTokenFetcher = tokenFetchMock,
-                        client = applicationClient,
-                        varselAuthorityUrl = testHostUrl,
-                    ),
+                    varselReader =
+                        VarselReader(
+                            azureTokenFetcher = tokenFetchMock,
+                            client = applicationClient,
+                            varselAuthorityUrl = testHostUrl,
+                        ),
                     httpClient = applicationClient,
                     authConfig = {
                         authentication {

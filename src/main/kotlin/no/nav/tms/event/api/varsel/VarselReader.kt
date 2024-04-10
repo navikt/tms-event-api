@@ -28,7 +28,11 @@ class VarselReader(
 }
 
 // TODO: fiks feilhåndtering på feilbeskjeder
-suspend inline fun HttpClient.getWithAzureAndFnr(url: URL, accessToken: String, fnr: String): List<DetaljertVarsel> =
+suspend inline fun HttpClient.getWithAzureAndFnr(
+    url: URL,
+    accessToken: String,
+    fnr: String,
+): List<DetaljertVarsel> =
     withContext(Dispatchers.IO) {
         request {
             url(url)
