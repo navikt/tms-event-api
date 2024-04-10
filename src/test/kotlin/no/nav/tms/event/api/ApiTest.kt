@@ -6,6 +6,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
+import nav.no.tms.common.testutils.initExternalServices
 import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.*
 import org.amshove.kluent.internal.assertFalse
@@ -20,12 +21,13 @@ import java.time.temporal.ChronoUnit
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ApiTest {
     private val dummyFnr = "12345678910"
+    private val testHostUrl = "https://www.test.no"
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter aktive varsler fra tms-varsel-authority `(type: String) {
         val (aktiveMockresponse, aktiveExpectedResult) =
-            mockContentLegacy(
+            mockContentAndExpectedLegacyResponse(
                 type = type,
                 førstBehandlet = ZonedDateTime.now().minusDays(1),
                 sistOppdatert = ZonedDateTime.now(),
@@ -33,11 +35,17 @@ class ApiTest {
                 size = 5,
             )
         testApplication {
-            eventApiSetup {
-                externalServices {
-                    tmsAuthoritySetup("/detaljert/aktive", aktiveMockresponse, fnrHeaderShouldBe = dummyFnr)
-                }
-            }
+            eventApiSetup(testHostUrl)
+            initExternalServices(
+                testHostUrl,
+                VarselRouteProvider(
+                    type = type,
+                    endpoint = "/detaljert/aktive",
+                    fnrHeaderShouldBe = dummyFnr,
+                    responseBody = aktiveMockresponse,
+                ),
+            )
+
             client.get("/$type/aktive") {
                 header("fodselsnummer", "12345678910")
             }.apply {
@@ -51,7 +59,7 @@ class ApiTest {
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter inaktive varsler fra tms-varsel-authority og gjør de om til DTO`(type: String) {
         val (inaktivMockresponse, inaktiveExpectedResult) =
-            mockContentLegacy(
+            mockContentAndExpectedLegacyResponse(
                 type = type,
                 førstBehandlet = ZonedDateTime.now().minusDays(1),
                 sistOppdatert = ZonedDateTime.now(),
@@ -60,11 +68,16 @@ class ApiTest {
             )
 
         testApplication {
-            eventApiSetup {
-                externalServices {
-                    tmsAuthoritySetup("/detaljert/inaktive", inaktivMockresponse, fnrHeaderShouldBe = dummyFnr)
-                }
-            }
+            eventApiSetup(testHostUrl)
+            initExternalServices(
+                testHostUrl,
+                VarselRouteProvider(
+                    type = type,
+                    endpoint = "/detaljert/inaktive",
+                    fnrHeaderShouldBe = dummyFnr,
+                    responseBody = inaktivMockresponse,
+                ),
+            )
             client.get("/$type/inaktive") {
                 header("fodselsnummer", "12345678910")
             }.apply {
@@ -74,11 +87,12 @@ class ApiTest {
         }
     }
 
+    // TODO: 404 not found?
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `Henter alle varsler fra tms-varsel-authority og gjør de om til DTO`(type: String) {
         val (alleMockresponse, alleExpectedResult) =
-            mockContentLegacy(
+            mockContentAndExpectedLegacyResponse(
                 type = type,
                 førstBehandlet = ZonedDateTime.now().minusDays(1),
                 sistOppdatert = ZonedDateTime.now(),
@@ -87,12 +101,17 @@ class ApiTest {
             )
 
         testApplication {
-            eventApiSetup {
-                externalServices {
-                    tmsAuthoritySetup("/detaljert/inaktive", alleMockresponse, fnrHeaderShouldBe = dummyFnr)
-                }
-            }
-            client.get("/$type/inaktive") {
+            eventApiSetup(testHostUrl)
+            initExternalServices(
+                testHostUrl,
+                VarselRouteProvider(
+                    type = type,
+                    endpoint = "/detaljert/alle",
+                    fnrHeaderShouldBe = dummyFnr,
+                    responseBody = alleMockresponse,
+                ),
+            )
+            client.get("/$type/all") {
                 header("fodselsnummer", "12345678910")
             }.apply {
                 status shouldBeEqualTo HttpStatusCode.OK
@@ -161,7 +180,7 @@ private fun assertZonedDateTime(
     }
 }
 
-private fun mockContentLegacy(
+private fun mockContentAndExpectedLegacyResponse(
     type: String,
     førstBehandlet: ZonedDateTime,
     sistOppdatert: ZonedDateTime,

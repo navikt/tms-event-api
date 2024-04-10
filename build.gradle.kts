@@ -55,6 +55,7 @@ dependencies {
     testImplementation(Junit.params)
     testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.5")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.10")
+    testImplementation(TmsCommonLib.testutils)
 
     testRuntimeOnly(Jjwt.impl)
     testRuntimeOnly(Junit.engine)
