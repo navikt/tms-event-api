@@ -1,5 +1,7 @@
 package no.nav.tms.event.api
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.*
@@ -17,8 +19,14 @@ import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.LegacyVarsel
 import no.nav.tms.event.api.varsel.VarselReader
 import no.nav.tms.token.support.azure.validation.mock.azureMock
+import org.amshove.kluent.internal.assertFalse
+import org.amshove.kluent.shouldBe
+import org.amshove.kluent.shouldBeEqualTo
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
 
-internal val azureMockToken = "TokenSmoken"
+internal const val azureMockToken = "TokenSmoken"
+internal val objectmapper = ObjectMapper()
 
 fun ApplicationTestBuilder.eventApiSetup(
     varselAuthorotyUrl: String,
@@ -95,3 +103,17 @@ internal operator fun LegacyVarsel.times(size: Int): List<LegacyVarsel> =
             list.add(this)
         }
     }
+
+internal fun assertZonedDateTime(
+    jsonNode: JsonNode?,
+    expectedDate: ZonedDateTime?,
+    key: String,
+) {
+    if (expectedDate != null) {
+        val resultDate = ZonedDateTime.parse(jsonNode?.get(key)?.textValue()).truncatedTo(ChronoUnit.MINUTES)
+        assertFalse(resultDate == null, "$key skal ikke være null")
+        resultDate.toString() shouldBeEqualTo expectedDate.truncatedTo(ChronoUnit.MINUTES).toString()
+    } else {
+        jsonNode?.get(key)?.textValue() shouldBe null
+    }
+}

@@ -1,21 +1,16 @@
 package no.nav.tms.event.api
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
 import nav.no.tms.common.testutils.initExternalServices
 import no.nav.tms.event.api.varsel.*
-import org.amshove.kluent.internal.assertFalse
-import org.amshove.kluent.shouldBe
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 import java.time.ZonedDateTime
-import java.time.temporal.ChronoUnit
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class LegacyApiTest {
@@ -24,7 +19,7 @@ class LegacyApiTest {
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
-    fun `Henter aktive varsler fra tms-varsel-authority `(type: String) {
+    fun `Henter aktive varsler på legacy format fra tms-varsel-authority `(type: String) {
         val (aktiveMockresponse, aktiveExpectedResult) =
             mockContentAndExpectedLegacyResponse(
                 type = type,
@@ -56,7 +51,7 @@ class LegacyApiTest {
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
-    fun `Henter inaktive varsler fra tms-varsel-authority og gjør de om til DTO`(type: String) {
+    fun `Henter inaktive varsler på legacy format fra tms-varsel-authority og gjør de om til DTO`(type: String) {
         val (inaktivMockresponse, inaktiveExpectedResult) =
             mockContentAndExpectedLegacyResponse(
                 type = type,
@@ -88,7 +83,7 @@ class LegacyApiTest {
 
     @ParameterizedTest
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
-    fun `Henter alle varsler fra tms-varsel-authority og gjør de om til DTO`(type: String) {
+    fun `Henter alle varsler på legacy format fra tms-varsel-authority og gjør de om til DTO`(type: String) {
         val (alleMockresponse, alleExpectedResult) =
             mockContentAndExpectedLegacyResponse(
                 type = type,
@@ -119,8 +114,6 @@ class LegacyApiTest {
     }
 }
 
-private val objectmapper = ObjectMapper()
-
 private fun assertLegacyContent(
     content: String?,
     expectedResult: List<LegacyVarsel>,
@@ -140,41 +133,6 @@ private fun assertLegacyContent(
         assertZonedDateTime(resultObject, expectedObject.synligFremTil, "synligFremTil")
         assertZonedDateTime(resultObject, expectedObject.forstBehandlet, "forstBehandlet")
         assertZonedDateTime(resultObject, expectedObject.sistOppdatert, "sistOppdatert")
-    }
-}
-
-private fun assertContent(
-    content: String?,
-    expectedResult: List<DetaljertVarsel>,
-) {
-    val jsonObjects = objectmapper.readTree(content)
-    jsonObjects.size() shouldBeEqualTo expectedResult.size
-    val expectedObject = expectedResult.first()
-    jsonObjects.first().also { resultObject ->
-        resultObject["varselId"].textValue() shouldBeEqualTo expectedObject.varselId
-        resultObject["produsent"]["namespace"].textValue() shouldBeEqualTo expectedObject.produsent.namespace
-        resultObject["produsent"]["appnavn"].textValue() shouldBeEqualTo expectedObject.produsent.appnavn
-        resultObject["sensitivitet"].textValue() shouldBeEqualTo expectedObject.sensitivitet.name
-        resultObject["innhold"]["tekst"].textValue() shouldBeEqualTo expectedObject.innhold.tekst
-        resultObject["innhold"]["link"].textValue() shouldBeEqualTo expectedObject.innhold.link
-        resultObject["aktiv"].asBoolean() shouldBeEqualTo expectedObject.aktiv
-        assertZonedDateTime(resultObject, expectedObject.aktivFremTil, "aktivFremTil")
-        assertZonedDateTime(resultObject, expectedObject.opprettet, "opprettet")
-        assertZonedDateTime(resultObject, expectedObject.inaktivert, "inaktivert")
-    }
-}
-
-private fun assertZonedDateTime(
-    jsonNode: JsonNode?,
-    expectedDate: ZonedDateTime?,
-    key: String,
-) {
-    if (expectedDate != null) {
-        val resultDate = ZonedDateTime.parse(jsonNode?.get(key)?.textValue()).truncatedTo(ChronoUnit.MINUTES)
-        assertFalse(resultDate == null, "$key skal ikke være null")
-        resultDate.toString() shouldBeEqualTo expectedDate.truncatedTo(ChronoUnit.MINUTES).toString()
-    } else {
-        jsonNode?.get(key)?.textValue() shouldBe null
     }
 }
 

@@ -8,49 +8,48 @@ import nav.no.tms.common.testutils.initExternalServices
 import no.nav.tms.event.api.varsel.*
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.params.ParameterizedTest
-import org.junit.jupiter.params.provider.ValueSource
 import java.time.ZonedDateTime
 
 class ApiTest {
+    private val dummyFnr = "12345678910"
+    private val testHostUrl = "https://www.test.no"
+
     @Test
-    fun `Henter aktive varsler fra tms-varsel-authority `(type: String) {
-        /*
-        val (aktiveMockresponse, aktiveExpectedResult) =
+    fun `Henter aktive varsler fra tms-varsel-authority `() {
+        val (responseBody, expectedContent) =
             mockContent(
-                ZonedDateTime.now().minusDays(1), ZonedDateTime.now(), ZonedDateTime.now().plusDays(10), 5,
+                opprettet = ZonedDateTime.now().minusDays(1),
+                aktivFremTil = ZonedDateTime.now().plusDays(10),
+                typer = listOf("beskjed", "oppgave"),
             )
         testApplication {
             eventApiSetup(testHostUrl)
             initExternalServices(
                 testHostUrl,
                 VarselRouteProvider(
-                    type = type,
-                    endpoint = "/detaljert/aktive",
+                    type = "varsel",
+                    endpoint = "detaljert/aktive",
                     fnrHeaderShouldBe = dummyFnr,
-                    responseBody = aktiveMockresponse,
+                    responseBody = responseBody,
                 ),
             )
 
-            client.get("/$type/aktive") {
+            client.get("/varsel/aktive") {
                 header("fodselsnummer", "12345678910")
             }.apply {
                 status shouldBeEqualTo HttpStatusCode.OK
-                assertLegacyContent(bodyAsText(), aktiveExpectedResult)
+                assertContent(bodyAsText(), expectedContent)
             }
         }
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
-    fun `Henter inaktive varsler fra tms-varsel-authority og gjør de om til DTO`(type: String) {
+    @Test
+    fun `Henter inaktive varsler fra tms-varsel-authority og gjør de om til DTO`() {
         val (inaktivMockresponse, inaktiveExpectedResult) =
-            mockContentAndExpectedLegacyResponse(
-                type = type,
-                førstBehandlet = ZonedDateTime.now().minusDays(1),
-                sistOppdatert = ZonedDateTime.now(),
-                synligFremTil = null,
-                size = 2,
+            mockContent(
+                opprettet = ZonedDateTime.now().minusDays(1),
+                inaktivert = ZonedDateTime.now(),
+                typer = listOf("beskjed", "oppgave"),
             )
 
         testApplication {
@@ -58,31 +57,28 @@ class ApiTest {
             initExternalServices(
                 testHostUrl,
                 VarselRouteProvider(
-                    type = type,
+                    type = "varsel",
                     endpoint = "/detaljert/inaktive",
                     fnrHeaderShouldBe = dummyFnr,
                     responseBody = inaktivMockresponse,
                 ),
             )
-            client.get("/$type/inaktive") {
+            client.get("/varsel/inaktive") {
                 header("fodselsnummer", "12345678910")
             }.apply {
                 status shouldBeEqualTo HttpStatusCode.OK
-                assertLegacyContent(bodyAsText(), inaktiveExpectedResult)
+                assertContent(bodyAsText(), inaktiveExpectedResult)
             }
         }
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
-    fun `Henter alle varsler fra tms-varsel-authority og gjør de om til DTO`(type: String) {
+    @Test
+    fun `Henter alle varsler fra tms-varsel-authority og gjør de om til DTO`() {
         val (alleMockresponse, alleExpectedResult) =
-            mockContentAndExpectedLegacyResponse(
-                type = type,
-                førstBehandlet = ZonedDateTime.now().minusDays(1),
-                sistOppdatert = ZonedDateTime.now(),
-                synligFremTil = ZonedDateTime.now().plusDays(3),
-                size = 6,
+            mockContent(
+                opprettet = ZonedDateTime.now().minusDays(1),
+                aktivFremTil = ZonedDateTime.now().plusDays(10),
+                typer = listOf("beskjed", "oppgave"),
             )
 
         testApplication {
@@ -90,31 +86,34 @@ class ApiTest {
             initExternalServices(
                 testHostUrl,
                 VarselRouteProvider(
-                    type = type,
+                    type = "varsel",
                     endpoint = "/detaljert/alle",
                     fnrHeaderShouldBe = dummyFnr,
                     responseBody = alleMockresponse,
                 ),
             )
-            client.get("/$type/all") {
+            client.get("/varsel/all") {
                 header("fodselsnummer", "12345678910")
             }.apply {
                 status shouldBeEqualTo HttpStatusCode.OK
-                assertLegacyContent(bodyAsText(), alleExpectedResult)
+                assertContent(bodyAsText(), alleExpectedResult)
             }
         }
     }
 }
 
+private fun List<Pair<String, DetaljertVarsel>>.mapExternalServiceResponse(): List<String> = map { it.first }
+
 private fun mockContent(
     opprettet: ZonedDateTime,
     inaktivert: ZonedDateTime? = null,
     aktivFremTil: ZonedDateTime? = null,
-    vararg typer: String,
-): List<Pair<String, DetaljertVarsel>> {
-    return typer.map { type ->
-        Pair(
-            """{
+    typer: List<String>,
+): Pair<String, List<DetaljertVarsel>> {
+    return typer
+        .map { type ->
+            Pair(
+                """{
             "type": "$type",
             "varselId": "abc-123",
             "opprettet": "${opprettet.withFixedOffsetZone()}",
@@ -136,46 +135,73 @@ private fun mockContent(
                 "sistOppdatert": "${opprettet.withFixedOffsetZone()}"
             }
           }""",
-            DetaljertVarsel(
-                type = type,
-                varselId = "abc-123",
-                opprettet = opprettet.withFixedOffsetZone(),
-                produsent = Produsent("ns", "app"),
-                sensitivitet = Sensitivitet.substantial,
-                innhold = Innhold("Tadda vi tester"),
-                aktiv = false,
-                inaktivert = inaktivert?.withFixedOffsetZone(),
-                aktivFremTil = aktivFremTil?.withFixedOffsetZone(),
-                eksternVarsling =
-                EksternVarslingStatus(
-                    sendt = true,
-                    renotifikasjonSendt = false,
-                    kanaler = listOf("SMS", "EPOST"),
-                    historikk =
-                    listOf(
-                        EksternVarslingHistorikkEntry(
-                            status = "bestilt",
-                            melding = "Varsel bestilt",
-                            tidspunkt = opprettet,
+                DetaljertVarsel(
+                    type = type,
+                    varselId = "abc-123",
+                    opprettet = opprettet.withFixedOffsetZone(),
+                    produsent = Produsent("ns", "app"),
+                    sensitivitet = Sensitivitet.substantial,
+                    innhold = Innhold("Tadda vi tester"),
+                    aktiv = false,
+                    inaktivert = inaktivert?.withFixedOffsetZone(),
+                    aktivFremTil = aktivFremTil?.withFixedOffsetZone(),
+                    eksternVarsling =
+                        EksternVarslingStatus(
+                            sendt = true,
+                            renotifikasjonSendt = false,
+                            kanaler = listOf("SMS", "EPOST"),
+                            historikk =
+                                listOf(
+                                    EksternVarslingHistorikkEntry(
+                                        status = "bestilt",
+                                        melding = "Varsel bestilt",
+                                        tidspunkt = opprettet,
+                                    ),
+                                    EksternVarslingHistorikkEntry(
+                                        status = "sendt",
+                                        melding = "Varsel sendt på sms",
+                                        kanal = "SMS",
+                                        renotifikasjon = false,
+                                        tidspunkt = opprettet,
+                                    ),
+                                    EksternVarslingHistorikkEntry(
+                                        status = "sendt",
+                                        melding = "Varsel sendt på epost",
+                                        kanal = "EPOST",
+                                        renotifikasjon = false,
+                                        tidspunkt = opprettet,
+                                    ),
+                                ),
+                            sistOppdatert = opprettet,
                         ),
-                        EksternVarslingHistorikkEntry(
-                            status = "sendt",
-                            melding = "Varsel sendt på sms",
-                            kanal = "SMS",
-                            renotifikasjon = false,
-                            tidspunkt = opprettet,
-                        ),
-                        EksternVarslingHistorikkEntry(
-                            status = "sendt",
-                            melding = "Varsel sendt på epost",
-                            kanal = "EPOST",
-                            renotifikasjon = false,
-                            tidspunkt = opprettet,
-                        ),
-                    ),
-                    sistOppdatert = opprettet,
                 ),
-            ),
-        )
-    }*/
+            )
+        }
+        .let { generatedContent ->
+            Pair(
+                generatedContent.joinToString(separator = ",", prefix = "[", postfix = "]") { it.first },
+                generatedContent.map { it.second },
+            )
+        }
+}
+
+fun assertContent(
+    content: String?,
+    expectedResult: List<DetaljertVarsel>,
+) {
+    val jsonObjects = objectmapper.readTree(content)
+    jsonObjects.size() shouldBeEqualTo expectedResult.size
+    val expectedObject = expectedResult.first()
+    jsonObjects.first().also { resultObject ->
+        resultObject["varselId"].textValue() shouldBeEqualTo expectedObject.varselId
+        resultObject["produsent"]["namespace"].textValue() shouldBeEqualTo expectedObject.produsent.namespace
+        resultObject["produsent"]["appnavn"].textValue() shouldBeEqualTo expectedObject.produsent.appnavn
+        resultObject["sensitivitet"].textValue() shouldBeEqualTo expectedObject.sensitivitet.name
+        resultObject["innhold"]["tekst"].textValue() shouldBeEqualTo expectedObject.innhold.tekst
+        resultObject["innhold"]["link"].textValue() shouldBeEqualTo expectedObject.innhold.link
+        resultObject["aktiv"].asBoolean() shouldBeEqualTo expectedObject.aktiv
+        assertZonedDateTime(resultObject, expectedObject.aktivFremTil, "aktivFremTil")
+        assertZonedDateTime(resultObject, expectedObject.opprettet, "opprettet")
+        assertZonedDateTime(resultObject, expectedObject.inaktivert, "inaktivert")
+    }
 }
