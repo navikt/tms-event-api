@@ -92,7 +92,7 @@ class ApiTest {
                     responseBody = alleMockresponse,
                 ),
             )
-            client.get("/varsel/all") {
+            client.get("/varsel/alle") {
                 header("fodselsnummer", "12345678910")
             }.apply {
                 status shouldBeEqualTo HttpStatusCode.OK
