@@ -56,6 +56,7 @@ class ApiFeilhåndteringTest {
             initExternalServices(
                 testHostUrl,
                 ErrorRouteProvider(endpoint = "innboks/detaljert/aktive", statusCode = InternalServerError),
+                ErrorRouteProvider(endpoint = "innboks/detaljert/aktive", statusCode = InternalServerError),
             )
 
             client.get("/beskjed/aktive") {
@@ -72,7 +73,7 @@ class ApiFeilhåndteringTest {
     fun `bad request for ugyldig fødselsnummer i header`(varselType: String) {
         testApplication {
             eventApiSetup(testHostUrl)
-            client.get("/$varselType/aktive").status shouldBe HttpStatusCode.BadRequest
+            client.get("/detaljert/aktive").status shouldBe HttpStatusCode.BadRequest
             client.get {
                 url("/$varselType/inaktive")
                 header("fodselsnummer", "1234")
