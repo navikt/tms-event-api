@@ -15,6 +15,7 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import nav.no.tms.common.metrics.installTmsMicrometerMetrics
+import nav.no.tms.common.observability.ApiMdc
 import no.nav.tms.common.util.config.StringEnvVar
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.HttpClientBuilder
@@ -23,7 +24,6 @@ import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.*
 import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
 import no.nav.tms.token.support.azure.validation.azure
-import observability.ApiMdc
 
 fun main() {
     val varselAuthorityUrl = "http://tms-varsel-authority"
@@ -32,27 +32,29 @@ fun main() {
     val httpClient = HttpClientBuilder.build()
     val azureService = AzureServiceBuilder.buildAzureService(enableDefaultProxy = true)
     val azureTokenFetcher = AzureTokenFetcher(azureService, varselAuthorityClientId)
-    val varselReader = VarselReader(
-        azureTokenFetcher = azureTokenFetcher,
-        client = httpClient,
-        varselAuthorityUrl = varselAuthorityUrl,
-    )
+    val varselReader =
+        VarselReader(
+            azureTokenFetcher = azureTokenFetcher,
+            client = httpClient,
+            varselAuthorityUrl = varselAuthorityUrl,
+        )
 
     embeddedServer(
         factory = Netty,
-        environment = applicationEngineEnvironment {
-            rootPath = "tms-event-api"
-            module {
-                api(
-                    authConfig = authConfigBuilder(),
-                    httpClient = httpClient,
-                    varselReader = varselReader,
-                )
-            }
-            connector {
-                port = 8080
-            }
-        },
+        environment =
+            applicationEngineEnvironment {
+                rootPath = "tms-event-api"
+                module {
+                    api(
+                        authConfig = authConfigBuilder(),
+                        httpClient = httpClient,
+                        varselReader = varselReader,
+                    )
+                }
+                connector {
+                    port = 8080
+                }
+            },
     ).start(wait = true)
 }
 
@@ -114,10 +116,11 @@ private fun Application.configureShutdownHook(httpClient: HttpClient) {
     }
 }
 
-private fun authConfigBuilder(): Application.() -> Unit = {
-    authentication {
-        azure {
-            setAsDefault = true
+private fun authConfigBuilder(): Application.() -> Unit =
+    {
+        authentication {
+            azure {
+                setAsDefault = true
+            }
         }
     }
-}

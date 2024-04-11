@@ -3,12 +3,12 @@ package no.nav.tms.event.api.varsel
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.server.application.*
+import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.server.auth.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.mockk.mockk
+import nav.no.tms.common.testutils.initExternalServices
+import no.nav.tms.event.api.ErrorRouteProvider
 import no.nav.tms.event.api.api
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.jsonConfig
@@ -26,19 +26,21 @@ class ApiFeilhåndteringTest {
     @Test
     fun `håndterer feilresponse fra baksystemer`() {
         testApplication {
-            val applicationClient = createClient {
-                jsonConfig()
-                install(HttpTimeout) {
-                    requestTimeoutMillis = 2000
+            val applicationClient =
+                createClient {
+                    jsonConfig()
+                    install(HttpTimeout) {
+                        requestTimeoutMillis = 2000
+                    }
                 }
-            }
             application {
                 api(
-                    varselReader = VarselReader(
-                        azureTokenFetcher = tokenFetchMock,
-                        client = applicationClient,
-                        varselAuthorityUrl = testHostUrl,
-                    ),
+                    varselReader =
+                        VarselReader(
+                            azureTokenFetcher = tokenFetchMock,
+                            client = applicationClient,
+                            varselAuthorityUrl = testHostUrl,
+                        ),
                     httpClient = applicationClient,
                     authConfig = {
                         authentication {
@@ -50,15 +52,12 @@ class ApiFeilhåndteringTest {
                     },
                 )
             }
-            externalServices {
-                hosts(testHostUrl) {
-                    routing {
-                        get("innboks/detaljert/aktive") {
-                            call.respond(HttpStatusCode.InternalServerError)
-                        }
-                    }
-                }
-            }
+
+            initExternalServices(
+                testHostUrl,
+                ErrorRouteProvider(endpoint = "innboks/detaljert/aktive", statusCode = InternalServerError),
+                ErrorRouteProvider(endpoint = "innboks/detaljert/aktive", statusCode = InternalServerError),
+            )
 
             client.get("/beskjed/aktive") {
                 header("fodselsnummer", "12345678910")
@@ -73,9 +72,8 @@ class ApiFeilhåndteringTest {
     @ValueSource(strings = ["beskjed", "oppgave", "innboks"])
     fun `bad request for ugyldig fødselsnummer i header`(varselType: String) {
         testApplication {
-            eventApiSetup { }
-
-            client.get("/$varselType/aktive").status shouldBe HttpStatusCode.BadRequest
+            eventApiSetup(testHostUrl)
+            client.get("/detaljert/aktive").status shouldBe HttpStatusCode.BadRequest
             client.get {
                 url("/$varselType/inaktive")
                 header("fodselsnummer", "1234")

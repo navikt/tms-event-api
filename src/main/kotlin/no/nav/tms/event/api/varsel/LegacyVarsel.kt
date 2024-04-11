@@ -7,36 +7,38 @@ import kotlinx.serialization.UseSerializers
 import no.nav.tms.event.api.config.ZonedDateTimeSerializer
 import java.time.ZonedDateTime
 
-fun List<DetaljertVarsel>.toLegacyVarsler() = map { varsel ->
-    val eksternVarsling = varsel.eksternVarsling?.let { mapEksternVarsling(it) }
+fun List<DetaljertVarsel>.toLegacyVarsler() =
+    map { varsel ->
+        val eksternVarsling = varsel.eksternVarsling?.let { mapEksternVarsling(it) }
 
-    LegacyVarsel(
-        fodselsnummer = "",
-        grupperingsId = "",
-        eventId = varsel.varselId,
-        forstBehandlet = varsel.opprettet,
-        produsent = varsel.produsent.appnavn,
-        sikkerhetsnivaa = varsel.sensitivitet.loginLevel(),
-        sistOppdatert = varsel.inaktivert ?: varsel.opprettet,
-        synligFremTil = varsel.aktivFremTil,
-        tekst = varsel.innhold.tekst,
-        link = varsel.innhold.link ?: "",
-        aktiv = varsel.aktiv,
-        eksternVarsling = eksternVarsling,
-    )
-}
-
-private fun mapEksternVarsling(eksternVarsling: EksternVarslingStatus): LegacyEksternVarsling {
-    val historikk = eksternVarsling.historikk.map {
-        LegacyEksternVarslingHistorikkEntry(
-            melding = it.melding,
-            status = it.status,
-            distribusjonsId = it.distribusjonsId,
-            kanal = it.kanal,
-            renotifikasjon = it.renotifikasjon,
-            tidspunkt = it.tidspunkt,
+        LegacyVarsel(
+            fodselsnummer = "",
+            grupperingsId = "",
+            eventId = varsel.varselId,
+            forstBehandlet = varsel.opprettet,
+            produsent = varsel.produsent.appnavn,
+            sikkerhetsnivaa = varsel.sensitivitet.loginLevel(),
+            sistOppdatert = varsel.inaktivert ?: varsel.opprettet,
+            synligFremTil = varsel.aktivFremTil,
+            tekst = varsel.innhold.tekst,
+            link = varsel.innhold.link ?: "",
+            aktiv = varsel.aktiv,
+            eksternVarsling = eksternVarsling,
         )
     }
+
+private fun mapEksternVarsling(eksternVarsling: EksternVarslingStatus): LegacyEksternVarsling {
+    val historikk =
+        eksternVarsling.historikk.map {
+            LegacyEksternVarslingHistorikkEntry(
+                melding = it.melding,
+                status = it.status,
+                distribusjonsId = it.distribusjonsId,
+                kanal = it.kanal,
+                renotifikasjon = it.renotifikasjon,
+                tidspunkt = it.tidspunkt,
+            )
+        }
 
     return LegacyEksternVarsling(
         sendt = eksternVarsling.sendt,

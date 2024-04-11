@@ -11,7 +11,7 @@ private val ApplicationCall.varselTypeParam: String
     get() =
         parameters["varseltype"]?.let { varselTypeParam ->
             if (!listOf("innboks", "beskjed", "oppgave").contains(varselTypeParam)) {
-                throw IllegalArgumentException("Ukjent varsetype i url")
+                throw IllegalArgumentException("Ukjent varsetype '$varselTypeParam' i url")
             }
             varselTypeParam
         } ?: throw IllegalStateException("varseltype finnes ikke i url")

@@ -16,7 +16,6 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 object HttpClientBuilder {
-
     fun build(): HttpClient {
         return HttpClient(Apache) {
             install(ContentNegotiation) {
@@ -35,13 +34,15 @@ fun jsonConfig(): Json {
 }
 
 class ZonedDateTimeSerializer : KSerializer<ZonedDateTime> {
-
     override fun deserialize(decoder: Decoder): ZonedDateTime {
         val value = decoder.decodeString()
         return ZonedDateTime.parse(value)
     }
 
-    override fun serialize(encoder: Encoder, value: ZonedDateTime) {
+    override fun serialize(
+        encoder: Encoder,
+        value: ZonedDateTime,
+    ) {
         encoder.encodeString(value.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
     }
 

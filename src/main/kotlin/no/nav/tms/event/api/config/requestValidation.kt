@@ -8,7 +8,9 @@ inline fun PipelineContext<Unit, ApplicationCall>.doIfValidRequest(handler: (fnr
     val fnrHeader = call.request.headers[headerName]
     when {
         fnrHeader == null -> throw IllegalArgumentException("Request mangler header-en '$headerName'")
-        !isFodselsnummerOfValidLength(fnrHeader) -> throw IllegalArgumentException("'header '$headerName' i request er ikke et gyldig fødselsnummer.")
+        !isFodselsnummerOfValidLength(
+            fnrHeader,
+        ) -> throw IllegalArgumentException("'header '$headerName' i request er ikke et gyldig fødselsnummer.")
         else -> handler.invoke(fnrHeader)
     }
 }
