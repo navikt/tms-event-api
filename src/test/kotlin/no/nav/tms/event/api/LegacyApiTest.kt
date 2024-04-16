@@ -4,7 +4,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import nav.no.tms.common.testutils.initExternalServices
+import no.nav.tms.common.testutils.initExternalServices
 import no.nav.tms.event.api.varsel.*
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.TestInstance

@@ -7,7 +7,7 @@ import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.server.auth.*
 import io.ktor.server.testing.*
 import io.mockk.mockk
-import nav.no.tms.common.testutils.initExternalServices
+import no.nav.tms.common.testutils.initExternalServices
 import no.nav.tms.event.api.ErrorRouteProvider
 import no.nav.tms.event.api.api
 import no.nav.tms.event.api.config.AzureTokenFetcher
