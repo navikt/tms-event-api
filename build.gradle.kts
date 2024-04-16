@@ -1,19 +1,19 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin on the JVM.
     kotlin("jvm").version(Kotlin.version)
     kotlin("plugin.serialization").version(Kotlin.version)
-    kotlin("plugin.allopen").version(Kotlin.version)
 
     id(Shadow.pluginId) version (Shadow.version)
     // Apply the application plugin to add support for building a CLI application.
     application
 }
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "17"
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(17))
+    }
 }
 
 repositories {
@@ -43,8 +43,6 @@ dependencies {
     implementation(TmsCommonLib.metrics)
     implementation(TmsCommonLib.observability)
 
-    implementation(Logstash.logbackEncoder)
-
     testImplementation(Junit.api)
     testImplementation(Ktor.Serialization.jackson)
     testImplementation(Ktor.Test.clientMock)
@@ -55,7 +53,7 @@ dependencies {
     testImplementation(Junit.params)
     testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.5")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.10")
-    testImplementation(TmsCommonLib.testutils)
+    testImplementation(TmsTestUtils.testUtils)
 
     testRuntimeOnly(Jjwt.impl)
     testRuntimeOnly(Junit.engine)
@@ -74,8 +72,3 @@ tasks {
         }
     }
 }
-
-// TODO: Fjern følgende work around i ny versjon av Shadow-pluginet:
-// Skal være løst i denne: https://github.com/johnrengelman/shadow/pull/612
-project.setProperty("mainClassName", application.mainClass.get())
-apply(plugin = Shadow.pluginId)

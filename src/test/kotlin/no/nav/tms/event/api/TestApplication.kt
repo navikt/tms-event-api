@@ -13,7 +13,7 @@ import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk
-import nav.no.tms.common.testutils.RouteProvider
+import no.nav.tms.common.testutils.RouteProvider
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.LegacyVarsel

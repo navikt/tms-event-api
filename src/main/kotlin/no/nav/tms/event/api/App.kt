@@ -14,8 +14,8 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import nav.no.tms.common.metrics.installTmsMicrometerMetrics
-import nav.no.tms.common.observability.ApiMdc
+import no.nav.tms.common.metrics.installTmsMicrometerMetrics
+import no.nav.tms.common.observability.ApiMdc
 import no.nav.tms.common.util.config.StringEnvVar
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.HttpClientBuilder
