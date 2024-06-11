@@ -43,6 +43,9 @@ spec:
         - application: modiapersonoversikt-api
           namespace: personoversikt
           cluster: prod-fss
+        - application: modiapersonoversikt-api
+          namespace: personoversikt
+          cluster: prod-gcp
     outbound:
       rules:
         - application: tms-varsel-authority

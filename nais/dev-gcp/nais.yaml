@@ -47,6 +47,9 @@ spec:
         - application: modiapersonoversikt-api-q0
           namespace: personoversikt
           cluster: dev-fss
+        - application: modiapersonoversikt-api
+          namespace: personoversikt
+          cluster: dev-gcp
     outbound:
       rules:
         - application: tms-varsel-authority
