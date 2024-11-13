@@ -28,24 +28,11 @@ fun List<DetaljertVarsel>.toLegacyVarsler() =
     }
 
 private fun mapEksternVarsling(eksternVarsling: EksternVarslingStatus): LegacyEksternVarsling {
-    val historikk =
-        eksternVarsling.historikk.map {
-            LegacyEksternVarslingHistorikkEntry(
-                melding = it.melding,
-                status = it.status,
-                distribusjonsId = it.distribusjonsId,
-                kanal = it.kanal,
-                renotifikasjon = it.renotifikasjon,
-                tidspunkt = it.tidspunkt,
-            )
-        }
-
     return LegacyEksternVarsling(
         sendt = eksternVarsling.sendt,
         renotifikasjonSendt = eksternVarsling.renotifikasjonSendt,
         prefererteKanaler = emptyList(),
-        sendteKanaler = eksternVarsling.kanaler,
-        historikk = historikk,
+        sendteKanaler = eksternVarsling.kanaler
     )
 }
 
@@ -74,7 +61,7 @@ data class LegacyEksternVarsling(
     val renotifikasjonSendt: Boolean,
     val prefererteKanaler: List<String>,
     val sendteKanaler: List<String>,
-    val historikk: List<LegacyEksternVarslingHistorikkEntry>,
+    val historikk: List<LegacyEksternVarslingHistorikkEntry> = emptyList(),
 )
 
 @Serializable

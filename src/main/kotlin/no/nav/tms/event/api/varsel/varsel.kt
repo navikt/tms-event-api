@@ -52,8 +52,8 @@ data class EksternVarslingStatus(
     val sendt: Boolean,
     val renotifikasjonSendt: Boolean,
     val kanaler: List<String>,
-    val historikk: List<EksternVarslingHistorikkEntry>,
     val sistOppdatert: ZonedDateTime,
+    val historikk: List<EksternVarslingHistorikkEntry> = emptyList(),
 )
 
 @Serializable

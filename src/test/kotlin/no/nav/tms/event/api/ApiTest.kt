@@ -127,11 +127,6 @@ private fun mockContent(
                 "sendt": true,
                 "renotifikasjonSendt": true,
                 "kanaler": ["SMS", "EPOST"],
-                "historikk": [
-                    { "status": "bestilt", "melding": "Varsel bestilt", "tidspunkt": "$opprettet" },
-                    { "status": "sendt", "melding": "Varsel sendt på sms", "kanal": "SMS", "renotifikasjon": false, "tidspunkt": "$opprettet" },
-                    { "status": "sendt", "melding": "Varsel sendt på epost", "kanal": "EPOST", "renotifikasjon": false, "tidspunkt": "$opprettet" }
-                ],
                 "sistOppdatert": "${opprettet.withFixedOffsetZone()}"
             }
           }""",
@@ -150,28 +145,6 @@ private fun mockContent(
                             sendt = true,
                             renotifikasjonSendt = false,
                             kanaler = listOf("SMS", "EPOST"),
-                            historikk =
-                                listOf(
-                                    EksternVarslingHistorikkEntry(
-                                        status = "bestilt",
-                                        melding = "Varsel bestilt",
-                                        tidspunkt = opprettet,
-                                    ),
-                                    EksternVarslingHistorikkEntry(
-                                        status = "sendt",
-                                        melding = "Varsel sendt på sms",
-                                        kanal = "SMS",
-                                        renotifikasjon = false,
-                                        tidspunkt = opprettet,
-                                    ),
-                                    EksternVarslingHistorikkEntry(
-                                        status = "sendt",
-                                        melding = "Varsel sendt på epost",
-                                        kanal = "EPOST",
-                                        renotifikasjon = false,
-                                        tidspunkt = opprettet,
-                                    ),
-                                ),
                             sistOppdatert = opprettet,
                         ),
                 ),

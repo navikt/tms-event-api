@@ -163,11 +163,6 @@ private fun mockContentAndExpectedLegacyResponse(
             "sendt": true,
             "renotifikasjonSendt": true,
             "kanaler": ["SMS", "EPOST"],
-            "historikk": [
-                { "status": "bestilt", "melding": "Varsel bestilt", "tidspunkt": "$sistOppdatert" },
-                { "status": "sendt", "melding": "Varsel sendt på sms", "kanal": "SMS", "renotifikasjon": false, "tidspunkt": "$sistOppdatert" },
-                { "status": "sendt", "melding": "Varsel sendt på epost", "kanal": "EPOST", "renotifikasjon": false, "tidspunkt": "$sistOppdatert" }
-            ],
             "sistOppdatert": "${sistOppdatert.withFixedOffsetZone()}"
         }
       }""".jsonArray(size),
@@ -188,29 +183,7 @@ private fun mockContentAndExpectedLegacyResponse(
                     sendt = true,
                     renotifikasjonSendt = false,
                     sendteKanaler = listOf("SMS", "EPOST"),
-                    prefererteKanaler = emptyList(),
-                    historikk =
-                        listOf(
-                            LegacyEksternVarslingHistorikkEntry(
-                                status = "bestilt",
-                                melding = "Varsel bestilt",
-                                tidspunkt = sistOppdatert,
-                            ),
-                            LegacyEksternVarslingHistorikkEntry(
-                                status = "sendt",
-                                melding = "Varsel sendt på sms",
-                                kanal = "SMS",
-                                renotifikasjon = false,
-                                tidspunkt = sistOppdatert,
-                            ),
-                            LegacyEksternVarslingHistorikkEntry(
-                                status = "sendt",
-                                melding = "Varsel sendt på epost",
-                                kanal = "EPOST",
-                                renotifikasjon = false,
-                                tidspunkt = sistOppdatert,
-                            ),
-                        ),
+                    prefererteKanaler = emptyList()
                 ),
         ) * size,
     )
