@@ -41,20 +41,20 @@ fun main() {
 
     embeddedServer(
         factory = Netty,
-        environment =
-            applicationEngineEnvironment {
-                rootPath = "tms-event-api"
-                module {
-                    api(
-                        authConfig = authConfigBuilder(),
-                        httpClient = httpClient,
-                        varselReader = varselReader,
-                    )
-                }
-                connector {
-                    port = 8080
-                }
-            },
+        configure = {
+            connector {
+                port = 8080
+            }
+        },
+        module = {
+            rootPath = "tms-event-api"
+
+            api(
+                authConfig = authConfigBuilder(),
+                httpClient = httpClient,
+                varselReader = varselReader,
+            )
+        },
     ).start(wait = true)
 }
 

@@ -1,9 +1,8 @@
 package no.nav.tms.event.api.config
 
-import io.ktor.server.application.*
-import io.ktor.util.pipeline.*
+import io.ktor.server.routing.*
 
-inline fun PipelineContext<Unit, ApplicationCall>.doIfValidRequest(handler: (fnr: String) -> Unit) {
+inline fun RoutingContext.doIfValidRequest(handler: (fnr: String) -> Unit) {
     val headerName = "fodselsnummer"
     val fnrHeader = call.request.headers[headerName]
     when {
