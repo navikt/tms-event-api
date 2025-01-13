@@ -111,7 +111,7 @@ fun Application.api(
 }
 
 private fun Application.configureShutdownHook(httpClient: HttpClient) {
-    environment.monitor.subscribe(ApplicationStopping) {
+    monitor.subscribe(ApplicationStopping) {
         httpClient.close()
     }
 }

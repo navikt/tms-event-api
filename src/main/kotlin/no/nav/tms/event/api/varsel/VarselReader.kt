@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.token.support.azure.validation.AzureHeader
+import java.net.URI
 import java.net.URL
 
 class VarselReader(
@@ -21,7 +22,7 @@ class VarselReader(
         fnr: String,
         varselPath: String,
     ): List<DetaljertVarsel> {
-        val completePathToEndpoint = URL("$varselAuthorityUrl/$varselPath")
+        val completePathToEndpoint = URI.create("$varselAuthorityUrl/$varselPath").toURL()
         val azureToken = azureTokenFetcher.fetchTokenForVarselAuthority()
         return client.getWithAzureAndFnr(completePathToEndpoint, azureToken, fnr)
     }
