@@ -1,18 +1,17 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
-    // Apply the Kotlin JVM plugin to add support for Kotlin on the JVM.
     kotlin("jvm").version(Kotlin.version)
     kotlin("plugin.serialization").version(Kotlin.version)
 
-    id(Shadow.pluginId) version (Shadow.version)
-    // Apply the application plugin to add support for building a CLI application.
+    id(TmsJarBundling.plugin)
+
     application
 }
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(17))
+        languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
 
@@ -52,8 +51,6 @@ dependencies {
     testImplementation(Kluent.kluent)
     testImplementation(Mockk.mockk)
     testImplementation(Junit.params)
-    testImplementation("io.ktor:ktor-server-test-host-jvm:2.3.5")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit:1.9.10")
     testImplementation(TmsTestUtils.testUtils)
 
     testRuntimeOnly(Jjwt.impl)
