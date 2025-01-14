@@ -43,18 +43,18 @@ dependencies {
     implementation(TmsCommonLib.metrics)
     implementation(TmsCommonLib.observability)
 
-    testImplementation(Junit.api)
+    testImplementation(JunitPlatform.launcher)
+    testImplementation(JunitJupiter.api)
+    testImplementation(JunitJupiter.params)
     testImplementation(Ktor.Serialization.jackson)
     testImplementation(Ktor.Test.clientMock)
     testImplementation(Ktor.Test.serverTestHost)
     testImplementation(TmsKtorTokenSupport.azureValidationMock)
     testImplementation(Kluent.kluent)
     testImplementation(Mockk.mockk)
-    testImplementation(Junit.params)
     testImplementation(TmsTestUtils.testUtils)
 
     testRuntimeOnly(Jjwt.impl)
-    testRuntimeOnly(Junit.engine)
 }
 
 application {
