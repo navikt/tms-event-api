@@ -2,26 +2,27 @@ package no.nav.tms.event.api
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.kotest.assertions.withClue
+import io.kotest.matchers.nulls.shouldNotBeNull
+import io.kotest.matchers.shouldBe
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.*
+import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.auth.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.tms.common.testutils.RouteProvider
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.LegacyVarsel
 import no.nav.tms.event.api.varsel.VarselReader
 import no.nav.tms.token.support.azure.validation.mock.azureMock
-import org.amshove.kluent.internal.assertFalse
-import org.amshove.kluent.shouldBe
-import org.amshove.kluent.shouldBeEqualTo
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
@@ -70,32 +71,37 @@ fun ApplicationTestBuilder.eventApiSetup(
     block()
 }
 
-class VarselRouteProvider(
-    type: String,
-    endpoint: String,
-    fnrHeaderShouldBe: String,
-    private val responseBody: String,
+fun TestApplicationBuilder.setupExternalVarselRoute(
+    host: String,
+    path: String,
+    responseBody: String,
     statusCode: HttpStatusCode = OK,
-) :
-    RouteProvider(
-            statusCode = statusCode,
-            path = "/$type/$endpoint",
-            routeMethodFunction = Routing::get,
-            assert = { call ->
-                if (call.request.headers["ident"] != fnrHeaderShouldBe) {
-                    call.respond(HttpStatusCode.BadRequest)
+    contentType: ContentType = ContentType.Application.Json,
+    requestPeek: suspend (ApplicationRequest) -> Unit = {},
+) {
+    externalServices {
+        hosts(host) {
+            routing {
+                get(path) {
+                    requestPeek.invoke(call.request)
+                    call.respondText(responseBody, status = statusCode, contentType = contentType)
                 }
-            },
-        ) {
-    override fun content(): String = responseBody
+            }
+        }
+    }
 }
 
-class ErrorRouteProvider(
-    private val endpoint: String,
-    statusCode: HttpStatusCode,
-) : RouteProvider(endpoint, Routing::get, statusCode) {
-    override fun content(): String = "Error from $endpoint"
-}
+fun TestApplicationBuilder.setupErrorVarselRoute(
+    host: String,
+    path: String,
+    statusCode: HttpStatusCode = InternalServerError
+) = setupExternalVarselRoute(
+    host = host,
+    path = path,
+    responseBody = "Oh no",
+    statusCode = statusCode,
+    contentType = ContentType.Text.Plain,
+)
 
 internal operator fun LegacyVarsel.times(size: Int): List<LegacyVarsel> =
     mutableListOf<LegacyVarsel>().also { list ->
@@ -111,8 +117,10 @@ internal fun assertZonedDateTime(
 ) {
     if (expectedDate != null) {
         val resultDate = ZonedDateTime.parse(jsonNode?.get(key)?.textValue()).truncatedTo(ChronoUnit.MINUTES)
-        assertFalse(resultDate == null, "$key skal ikke være null")
-        resultDate.toString() shouldBeEqualTo expectedDate.truncatedTo(ChronoUnit.MINUTES).toString()
+        withClue("$key skal ikke være null") {
+            resultDate.shouldNotBeNull()
+        }
+        resultDate.toString() shouldBe expectedDate.truncatedTo(ChronoUnit.MINUTES).toString()
     } else {
         jsonNode?.get(key)?.textValue() shouldBe null
     }

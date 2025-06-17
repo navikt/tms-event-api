@@ -1,12 +1,11 @@
 package no.nav.tms.event.api
 
+import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import no.nav.tms.common.testutils.initExternalServices
 import no.nav.tms.event.api.varsel.*
-import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.Test
 import java.time.ZonedDateTime
 
@@ -24,22 +23,26 @@ class ApiTest {
             )
         testApplication {
             eventApiSetup(testHostUrl)
-            initExternalServices(
-                testHostUrl,
-                VarselRouteProvider(
-                    type = "varsel",
-                    endpoint = "detaljert/aktive",
-                    fnrHeaderShouldBe = dummyFnr,
-                    responseBody = responseBody,
-                ),
+
+            var fnrHeader: String? = null
+
+            setupExternalVarselRoute(
+                host = testHostUrl,
+                path = "/varsel/detaljert/aktive",
+                responseBody = responseBody,
+                requestPeek = {
+                    fnrHeader = it.headers["ident"]
+                },
             )
 
             client.get("/varsel/aktive") {
-                header("fodselsnummer", "12345678910")
+                header("fodselsnummer", dummyFnr)
             }.apply {
-                status shouldBeEqualTo HttpStatusCode.OK
+                status shouldBe HttpStatusCode.OK
                 assertContent(bodyAsText(), expectedContent)
             }
+
+            fnrHeader shouldBe dummyFnr
         }
     }
 
@@ -54,21 +57,26 @@ class ApiTest {
 
         testApplication {
             eventApiSetup(testHostUrl)
-            initExternalServices(
-                testHostUrl,
-                VarselRouteProvider(
-                    type = "varsel",
-                    endpoint = "/detaljert/inaktive",
-                    fnrHeaderShouldBe = dummyFnr,
-                    responseBody = inaktivMockresponse,
-                ),
+
+            var fnrHeader: String? = null
+
+            setupExternalVarselRoute(
+                host = testHostUrl,
+                path = "/varsel/detaljert/inaktive",
+                responseBody = inaktivMockresponse,
+                requestPeek = {
+                    fnrHeader = it.headers["ident"]
+                },
             )
+
             client.get("/varsel/inaktive") {
                 header("fodselsnummer", "12345678910")
             }.apply {
-                status shouldBeEqualTo HttpStatusCode.OK
+                status shouldBe HttpStatusCode.OK
                 assertContent(bodyAsText(), inaktiveExpectedResult)
             }
+
+            fnrHeader shouldBe dummyFnr
         }
     }
 
@@ -83,26 +91,29 @@ class ApiTest {
 
         testApplication {
             eventApiSetup(testHostUrl)
-            initExternalServices(
-                testHostUrl,
-                VarselRouteProvider(
-                    type = "varsel",
-                    endpoint = "/detaljert/alle",
-                    fnrHeaderShouldBe = dummyFnr,
-                    responseBody = alleMockresponse,
-                ),
+
+            var fnrHeader: String? = null
+
+            setupExternalVarselRoute(
+                host = testHostUrl,
+                path = "varsel/detaljert/alle",
+                responseBody = alleMockresponse,
+                requestPeek = {
+                    fnrHeader = it.headers["ident"]
+                }
             )
+
             client.get("/varsel/alle") {
                 header("fodselsnummer", "12345678910")
             }.apply {
-                status shouldBeEqualTo HttpStatusCode.OK
+                status shouldBe HttpStatusCode.OK
                 assertContent(bodyAsText(), alleExpectedResult)
             }
+
+            fnrHeader shouldBe dummyFnr
         }
     }
 }
-
-private fun List<Pair<String, DetaljertVarsel>>.mapExternalServiceResponse(): List<String> = map { it.first }
 
 private fun mockContent(
     opprettet: ZonedDateTime,
@@ -163,16 +174,16 @@ fun assertContent(
     expectedResult: List<DetaljertVarsel>,
 ) {
     val jsonObjects = objectmapper.readTree(content)
-    jsonObjects.size() shouldBeEqualTo expectedResult.size
+    jsonObjects.size() shouldBe expectedResult.size
     val expectedObject = expectedResult.first()
     jsonObjects.first().also { resultObject ->
-        resultObject["varselId"].textValue() shouldBeEqualTo expectedObject.varselId
-        resultObject["produsent"]["namespace"].textValue() shouldBeEqualTo expectedObject.produsent.namespace
-        resultObject["produsent"]["appnavn"].textValue() shouldBeEqualTo expectedObject.produsent.appnavn
-        resultObject["sensitivitet"].textValue() shouldBeEqualTo expectedObject.sensitivitet.name
-        resultObject["innhold"]["tekst"].textValue() shouldBeEqualTo expectedObject.innhold.tekst
-        resultObject["innhold"]["link"].textValue() shouldBeEqualTo expectedObject.innhold.link
-        resultObject["aktiv"].asBoolean() shouldBeEqualTo expectedObject.aktiv
+        resultObject["varselId"].textValue() shouldBe expectedObject.varselId
+        resultObject["produsent"]["namespace"].textValue() shouldBe expectedObject.produsent.namespace
+        resultObject["produsent"]["appnavn"].textValue() shouldBe expectedObject.produsent.appnavn
+        resultObject["sensitivitet"].textValue() shouldBe expectedObject.sensitivitet.name
+        resultObject["innhold"]["tekst"].textValue() shouldBe expectedObject.innhold.tekst
+        resultObject["innhold"]["link"].textValue() shouldBe expectedObject.innhold.link
+        resultObject["aktiv"].asBoolean() shouldBe expectedObject.aktiv
         assertZonedDateTime(resultObject, expectedObject.aktivFremTil, "aktivFremTil")
         assertZonedDateTime(resultObject, expectedObject.opprettet, "opprettet")
         assertZonedDateTime(resultObject, expectedObject.inaktivert, "inaktivert")

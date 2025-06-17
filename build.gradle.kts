@@ -50,9 +50,8 @@ dependencies {
     testImplementation(Ktor.Test.clientMock)
     testImplementation(Ktor.Test.serverTestHost)
     testImplementation(TmsKtorTokenSupport.azureValidationMock)
-    testImplementation(Kluent.kluent)
+    testImplementation(Kotest.assertionsCore)
     testImplementation(Mockk.mockk)
-    testImplementation(TmsTestUtils.testUtils)
 
     testRuntimeOnly(Jjwt.impl)
 }

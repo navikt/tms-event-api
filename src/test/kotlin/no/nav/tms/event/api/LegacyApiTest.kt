@@ -1,12 +1,11 @@
 package no.nav.tms.event.api
 
+import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
-import no.nav.tms.common.testutils.initExternalServices
 import no.nav.tms.event.api.varsel.*
-import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -30,22 +29,26 @@ class LegacyApiTest {
             )
         testApplication {
             eventApiSetup(testHostUrl)
-            initExternalServices(
+
+            var fnrHeader: String? = null
+
+            setupExternalVarselRoute(
                 testHostUrl,
-                VarselRouteProvider(
-                    type = type,
-                    endpoint = "/detaljert/aktive",
-                    fnrHeaderShouldBe = dummyFnr,
-                    responseBody = aktiveMockresponse,
-                ),
+                path = "$type/detaljert/aktive",
+                responseBody = aktiveMockresponse,
+                requestPeek = {
+                    fnrHeader = it.headers["ident"]
+                },
             )
 
             client.get("/$type/aktive") {
-                header("fodselsnummer", "12345678910")
+                header("fodselsnummer", dummyFnr)
             }.apply {
-                status shouldBeEqualTo HttpStatusCode.OK
+                status shouldBe HttpStatusCode.OK
                 assertLegacyContent(bodyAsText(), aktiveExpectedResult)
             }
+
+            fnrHeader shouldBe dummyFnr
         }
     }
 
@@ -63,21 +66,25 @@ class LegacyApiTest {
 
         testApplication {
             eventApiSetup(testHostUrl)
-            initExternalServices(
-                testHostUrl,
-                VarselRouteProvider(
-                    type = type,
-                    endpoint = "/detaljert/inaktive",
-                    fnrHeaderShouldBe = dummyFnr,
-                    responseBody = inaktivMockresponse,
-                ),
+
+            var fnrHeader: String? = null
+
+            setupExternalVarselRoute(
+                host = testHostUrl,
+                path = "/$type/detaljert/inaktive",
+                responseBody = inaktivMockresponse,
+                requestPeek = {
+                    fnrHeader = it.headers["ident"]
+                },
             )
             client.get("/$type/inaktive") {
-                header("fodselsnummer", "12345678910")
+                header("fodselsnummer", dummyFnr)
             }.apply {
-                status shouldBeEqualTo HttpStatusCode.OK
+                status shouldBe HttpStatusCode.OK
                 assertLegacyContent(bodyAsText(), inaktiveExpectedResult)
             }
+
+            fnrHeader shouldBe dummyFnr
         }
     }
 
@@ -95,21 +102,26 @@ class LegacyApiTest {
 
         testApplication {
             eventApiSetup(testHostUrl)
-            initExternalServices(
-                testHostUrl,
-                VarselRouteProvider(
-                    type = type,
-                    endpoint = "/detaljert/alle",
-                    fnrHeaderShouldBe = dummyFnr,
-                    responseBody = alleMockresponse,
-                ),
+
+            var fnrHeader: String? = null
+
+            setupExternalVarselRoute(
+                host = testHostUrl,
+                path = "/$type/detaljert/alle",
+                responseBody = alleMockresponse,
+                requestPeek = {
+                    fnrHeader = it.headers["ident"]
+                },
             )
+
             client.get("/$type/all") {
-                header("fodselsnummer", "12345678910")
+                header("fodselsnummer", dummyFnr)
             }.apply {
-                status shouldBeEqualTo HttpStatusCode.OK
+                status shouldBe HttpStatusCode.OK
                 assertLegacyContent(bodyAsText(), alleExpectedResult)
             }
+
+            fnrHeader shouldBe dummyFnr
         }
     }
 }
@@ -119,17 +131,17 @@ private fun assertLegacyContent(
     expectedResult: List<LegacyVarsel>,
 ) {
     val jsonObjects = objectmapper.readTree(content)
-    jsonObjects.size() shouldBeEqualTo expectedResult.size
+    jsonObjects.size() shouldBe expectedResult.size
     val expectedObject = expectedResult.first()
     jsonObjects.first().also { resultObject ->
-        resultObject["fodselsnummer"].textValue() shouldBeEqualTo expectedObject.fodselsnummer
-        resultObject["grupperingsId"].textValue() shouldBeEqualTo expectedObject.grupperingsId
-        resultObject["eventId"].textValue() shouldBeEqualTo expectedObject.eventId
-        resultObject["produsent"].textValue() shouldBeEqualTo expectedObject.produsent
-        resultObject["sikkerhetsnivaa"].asInt() shouldBeEqualTo expectedObject.sikkerhetsnivaa
-        resultObject["tekst"].textValue() shouldBeEqualTo expectedObject.tekst
-        resultObject["link"].textValue() shouldBeEqualTo expectedObject.link
-        resultObject["aktiv"].asBoolean() shouldBeEqualTo expectedObject.aktiv
+        resultObject["fodselsnummer"].textValue() shouldBe expectedObject.fodselsnummer
+        resultObject["grupperingsId"].textValue() shouldBe expectedObject.grupperingsId
+        resultObject["eventId"].textValue() shouldBe expectedObject.eventId
+        resultObject["produsent"].textValue() shouldBe expectedObject.produsent
+        resultObject["sikkerhetsnivaa"].asInt() shouldBe expectedObject.sikkerhetsnivaa
+        resultObject["tekst"].textValue() shouldBe expectedObject.tekst
+        resultObject["link"].textValue() shouldBe expectedObject.link
+        resultObject["aktiv"].asBoolean() shouldBe expectedObject.aktiv
         assertZonedDateTime(resultObject, expectedObject.synligFremTil, "synligFremTil")
         assertZonedDateTime(resultObject, expectedObject.forstBehandlet, "forstBehandlet")
         assertZonedDateTime(resultObject, expectedObject.sistOppdatert, "sistOppdatert")
