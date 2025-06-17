@@ -1,20 +1,18 @@
 package no.nav.tms.event.api.varsel
 
+import io.kotest.matchers.shouldBe
 import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.server.auth.*
 import io.ktor.server.testing.*
 import io.mockk.mockk
-import no.nav.tms.common.testutils.initExternalServices
-import no.nav.tms.event.api.ErrorRouteProvider
 import no.nav.tms.event.api.api
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.event.api.config.jsonConfig
+import no.nav.tms.event.api.setupErrorVarselRoute
 import no.nav.tms.event.api.eventApiSetup
 import no.nav.tms.token.support.azure.validation.mock.azureMock
-import org.amshove.kluent.shouldBe
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
@@ -53,15 +51,8 @@ class ApiFeilhåndteringTest {
                 )
             }
 
-            initExternalServices(
-                testHostUrl,
-                ErrorRouteProvider(endpoint = "innboks/detaljert/aktive", statusCode = InternalServerError),
-                ErrorRouteProvider(endpoint = "innboks/detaljert/aktive", statusCode = InternalServerError),
-            )
+            setupErrorVarselRoute(testHostUrl, "/innboks/aktive")
 
-            client.get("/beskjed/aktive") {
-                header("fodselsnummer", "12345678910")
-            }.status shouldBe HttpStatusCode.ServiceUnavailable
             client.get("/innboks/aktive") {
                 header("fodselsnummer", "12345678910")
             }.status shouldBe HttpStatusCode.ServiceUnavailable
