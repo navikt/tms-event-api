@@ -14,6 +14,7 @@ import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import no.nav.tms.common.logging.TeamLogs
 import no.nav.tms.common.metrics.installTmsMicrometerMetrics
 import no.nav.tms.common.observability.ApiMdc
 import no.nav.tms.common.util.config.StringEnvVar
@@ -64,7 +65,7 @@ fun Application.api(
     authConfig: Application.() -> Unit,
 ) {
     val log = KotlinLogging.logger {}
-    val securelog = KotlinLogging.logger("secureLog")
+    val teamLog = TeamLogs.logger { }
 
     install(DefaultHeaders)
     authConfig()
@@ -91,8 +92,8 @@ fun Application.api(
                 }
 
                 else -> {
-                    log.error { "Kall til ${call.request.uri} feilet: ${cause.message}" }
-                    securelog.error(cause) { "Kall til ${call.request.uri} feilet: \n ${cause.stackTrace}" }
+                    log.error { "Henting av varsler fra ${call.request.uri} feilet." }
+                    teamLog.error(cause) { "Henting av varsler fra ${call.request.uri} feilet." }
                     call.respond(HttpStatusCode.InternalServerError)
                 }
             }

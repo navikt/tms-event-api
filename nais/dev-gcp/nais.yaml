@@ -17,8 +17,6 @@ spec:
   prometheus:
     enabled: true
     path: /tms-event-api/metrics
-  secureLogs:
-    enabled: true
   observability:
     autoInstrumentation:
       enabled: true
@@ -57,6 +55,8 @@ spec:
     outbound:
       rules:
         - application: tms-varsel-authority
+        - application: logging
+          namespace: nais-system
   env:
     - name: VARSEL_AUTHORITY_CLIENT_ID
       value: dev-gcp.min-side.tms-varsel-authority

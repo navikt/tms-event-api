@@ -39,9 +39,10 @@ dependencies {
     implementation(Logstash.logbackEncoder)
     implementation(TmsKtorTokenSupport.azureExchange)
     implementation(TmsKtorTokenSupport.azureValidation)
-    implementation(TmsCommonLib.utils)
     implementation(TmsCommonLib.metrics)
     implementation(TmsCommonLib.observability)
+    implementation(TmsCommonLib.teamLogger)
+    implementation(TmsCommonLib.utils)
 
     testImplementation(JunitPlatform.launcher)
     testImplementation(JunitJupiter.api)
