@@ -50,18 +50,17 @@ data class Produsent(
 @Serializable
 data class EksternVarslingStatus(
     val sendt: Boolean,
+    val sendtTidspunkt: ZonedDateTime? = null,
+    val sendtSomBatch: Boolean,
     val renotifikasjonSendt: Boolean,
+    val renotifikasjonTidspunkt: ZonedDateTime? = null,
     val kanaler: List<String>,
-    val sistOppdatert: ZonedDateTime,
-    val historikk: List<EksternVarslingHistorikkEntry> = emptyList(),
+    val feilhistorikk: List<EksternFeilHistorikkEntry>,
+    val sistOppdatert: ZonedDateTime
 )
 
 @Serializable
-data class EksternVarslingHistorikkEntry(
-    val melding: String,
-    val status: String,
-    val distribusjonsId: Long? = null,
-    val kanal: String? = null,
-    val renotifikasjon: Boolean? = null,
-    val tidspunkt: ZonedDateTime,
+data class EksternFeilHistorikkEntry(
+    val feilmelding: String,
+    val tidspunkt: ZonedDateTime
 )

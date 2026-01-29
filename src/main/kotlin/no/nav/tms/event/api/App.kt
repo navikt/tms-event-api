@@ -103,7 +103,10 @@ fun Application.api(
     routing {
         healthApi()
         authenticate {
-            legavyVarselApi(varselReader)
+            legacyVarselApi(varselReader)
+            varselApi(varselReader)
+        }
+        route("/debug") {
             varselApi(varselReader)
         }
     }

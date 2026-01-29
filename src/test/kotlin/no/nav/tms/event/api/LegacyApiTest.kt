@@ -173,8 +173,12 @@ private fun mockContentAndExpectedLegacyResponse(
         "aktiv": false,
         "eksternVarsling": {
             "sendt": true,
+            "sendtTidspunkt": "${sistOppdatert.withFixedOffsetZone()}",
+            "sendtSomBatch": false,
             "renotifikasjonSendt": true,
+            "renotifikasjonTidspunkt": "${sistOppdatert.withFixedOffsetZone()}",
             "kanaler": ["SMS", "EPOST"],
+            "feilhistorikk": [{"feilmelding": "Kortvarig feil", "tidspunkt": "${sistOppdatert.withFixedOffsetZone()}"}]
             "sistOppdatert": "${sistOppdatert.withFixedOffsetZone()}"
         }
       }""".jsonArray(size),

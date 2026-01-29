@@ -16,7 +16,7 @@ private val ApplicationCall.varselTypeParam: String
             varselTypeParam
         } ?: throw IllegalStateException("varseltype finnes ikke i url")
 
-fun Route.legavyVarselApi(varselReader: VarselReader) {
+fun Route.legacyVarselApi(varselReader: VarselReader) {
     get("/{varseltype}/aktive") {
         doIfValidRequest { fnr ->
 
