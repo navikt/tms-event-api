@@ -4,7 +4,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import no.nav.tms.event.api.config.doIfValidRequest
+import no.nav.tms.event.api.config.doIfValidHeader
 import java.lang.IllegalArgumentException
 
 private val ApplicationCall.varselTypeParam: String
@@ -18,7 +18,7 @@ private val ApplicationCall.varselTypeParam: String
 
 fun Route.legacyVarselApi(varselReader: VarselReader) {
     get("/{varseltype}/aktive") {
-        doIfValidRequest { fnr ->
+        doIfValidHeader { fnr ->
 
             call.respond(
                 HttpStatusCode.OK,
@@ -28,7 +28,7 @@ fun Route.legacyVarselApi(varselReader: VarselReader) {
     }
 
     get("/{varseltype}/inaktive") {
-        doIfValidRequest { fnr ->
+        doIfValidHeader { fnr ->
             call.respond(
                 HttpStatusCode.OK,
                 varselReader.fetchVarsel(fnr, "${call.varselTypeParam}/detaljert/inaktive").toLegacyVarsler(),
@@ -37,7 +37,7 @@ fun Route.legacyVarselApi(varselReader: VarselReader) {
     }
 
     get("/{varseltype}/all") {
-        doIfValidRequest { fnr ->
+        doIfValidHeader { fnr ->
             call.respond(
                 HttpStatusCode.OK,
                 varselReader.fetchVarsel(fnr, "${call.varselTypeParam}/detaljert/alle").toLegacyVarsler(),

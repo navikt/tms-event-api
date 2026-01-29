@@ -7,13 +7,11 @@ import io.kotest.matchers.string.shouldContain
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.server.request.receive
 import io.ktor.server.request.receiveText
 import io.ktor.server.routing.RoutingCall
 import io.ktor.server.testing.*
 import no.nav.tms.event.api.varsel.*
 import org.junit.jupiter.api.Test
-import tools.jackson.databind.ObjectMapper
 import java.time.ZonedDateTime
 
 class ApiTest {
@@ -112,6 +110,41 @@ class ApiTest {
 
             client.get("/varsel/alle") {
                 header("fodselsnummer", "12345678910")
+            }.apply {
+                status shouldBe HttpStatusCode.OK
+                assertContent(bodyAsText(), alleExpectedResult)
+            }
+
+            requestBody["ident"] shouldBe dummyFnr
+        }
+    }
+
+    @Test
+    fun `tillater henting av varsler med post-body i stedet for header i get`() {
+        val (alleMockresponse, alleExpectedResult) =
+            mockContent(
+                opprettet = ZonedDateTime.now().minusDays(1),
+                aktivFremTil = ZonedDateTime.now().plusDays(10),
+                typer = listOf("beskjed", "oppgave", "innboks"),
+            )
+
+        testApplication {
+            eventApiSetup(testHostUrl)
+
+            var requestBody: Map<String, String> = emptyMap()
+
+            setupExternalVarselRoute(
+                host = testHostUrl,
+                path = "varsel/detaljert/alle",
+                responseBody = alleMockresponse,
+                callPeek = {
+                    requestBody = it.receiveJson()
+                }
+            )
+
+            client.post("/varsel/alle") {
+                contentType(ContentType.Application.Json)
+                setBody("{\"ident\": \"12345678910\"}")
             }.apply {
                 status shouldBe HttpStatusCode.OK
                 assertContent(bodyAsText(), alleExpectedResult)
