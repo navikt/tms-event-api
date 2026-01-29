@@ -1,9 +1,14 @@
 package no.nav.tms.event.api
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.server.request.receive
+import io.ktor.server.request.receiveText
+import io.ktor.server.routing.RoutingCall
 import io.ktor.server.testing.*
 import no.nav.tms.event.api.varsel.*
 import org.junit.jupiter.api.TestInstance
@@ -30,14 +35,14 @@ class LegacyApiTest {
         testApplication {
             eventApiSetup(testHostUrl)
 
-            var fnrHeader: String? = null
+            var requestBody: Map<String, String> = emptyMap()
 
             setupExternalVarselRoute(
                 testHostUrl,
                 path = "$type/detaljert/aktive",
                 responseBody = aktiveMockresponse,
-                requestPeek = {
-                    fnrHeader = it.headers["ident"]
+                callPeek = {
+                    requestBody = it.receiveJson()
                 },
             )
 
@@ -48,7 +53,7 @@ class LegacyApiTest {
                 assertLegacyContent(bodyAsText(), aktiveExpectedResult)
             }
 
-            fnrHeader shouldBe dummyFnr
+            requestBody["ident"] shouldBe dummyFnr
         }
     }
 
@@ -67,14 +72,14 @@ class LegacyApiTest {
         testApplication {
             eventApiSetup(testHostUrl)
 
-            var fnrHeader: String? = null
+            var requestBody: Map<String, String> = emptyMap()
 
             setupExternalVarselRoute(
                 host = testHostUrl,
                 path = "/$type/detaljert/inaktive",
                 responseBody = inaktivMockresponse,
-                requestPeek = {
-                    fnrHeader = it.headers["ident"]
+                callPeek = {
+                    requestBody = it.receiveJson()
                 },
             )
             client.get("/$type/inaktive") {
@@ -84,7 +89,7 @@ class LegacyApiTest {
                 assertLegacyContent(bodyAsText(), inaktiveExpectedResult)
             }
 
-            fnrHeader shouldBe dummyFnr
+            requestBody["ident"] shouldBe dummyFnr
         }
     }
 
@@ -103,14 +108,14 @@ class LegacyApiTest {
         testApplication {
             eventApiSetup(testHostUrl)
 
-            var fnrHeader: String? = null
+            var requestBody: Map<String, String> = emptyMap()
 
             setupExternalVarselRoute(
                 host = testHostUrl,
                 path = "/$type/detaljert/alle",
                 responseBody = alleMockresponse,
-                requestPeek = {
-                    fnrHeader = it.headers["ident"]
+                callPeek = {
+                    requestBody = it.receiveJson()
                 },
             )
 
@@ -121,8 +126,15 @@ class LegacyApiTest {
                 assertLegacyContent(bodyAsText(), alleExpectedResult)
             }
 
-            fnrHeader shouldBe dummyFnr
+            requestBody["ident"] shouldBe dummyFnr
         }
+    }
+}
+
+private val objectMapper = jacksonObjectMapper()
+private suspend fun RoutingCall.receiveJson(): Map<String, String> {
+    return receiveText().let {
+        objectMapper.readValue(it)
     }
 }
 

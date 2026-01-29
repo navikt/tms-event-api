@@ -1,12 +1,19 @@
 package no.nav.tms.event.api
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.kotest.matchers.shouldBe
+import io.kotest.matchers.string.shouldContain
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
+import io.ktor.server.request.receive
+import io.ktor.server.request.receiveText
+import io.ktor.server.routing.RoutingCall
 import io.ktor.server.testing.*
 import no.nav.tms.event.api.varsel.*
 import org.junit.jupiter.api.Test
+import tools.jackson.databind.ObjectMapper
 import java.time.ZonedDateTime
 
 class ApiTest {
@@ -24,14 +31,14 @@ class ApiTest {
         testApplication {
             eventApiSetup(testHostUrl)
 
-            var fnrHeader: String? = null
+            var requestBody: Map<String, String> = emptyMap()
 
             setupExternalVarselRoute(
                 host = testHostUrl,
                 path = "/varsel/detaljert/aktive",
                 responseBody = responseBody,
-                requestPeek = {
-                    fnrHeader = it.headers["ident"]
+                callPeek = {
+                    requestBody = it.receiveJson()
                 },
             )
 
@@ -42,7 +49,7 @@ class ApiTest {
                 assertContent(bodyAsText(), expectedContent)
             }
 
-            fnrHeader shouldBe dummyFnr
+            requestBody["ident"] shouldContain dummyFnr
         }
     }
 
@@ -58,14 +65,14 @@ class ApiTest {
         testApplication {
             eventApiSetup(testHostUrl)
 
-            var fnrHeader: String? = null
+            var requestBody: Map<String, String> = emptyMap()
 
             setupExternalVarselRoute(
                 host = testHostUrl,
                 path = "/varsel/detaljert/inaktive",
                 responseBody = inaktivMockresponse,
-                requestPeek = {
-                    fnrHeader = it.headers["ident"]
+                callPeek = {
+                    requestBody = it.receiveJson()
                 },
             )
 
@@ -76,7 +83,7 @@ class ApiTest {
                 assertContent(bodyAsText(), inaktiveExpectedResult)
             }
 
-            fnrHeader shouldBe dummyFnr
+            requestBody["ident"] shouldBe dummyFnr
         }
     }
 
@@ -92,14 +99,14 @@ class ApiTest {
         testApplication {
             eventApiSetup(testHostUrl)
 
-            var fnrHeader: String? = null
+            var requestBody: Map<String, String> = emptyMap()
 
             setupExternalVarselRoute(
                 host = testHostUrl,
                 path = "varsel/detaljert/alle",
                 responseBody = alleMockresponse,
-                requestPeek = {
-                    fnrHeader = it.headers["ident"]
+                callPeek = {
+                    requestBody = it.receiveJson()
                 }
             )
 
@@ -110,7 +117,7 @@ class ApiTest {
                 assertContent(bodyAsText(), alleExpectedResult)
             }
 
-            fnrHeader shouldBe dummyFnr
+            requestBody["ident"] shouldBe dummyFnr
         }
     }
 
@@ -128,14 +135,14 @@ class ApiTest {
         testApplication {
             eventApiSetup(testHostUrl)
 
-            var fnrHeader: String? = null
+            var requestBody: Map<String, String> = emptyMap()
 
             setupExternalVarselRoute(
                 host = testHostUrl,
                 path = "varsel/detaljert/alle",
                 responseBody = alleMockresponse,
-                requestPeek = {
-                    fnrHeader = it.headers["ident"]
+                callPeek = {
+                    requestBody = it.receiveJson()
                 }
             )
 
@@ -146,7 +153,7 @@ class ApiTest {
                 assertContent(bodyAsText(), alleExpectedResult)
             }
 
-            fnrHeader shouldBe dummyFnr
+            requestBody["ident"] shouldBe dummyFnr
         }
     }
 }
@@ -222,6 +229,13 @@ private fun Any?.nullableJson(): String {
         "null"
     } else {
         "\"$this\""
+    }
+}
+
+private val objectMapper = jacksonObjectMapper()
+private suspend fun RoutingCall.receiveJson(): Map<String, String> {
+    return receiveText().let {
+        objectMapper.readValue(it)
     }
 }
 
