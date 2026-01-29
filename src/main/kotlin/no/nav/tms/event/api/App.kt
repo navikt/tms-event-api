@@ -109,9 +109,6 @@ fun Application.api(
             legacyVarselApi(varselReader)
             varselApi(varselReader)
         }
-        route("/debug") {
-            varselApi(varselReader)
-        }
     }
 
     configureShutdownHook(httpClient)
