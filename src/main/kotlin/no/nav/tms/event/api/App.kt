@@ -8,6 +8,7 @@ import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.statuspages.*
@@ -90,7 +91,9 @@ fun Application.api(
                     log.error { "Kall mot ${cause.url} feiler med staus ${cause.statusCode}" }
                     call.respond(HttpStatusCode.ServiceUnavailable)
                 }
-
+                is NotFoundException -> {
+                    call.respond(HttpStatusCode.NotFound)
+                }
                 else -> {
                     log.error { "Henting av varsler fra ${call.request.uri} feilet." }
                     teamLog.error(cause) { "Henting av varsler fra ${call.request.uri} feilet." }
@@ -103,7 +106,7 @@ fun Application.api(
     routing {
         healthApi()
         authenticate {
-            legavyVarselApi(varselReader)
+            legacyVarselApi(varselReader)
             varselApi(varselReader)
         }
     }

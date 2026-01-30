@@ -77,13 +77,13 @@ fun TestApplicationBuilder.setupExternalVarselRoute(
     responseBody: String,
     statusCode: HttpStatusCode = OK,
     contentType: ContentType = ContentType.Application.Json,
-    requestPeek: suspend (ApplicationRequest) -> Unit = {},
+    callPeek: suspend (RoutingCall) -> Unit = {},
 ) {
     externalServices {
         hosts(host) {
             routing {
-                get(path) {
-                    requestPeek.invoke(call.request)
+                post(path) {
+                    callPeek.invoke(call)
                     call.respondText(responseBody, status = statusCode, contentType = contentType)
                 }
             }

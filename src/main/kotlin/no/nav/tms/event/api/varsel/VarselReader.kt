@@ -8,6 +8,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import no.nav.tms.event.api.config.AzureTokenFetcher
 import no.nav.tms.token.support.azure.validation.AzureHeader
 import java.net.URI
@@ -29,18 +30,18 @@ class VarselReader(
 }
 
 // TODO: fiks feilhåndtering på feilbeskjeder
-suspend inline fun HttpClient.getWithAzureAndFnr(
+suspend fun HttpClient.getWithAzureAndFnr(
     url: URL,
     accessToken: String,
     fnr: String,
 ): List<DetaljertVarsel> =
     withContext(Dispatchers.IO) {
-        request {
+        post {
             url(url)
-            method = HttpMethod.Get
             accept(ContentType.Application.Json)
             header(AzureHeader.Authorization, "Bearer $accessToken")
-            header("ident", fnr)
+            contentType(ContentType.Application.Json)
+            setBody(identBody(fnr))
             timeout {
                 socketTimeoutMillis = 30000
                 connectTimeoutMillis = 10000
@@ -51,5 +52,13 @@ suspend inline fun HttpClient.getWithAzureAndFnr(
         if (it.status != HttpStatusCode.OK) throw VarselFetchError(it.request.url, it.status)
         it.body()
     }
+
+private fun identBody(
+    ident: String
+) = """
+{
+    "ident": "$ident"
+} 
+"""
 
 class VarselFetchError(val url: Url, val statusCode: HttpStatusCode) : Exception()
