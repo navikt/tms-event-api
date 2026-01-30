@@ -57,7 +57,10 @@ data class EksternVarslingStatus(
     val kanaler: List<String>,
     val feilhistorikk: List<EksternFeilHistorikkEntry>,
     val sistOppdatert: ZonedDateTime
-)
+) {
+    // kompatibilitet
+    val historikk: List<Unit> = emptyList()
+}
 
 @Serializable
 data class EksternFeilHistorikkEntry(

@@ -12,7 +12,6 @@ import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.http.HttpStatusCode.Companion.OK
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.auth.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.testing.*
@@ -30,7 +29,7 @@ internal const val azureMockToken = "TokenSmoken"
 internal val objectmapper = ObjectMapper()
 
 fun ApplicationTestBuilder.eventApiSetup(
-    varselAuthorotyUrl: String,
+    varselAuthorityUrl: String,
     block: ApplicationTestBuilder.() -> Unit = {},
 ) = run {
     val applicationClient =
@@ -54,7 +53,7 @@ fun ApplicationTestBuilder.eventApiSetup(
                 VarselReader(
                     azureTokenFetcher = tokenFetchMock,
                     client = applicationClient,
-                    varselAuthorityUrl = varselAuthorotyUrl,
+                    varselAuthorityUrl = varselAuthorityUrl,
                 ),
             httpClient = applicationClient,
             authConfig = {
