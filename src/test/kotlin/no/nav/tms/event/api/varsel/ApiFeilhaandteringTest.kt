@@ -8,17 +8,17 @@ import io.ktor.server.auth.*
 import io.ktor.server.testing.*
 import io.mockk.mockk
 import no.nav.tms.event.api.api
-import no.nav.tms.event.api.config.AzureTokenFetcher
+import no.nav.tms.event.api.config.TokenFetcher
 import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.setupErrorVarselRoute
 import no.nav.tms.event.api.eventApiSetup
-import no.nav.tms.token.support.azure.validation.mock.azureMock
+import no.nav.tms.token.support.entraid.token.verification.mock.entraIdMock
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ValueSource
 
-class ApiFeilhåndteringTest {
-    private val tokenFetchMock = mockk<AzureTokenFetcher>(relaxed = true)
+class ApiFeilhaandteringTest {
+    private val tokenFetchMock = mockk<TokenFetcher>(relaxed = true)
     private val testHostUrl = "https://www.test.no"
 
     @Test
@@ -35,16 +35,17 @@ class ApiFeilhåndteringTest {
                 api(
                     varselReader =
                         VarselReader(
-                            azureTokenFetcher = tokenFetchMock,
+                            tokenFetcher = tokenFetchMock,
                             client = applicationClient,
                             varselAuthorityUrl = testHostUrl,
                         ),
                     httpClient = applicationClient,
                     authConfig = {
                         authentication {
-                            azureMock {
-                                alwaysAuthenticated = true
-                                setAsDefault = true
+                            entraIdMock {
+                                enableDefaultAuthentication {
+
+                                }
                             }
                         }
                     },

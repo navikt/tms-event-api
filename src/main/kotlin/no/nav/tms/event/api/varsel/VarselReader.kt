@@ -8,14 +8,12 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.Serializable
-import no.nav.tms.event.api.config.AzureTokenFetcher
-import no.nav.tms.token.support.azure.validation.AzureHeader
+import no.nav.tms.event.api.config.TokenFetcher
 import java.net.URI
 import java.net.URL
 
 class VarselReader(
-    private val azureTokenFetcher: AzureTokenFetcher,
+    private val tokenFetcher: TokenFetcher,
     private val client: HttpClient,
     private val varselAuthorityUrl: String,
 ) {
@@ -24,7 +22,7 @@ class VarselReader(
         varselPath: String,
     ): List<DetaljertVarsel> {
         val completePathToEndpoint = URI.create("$varselAuthorityUrl/$varselPath").toURL()
-        val azureToken = azureTokenFetcher.fetchTokenForVarselAuthority()
+        val azureToken = tokenFetcher.fetchTokenForVarselAuthority()
         return client.getWithAzureAndFnr(completePathToEndpoint, azureToken, fnr)
     }
 }
@@ -39,7 +37,7 @@ suspend fun HttpClient.getWithAzureAndFnr(
         post {
             url(url)
             accept(ContentType.Application.Json)
-            header(AzureHeader.Authorization, "Bearer $accessToken")
+            header(HttpHeaders.Authorization, "Bearer $accessToken")
             contentType(ContentType.Application.Json)
             setBody(identBody(fnr))
             timeout {
