@@ -17,11 +17,11 @@ import io.ktor.server.routing.*
 import io.ktor.server.testing.*
 import io.mockk.coEvery
 import io.mockk.mockk
-import no.nav.tms.event.api.config.AzureTokenFetcher
+import no.nav.tms.event.api.config.TokenFetcher
 import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.LegacyVarsel
 import no.nav.tms.event.api.varsel.VarselReader
-import no.nav.tms.token.support.azure.validation.mock.azureMock
+import no.nav.tms.token.support.entraid.token.verification.mock.entraIdMock
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 
@@ -43,7 +43,7 @@ fun ApplicationTestBuilder.eventApiSetup(
         }
     application {
         val tokenFetchMock =
-            mockk<AzureTokenFetcher>(relaxed = true).also {
+            mockk<TokenFetcher>(relaxed = true).also {
                 coEvery {
                     it.fetchTokenForVarselAuthority()
                 } returns azureMockToken
@@ -51,16 +51,17 @@ fun ApplicationTestBuilder.eventApiSetup(
         api(
             varselReader =
                 VarselReader(
-                    azureTokenFetcher = tokenFetchMock,
+                    tokenFetcher = tokenFetchMock,
                     client = applicationClient,
                     varselAuthorityUrl = varselAuthorityUrl,
                 ),
             httpClient = applicationClient,
             authConfig = {
                 authentication {
-                    azureMock {
-                        alwaysAuthenticated = true
-                        setAsDefault = true
+                    entraIdMock {
+                        enableDefaultAuthentication {
+
+                        }
                     }
                 }
             },

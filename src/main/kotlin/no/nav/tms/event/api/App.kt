@@ -19,24 +19,24 @@ import no.nav.tms.common.logging.TeamLogs
 import no.nav.tms.common.metrics.installTmsMicrometerMetrics
 import no.nav.tms.common.observability.ApiMdc
 import no.nav.tms.common.util.config.StringEnvVar
-import no.nav.tms.event.api.config.AzureTokenFetcher
+import no.nav.tms.event.api.config.TokenFetcher
 import no.nav.tms.event.api.config.HttpClientBuilder
 import no.nav.tms.event.api.config.healthApi
 import no.nav.tms.event.api.config.jsonConfig
 import no.nav.tms.event.api.varsel.*
-import no.nav.tms.token.support.azure.exchange.AzureServiceBuilder
-import no.nav.tms.token.support.azure.validation.azure
+import no.nav.tms.token.support.entraid.token.fetcher.EntraIdTokenFetcherBuilder
+import no.nav.tms.token.support.entraid.token.verification.entraId
 
 fun main() {
     val varselAuthorityUrl = "http://tms-varsel-authority"
     val varselAuthorityClientId: String = StringEnvVar.getEnvVar("VARSEL_AUTHORITY_CLIENT_ID")
 
     val httpClient = HttpClientBuilder.build()
-    val azureService = AzureServiceBuilder.buildAzureService(enableDefaultProxy = true)
-    val azureTokenFetcher = AzureTokenFetcher(azureService, varselAuthorityClientId)
+    val entraIdTokenFetcher = EntraIdTokenFetcherBuilder.build(enableDefaultProxy = true)
+    val tokenFetcher = TokenFetcher(entraIdTokenFetcher, varselAuthorityClientId)
     val varselReader =
         VarselReader(
-            azureTokenFetcher = azureTokenFetcher,
+            tokenFetcher = tokenFetcher,
             client = httpClient,
             varselAuthorityUrl = varselAuthorityUrl,
         )
@@ -123,8 +123,8 @@ private fun Application.configureShutdownHook(httpClient: HttpClient) {
 private fun authConfigBuilder(): Application.() -> Unit =
     {
         authentication {
-            azure {
-                setAsDefault = true
+            entraId {
+
             }
         }
     }
