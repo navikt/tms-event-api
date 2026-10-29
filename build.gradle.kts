@@ -1,10 +1,9 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
-    kotlin("jvm").version(Kotlin.version)
-    kotlin("plugin.serialization").version(Kotlin.version)
+    kotlin("jvm").version(managed.versions.kotlin)
 
-    id(TmsJarBundling.plugin)
+    alias(managed.plugins.tms.jarBundling)
 
     application
 }
@@ -24,38 +23,31 @@ repositories {
 }
 
 dependencies {
-    implementation(KotlinLogging.logging)
-    implementation(Ktor.Server.core)
-    implementation(Ktor.Server.netty)
-    implementation(Ktor.Server.metricsMicrometer)
-    implementation(Ktor.Server.defaultHeaders)
-    implementation(Ktor.Server.auth)
-    implementation(Ktor.Server.contentNegotiation)
-    implementation(Ktor.Server.statusPages)
-    implementation(Ktor.Client.core)
-    implementation(Ktor.Client.apache5)
-    implementation(Ktor.Client.contentNegotiation)
-    implementation(Ktor.Serialization.kotlinX)
-    implementation(Logstash.logbackEncoder)
-    implementation(TmsKtorTokenSupport.entraIdTokenFetcher)
-    implementation(TmsKtorTokenSupport.entraIdTokenVerification)
-    implementation(TmsCommonLib.metrics)
-    implementation(TmsCommonLib.observability)
-    implementation(TmsCommonLib.teamLogger)
-    implementation(TmsCommonLib.utils)
+    implementation(managed.bundles.jackson)
+    implementation(managed.bundles.ktorClient)
+    implementation(managed.bundles.ktorServer)
 
-    testImplementation(JunitPlatform.launcher)
-    testImplementation(JunitJupiter.api)
-    testImplementation(JunitJupiter.engine)
-    testImplementation(JunitJupiter.params)
-    testImplementation(Ktor.Serialization.jackson)
-    testImplementation(Ktor.Test.clientMock)
-    testImplementation(Ktor.Test.serverTestHost)
-    testImplementation(TmsKtorTokenSupport.entraIdTokenVerificationMock)
-    testImplementation(Kotest.assertionsCore)
-    testImplementation(Mockk.mockk)
+    implementation(managed.kotlinLogging)
+    implementation(managed.ktor.serialization.jackson)
+    implementation(managed.ktor.server.defaultHeaders)
+    implementation(managed.logback.encoder)
+    implementation(managed.tms.ktorTokenSupport.entraId.fetcher)
+    implementation(managed.tms.ktorTokenSupport.entraId.verification)
+    implementation(managed.tms.commonLib.metrics)
+    implementation(managed.tms.commonLib.observability)
+    implementation(managed.tms.commonLib.teamLogger)
+    implementation(managed.tms.commonLib.utils)
 
-    testRuntimeOnly(Jjwt.impl)
+
+    testImplementation(managed.bundles.junit)
+
+    testImplementation(managed.junit.params)
+
+    testImplementation(managed.ktor.test.clientMock)
+    testImplementation(managed.ktor.test.server)
+    testImplementation(managed.tms.ktorTokenSupport.entraId.verificationMock)
+    testImplementation(managed.kotest.assertion)
+    testImplementation(managed.mockk)
 }
 
 application {

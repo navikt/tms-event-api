@@ -1,13 +1,7 @@
-@file:UseSerializers(ZonedDateTimeSerializer::class)
-
 package no.nav.tms.event.api.varsel
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.UseSerializers
-import no.nav.tms.event.api.config.ZonedDateTimeSerializer
 import java.time.ZonedDateTime
 
-@Serializable
 data class DetaljertVarsel(
     val type: String,
     val varselId: String,
@@ -22,13 +16,11 @@ data class DetaljertVarsel(
     val inaktivertAv: String? = null,
 )
 
-@Serializable
 data class Innhold(
     val tekst: String,
     val link: String? = null,
 )
 
-@Serializable
 enum class Sensitivitet {
     substantial,
     high,
@@ -41,13 +33,11 @@ enum class Sensitivitet {
         }
 }
 
-@Serializable
 data class Produsent(
     val namespace: String,
     val appnavn: String,
 )
 
-@Serializable
 data class EksternVarslingStatus(
     val sendt: Boolean,
     val sendtTidspunkt: ZonedDateTime? = null,
@@ -62,7 +52,6 @@ data class EksternVarslingStatus(
     val historikk: List<Unit> = emptyList()
 }
 
-@Serializable
 data class EksternFeilHistorikkEntry(
     val feilmelding: String,
     val tidspunkt: ZonedDateTime

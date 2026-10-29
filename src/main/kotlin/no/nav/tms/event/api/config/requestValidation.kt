@@ -1,5 +1,6 @@
 package no.nav.tms.event.api.config
 
+import io.ktor.server.request.receive
 import io.ktor.server.request.receiveNullable
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
@@ -18,7 +19,7 @@ inline fun RoutingContext.doIfValidHeader(handler: (fnr: String) -> Unit) {
 
 
 suspend fun RoutingContext.doIfValidBody(handler: suspend (String) -> Unit) {
-    val identBody: IdentBody? = call.receiveNullable()
+    val identBody: IdentBody? = call.receive()
 
     when {
         identBody == null -> throw IllegalArgumentException("Request mangler body { \"ident\": \"<ident>\" }")

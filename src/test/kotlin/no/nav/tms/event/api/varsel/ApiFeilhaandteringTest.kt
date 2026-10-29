@@ -2,6 +2,7 @@ package no.nav.tms.event.api.varsel
 
 import io.kotest.matchers.shouldBe
 import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.auth.*
@@ -26,7 +27,7 @@ class ApiFeilhaandteringTest {
         testApplication {
             val applicationClient =
                 createClient {
-                    jsonConfig()
+                    install(ContentNegotiation)
                     install(HttpTimeout) {
                         requestTimeoutMillis = 2000
                     }

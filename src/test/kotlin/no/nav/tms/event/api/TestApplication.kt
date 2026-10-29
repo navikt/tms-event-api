@@ -3,6 +3,7 @@ package no.nav.tms.event.api
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.kotest.assertions.withClue
+import io.kotest.matchers.date.atSameZone
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.ktor.client.plugins.HttpTimeout
@@ -10,7 +11,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.*
 import io.ktor.http.HttpStatusCode.Companion.InternalServerError
 import io.ktor.http.HttpStatusCode.Companion.OK
-import io.ktor.serialization.kotlinx.json.json
+import io.ktor.serialization.jackson.jackson
 import io.ktor.server.auth.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -35,7 +36,9 @@ fun ApplicationTestBuilder.eventApiSetup(
     val applicationClient =
         createClient {
             install(ContentNegotiation) {
-                json(jsonConfig())
+                jackson {
+                    jsonConfig()
+                }
             }
             install(HttpTimeout) {
                 requestTimeoutMillis = 2000
@@ -116,11 +119,14 @@ internal fun assertZonedDateTime(
     key: String,
 ) {
     if (expectedDate != null) {
-        val resultDate = ZonedDateTime.parse(jsonNode?.get(key)?.textValue()).truncatedTo(ChronoUnit.MINUTES)
+        val expectedInstant = expectedDate.truncatedTo(ChronoUnit.MILLIS).toInstant()
+
+        val resultDate = ZonedDateTime.parse(jsonNode?.get(key)?.textValue()).truncatedTo(ChronoUnit.MILLIS).toInstant()
         withClue("$key skal ikke være null") {
             resultDate.shouldNotBeNull()
         }
-        resultDate.toString() shouldBe expectedDate.truncatedTo(ChronoUnit.MINUTES).toString()
+
+        resultDate shouldBe expectedInstant
     } else {
         jsonNode?.get(key)?.textValue() shouldBe null
     }

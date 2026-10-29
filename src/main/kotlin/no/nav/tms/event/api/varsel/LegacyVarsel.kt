@@ -1,10 +1,5 @@
-@file:UseSerializers(ZonedDateTimeSerializer::class)
-
 package no.nav.tms.event.api.varsel
 
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.UseSerializers
-import no.nav.tms.event.api.config.ZonedDateTimeSerializer
 import java.time.ZonedDateTime
 
 fun List<DetaljertVarsel>.toLegacyVarsler() =
@@ -36,7 +31,6 @@ private fun mapEksternVarsling(eksternVarsling: EksternVarslingStatus): LegacyEk
     )
 }
 
-@Serializable
 data class LegacyVarsel(
     val fodselsnummer: String,
     val grupperingsId: String,
@@ -55,7 +49,6 @@ data class LegacyVarsel(
     val eksternVarslingKanaler = eksternVarsling?.sendteKanaler ?: emptyList()
 }
 
-@Serializable
 data class LegacyEksternVarsling(
     val sendt: Boolean,
     val renotifikasjonSendt: Boolean,
@@ -64,7 +57,6 @@ data class LegacyEksternVarsling(
     val historikk: List<LegacyEksternVarslingHistorikkEntry> = emptyList(),
 )
 
-@Serializable
 data class LegacyEksternVarslingHistorikkEntry(
     val melding: String,
     val status: String,

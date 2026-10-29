@@ -3,7 +3,7 @@ package no.nav.tms.event.api
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.ktor.client.HttpClient
 import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.kotlinx.json.*
+import io.ktor.serialization.jackson.jackson
 import io.ktor.server.application.*
 import io.ktor.server.auth.*
 import io.ktor.server.engine.*
@@ -71,7 +71,9 @@ fun Application.api(
     install(DefaultHeaders)
     authConfig()
     install(ContentNegotiation) {
-        json(jsonConfig())
+        jackson {
+            jsonConfig()
+        }
     }
 
     installTmsMicrometerMetrics {
