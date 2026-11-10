@@ -194,12 +194,15 @@ class ApiTest {
 
     @Test
     fun `Overleverer info om tekster i ekstern varsling`() {
+        val sendtTidspunkt = ZonedDateTime.now().minusDays(21)
+        val sisteRenotifikasjonTidspunkt = ZonedDateTime.now().minusDays(7)
+
         val (alleMockresponse, alleExpectedResult) =
             mockContent(
                 opprettet = ZonedDateTime.now().minusDays(1),
                 aktivFremTil = ZonedDateTime.now().plusDays(10),
-                sendtTidspunkt = ZonedDateTime.now().minusDays(21),
-                renotifikasjonTidspunkt = ZonedDateTime.now().minusDays(7),
+                sendtTidspunkt = sendtTidspunkt,
+                renotifikasjonTidspunkt = sisteRenotifikasjonTidspunkt,
                 typer = listOf("beskjed", "oppgave", "innboks"),
                 sending = EksternVarslingSending(
                     kanal = "SMS",
@@ -218,7 +221,7 @@ class ApiTest {
                         kanal = "EPOST",
                         tittel = "Renotifikasjon-tittel",
                         tekst = "Renotifikasjon-tekst",
-                        tidspunkt = ZonedDateTime.now().minusDays(7),
+                        tidspunkt = sisteRenotifikasjonTidspunkt,
                     ),
                 )
             )
@@ -295,7 +298,7 @@ private fun mockContent(
                 }
                 ${
                     if (renotikasjoner.isEmpty()) {
-                        "\"renotifkasjoner\": [],"
+                        "\"renotifikasjoner\": [],"
                     } else {
                         renotikasjoner.map { renotikasjon ->
                             """
