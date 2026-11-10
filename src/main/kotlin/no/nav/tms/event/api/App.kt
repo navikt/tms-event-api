@@ -111,6 +111,9 @@ fun Application.api(
             legacyVarselApi(varselReader)
             varselApi(varselReader)
         }
+        route("/internal") {
+            varselApi(varselReader)
+        }
     }
 
     configureShutdownHook(httpClient)
