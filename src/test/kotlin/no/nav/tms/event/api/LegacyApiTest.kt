@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldBe
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.server.request.receive
 import io.ktor.server.request.receiveText
 import io.ktor.server.routing.RoutingCall
 import io.ktor.server.testing.*

@@ -42,15 +42,21 @@ data class EksternVarslingStatus(
     val sendt: Boolean,
     val sendtTidspunkt: ZonedDateTime? = null,
     val sendtSomBatch: Boolean,
+    val sending: EksternVarslingSending? = null,
     val renotifikasjonSendt: Boolean,
     val renotifikasjonTidspunkt: ZonedDateTime? = null,
+    val renotifikasjoner: List<EksternVarslingSending> = emptyList(),
     val kanaler: List<String>,
     val feilhistorikk: List<EksternFeilHistorikkEntry>,
     val sistOppdatert: ZonedDateTime
-) {
-    // kompatibilitet
-    val historikk: List<Unit> = emptyList()
-}
+)
+
+data class EksternVarslingSending(
+    val kanal: String,
+    val tittel: String?,
+    val tekst: String,
+    val tidspunkt: ZonedDateTime
+)
 
 data class EksternFeilHistorikkEntry(
     val feilmelding: String,
