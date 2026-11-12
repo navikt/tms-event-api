@@ -186,6 +186,9 @@ components:
         kanal:
           type: string
           nullable: true
+          description:
+            Kanal for initiell sending. Hvis denne er null vil tittel og tekst alltid være null.
+            For varsler sendt før 11/11/2026 vil denne alltid være null grunnet manglende data i baksystem.
         tittel:
           type: string
           nullable: true
@@ -201,6 +204,9 @@ components:
         renotifikasjonKanal:
           type: string
           nullable: true
+          description:
+            Kanal for siste renotifikasjon. Hvis denne er null vil renotifikasjonTittel og renotifikasjonTekst alltid være null.
+            For varsler sendt før 11/11/2026 vil denne alltid være null grunnet manglende data i baksystem.
         renotifikasjonTittel:
           type: string
           nullable: true
