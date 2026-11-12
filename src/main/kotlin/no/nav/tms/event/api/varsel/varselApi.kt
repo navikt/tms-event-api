@@ -6,11 +6,14 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import no.nav.tms.event.api.config.doIfValidBody
 import no.nav.tms.event.api.config.doIfValidHeader
+import no.nav.tms.event.api.config.logCaller
 import java.time.ZonedDateTime
 
 fun Route.varselApi(varselReader: VarselReader) {
     get("/varsel/{aktiv}") {
         doIfValidHeader { fnr ->
+            logCaller()
+
             varselReader.fetchVarsel(fnr, "varsel/detaljert/${call.aktivFilterFromPath()}")
                 .map(VarselDto::fromDetaljertVarsel)
                 .let { call.respond(HttpStatusCode.OK, it) }
@@ -19,6 +22,8 @@ fun Route.varselApi(varselReader: VarselReader) {
 
     post("/varsel/{aktiv}") {
         doIfValidBody { fnr ->
+            logCaller()
+
             varselReader.fetchVarsel(fnr, "varsel/detaljert/${call.aktivFilterFromPath()}")
                 .map(VarselDto::fromDetaljertVarsel)
                 .let { call.respond(HttpStatusCode.OK, it) }
