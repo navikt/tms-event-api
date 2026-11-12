@@ -1,7 +1,6 @@
 package no.nav.tms.event.api.config
 
 import io.ktor.server.request.receive
-import io.ktor.server.request.receiveNullable
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 
