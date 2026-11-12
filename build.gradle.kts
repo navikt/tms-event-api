@@ -30,6 +30,7 @@ dependencies {
     implementation(managed.kotlinLogging)
     implementation(managed.ktor.serialization.jackson)
     implementation(managed.ktor.server.defaultHeaders)
+    implementation(managed.ktor.server.swagger)
     implementation(managed.logback.encoder)
     implementation(managed.tms.ktorTokenSupport.entraId.fetcher)
     implementation(managed.tms.ktorTokenSupport.entraId.verification)

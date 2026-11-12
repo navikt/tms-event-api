@@ -10,8 +10,10 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.NotFoundException
 import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.statuspages.*
+import io.ktor.server.plugins.swagger.swaggerUI
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
@@ -106,6 +108,7 @@ fun Application.api(
     }
 
     routing {
+        swaggerUI("api-docs", swaggerFile = "swagger.yaml")
         healthApi()
         authenticate {
             legacyVarselApi(varselReader)
