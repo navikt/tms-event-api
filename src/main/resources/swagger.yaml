@@ -78,6 +78,37 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Brukervarsel"
+                example:
+                  - type: beskjed
+                    varselId: "abc-123"
+                    aktiv: true
+                    produsent:
+                      namespace: team-fagsystem
+                      appnavn: applikasjonsnavn
+                    sensitivitet: substantial
+                    innhold:
+                      tekst: Beskjed på min side
+                      link: "https://www.nav.no"
+                    opprettet: "2026-01-01T10:00:00Z"
+                    aktivFremTil: "2026-02-01T10:00:00Z"
+                    inaktivert: null
+                    inaktivertAv: null
+                    eksternVarsling:
+                      sendt: true
+                      sendtTidspunkt: "2026-01-01T10:05:00Z"
+                      sendtSomBatch: false
+                      kanal: "SMS"
+                      tittel: null
+                      tekst: "Du har fått en ny beskjed på nav.no"
+                      renotifikasjonSendt: false
+                      renotifikasjonTidspunkt: null
+                      renotifikasjonKanal: null
+                      renotifikasjonTittel: null
+                      renotifikasjonTekst: null
+                      kanaler:
+                        - SMS
+                      feilhistorikk: [ ]
+                      sistOppdatert: "2026-01-01T10:05:00Z"
         "400":
           description: Ugyldig eller manglende ident i body.
         "401":
