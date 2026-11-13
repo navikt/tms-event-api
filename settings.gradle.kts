@@ -15,6 +15,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("managed") {
             from("no.nav.tms:tms-dependency-admin:20261105.14.1")
+            library("ktor-server-swagger", "io.ktor", "ktor-server-swagger").versionRef("ktor")
         }
     }
 }
