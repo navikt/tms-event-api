@@ -1,8 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
-    kotlin("jvm").version(managed.versions.kotlin)
-
+    alias(managed.plugins.kotlin)
     alias(managed.plugins.tms.jarBundling)
 
     application
@@ -29,9 +28,7 @@ dependencies {
 
     implementation(managed.kotlinLogging)
     implementation(managed.ktor.serialization.jackson)
-    implementation(managed.ktor.server.defaultHeaders)
     implementation(managed.ktor.server.swagger)
-    implementation(managed.logback.encoder)
     implementation(managed.tms.ktorTokenSupport.entraId.fetcher)
     implementation(managed.tms.ktorTokenSupport.entraId.verification)
     implementation(managed.tms.commonLib.metrics)
@@ -40,15 +37,18 @@ dependencies {
     implementation(managed.tms.commonLib.utils)
 
 
-    testImplementation(managed.bundles.junit)
+    runtimeOnly(managed.logback.encoder)
 
+    testImplementation(managed.junit.api)
     testImplementation(managed.junit.params)
 
-    testImplementation(managed.ktor.test.clientMock)
     testImplementation(managed.ktor.test.server)
     testImplementation(managed.tms.ktorTokenSupport.entraId.verificationMock)
     testImplementation(managed.kotest.assertion)
     testImplementation(managed.mockk)
+
+    testRuntimeOnly(managed.junit.engine)
+    testRuntimeOnly(managed.junit.launcher)
 }
 
 application {
